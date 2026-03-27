@@ -26,6 +26,7 @@
 - [src/pages/CreditIntake.tsx](file://src/pages/CreditIntake.tsx)
 - [src/pages/ThankYou.tsx](file://src/pages/ThankYou.tsx)
 - [src/pages/Unsubscribe.tsx](file://src/pages/Unsubscribe.tsx)
+- [src/pages/ReferralRedirect.tsx](file://src/pages/ReferralRedirect.tsx)
 - [src/pages/admin/AdminAffiliateDetail.tsx](file://src/pages/admin/AdminAffiliateDetail.tsx)
 - [src/pages/admin/AdminAffiliates.tsx](file://src/pages/admin/AdminAffiliates.tsx)
 - [src/pages/admin/AdminLeads.tsx](file://src/pages/admin/AdminLeads.tsx)
@@ -42,13 +43,11 @@
 
 ## Update Summary
 **Changes Made**
-- Enhanced admin pages with comprehensive affiliate management interface
-- Added new AdminAffiliateDetail page with tabbed affiliate management
-- Updated AdminAffiliates page with improved sorting and commission rate display
-- Enhanced AdminLeads page with better data presentation and statistics
-- Added new AdminCommissions page for commission management
-- Implemented AdminLeadDetailDrawer for lead detail viewing
-- Added comprehensive affiliate detail tabs (Profile, Commissions, Leads, Payouts, Settings)
+- Added new ReferralRedirect route (/r/:ref) for clean referral URL structure
+- Removed old PortalCalculator route (/portal/calculator) from portal navigation
+- Updated main application routing to use clean referral URL structure
+- Enhanced referral tracking system with localStorage-based attribution
+- Updated portal sidebar navigation to remove Calculator link
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -79,6 +78,7 @@ The repository provides a minimal but functional foundation for a modern React a
 - Core routing and layout components under src/
 - Enhanced page structure with dedicated Thank You and Unsubscribe pages
 - Comprehensive admin portal with affiliate management capabilities
+- New ReferralRedirect route for clean referral URL structure
 
 ```mermaid
 graph TB
@@ -93,6 +93,7 @@ Src --> Comps["components/"]
 Comps --> ScrollToTop["ScrollToTop.tsx"]
 Comps --> NavLink["NavLink.tsx"]
 Comps --> PortalLayout["portal/PortalLayout.tsx"]
+Comps --> PortalSidebar["portal/PortalSidebar.tsx"]
 Comps --> AdminLayout["admin/AdminLayout.tsx"]
 Comps --> AdminLeadDetailDrawer["AdminLeadDetailDrawer.tsx"]
 Comps --> AffiliateDetailTabs["affiliate-detail/"]
@@ -109,6 +110,7 @@ AdminPages --> AdminAffiliateDetail["AdminAffiliateDetail.tsx"]
 AdminPages --> AdminAffiliates["AdminAffiliates.tsx"]
 AdminPages --> AdminLeads["AdminLeads.tsx"]
 AdminPages --> AdminCommissions["AdminCommissions.tsx"]
+Pages --> ReferralRedirect["ReferralRedirect.tsx"]
 Pages --> ThankYou["ThankYou.tsx"]
 Pages --> Unsubscribe["Unsubscribe.tsx"]
 ```
@@ -122,6 +124,7 @@ Pages --> Unsubscribe["Unsubscribe.tsx"]
 - [src/components/ScrollToTop.tsx:1-14](file://src/components/ScrollToTop.tsx#L1-L14)
 - [src/components/NavLink.tsx:1-28](file://src/components/NavLink.tsx#L1-L28)
 - [src/components/portal/PortalLayout.tsx:1-28](file://src/components/portal/PortalLayout.tsx#L1-L28)
+- [src/components/portal/PortalSidebar.tsx:1-133](file://src/components/portal/PortalSidebar.tsx#L1-L133)
 - [src/components/admin/AdminLayout.tsx:1-40](file://src/components/admin/AdminLayout.tsx#L1-L40)
 - [src/components/admin/AdminLeadDetailDrawer.tsx:1-134](file://src/components/admin/AdminLeadDetailDrawer.tsx#L1-L134)
 - [src/components/admin/affiliate-detail/AffiliateProfileTab.tsx:1-82](file://src/components/admin/affiliate-detail/AffiliateProfileTab.tsx#L1-L82)
@@ -130,6 +133,7 @@ Pages --> Unsubscribe["Unsubscribe.tsx"]
 - [src/components/admin/affiliate-detail/AffiliatePayoutsTab.tsx:1-155](file://src/components/admin/affiliate-detail/AffiliatePayoutsTab.tsx#L1-L155)
 - [src/components/admin/affiliate-detail/AffiliateSettingsTab.tsx:1-187](file://src/components/admin/affiliate-detail/AffiliateSettingsTab.tsx#L1-L187)
 - [src/hooks/use-mobile.tsx:1-19](file://src/hooks/use-mobile.tsx#L1-L19)
+- [src/pages/ReferralRedirect.tsx:1-7](file://src/pages/ReferralRedirect.tsx#L1-L7)
 - [src/pages/ThankYou.tsx:1-197](file://src/pages/ThankYou.tsx#L1-L197)
 - [src/pages/Unsubscribe.tsx:1-119](file://src/pages/Unsubscribe.tsx#L1-L119)
 
@@ -162,6 +166,7 @@ This section outlines the core building blocks for pages and routing in the appl
 - Enhanced Page Components
   - Thank You page with order processing and polling mechanisms
   - Unsubscribe page with token validation and email suppression handling
+  - Referral redirect system for clean URL structure
   - Comprehensive admin portal with affiliate management capabilities
 
 Implementation references:
@@ -171,6 +176,7 @@ Implementation references:
 - [src/hooks/use-mobile.tsx:1-19](file://src/hooks/use-mobile.tsx#L1-L19)
 - [src/components/portal/PortalLayout.tsx:1-28](file://src/components/portal/PortalLayout.tsx#L1-L28)
 - [src/components/admin/AdminLayout.tsx:1-40](file://src/components/admin/AdminLayout.tsx#L1-L40)
+- [src/pages/ReferralRedirect.tsx:1-7](file://src/pages/ReferralRedirect.tsx#L1-L7)
 - [src/pages/ThankYou.tsx:29-80](file://src/pages/ThankYou.tsx#L29-L80)
 - [src/pages/Unsubscribe.tsx:10-56](file://src/pages/Unsubscribe.tsx#L10-L56)
 
@@ -181,11 +187,14 @@ Implementation references:
 - [src/hooks/use-mobile.tsx:1-19](file://src/hooks/use-mobile.tsx#L1-L19)
 - [src/components/portal/PortalLayout.tsx:1-28](file://src/components/portal/PortalLayout.tsx#L1-L28)
 - [src/components/admin/AdminLayout.tsx:1-40](file://src/components/admin/AdminLayout.tsx#L1-L40)
+- [src/pages/ReferralRedirect.tsx:1-7](file://src/pages/ReferralRedirect.tsx#L1-L7)
 - [src/pages/ThankYou.tsx:29-80](file://src/pages/ThankYou.tsx#L29-L80)
 - [src/pages/Unsubscribe.tsx:10-56](file://src/pages/Unsubscribe.tsx#L10-L56)
 
 ## Architecture Overview
 The routing architecture centers around React Router DOM with a provider-based setup. Static pages are mapped to routes, and nested routes encapsulate portal-related functionality. Providers manage global state and UI behavior.
+
+**Updated** The routing architecture now includes a new ReferralRedirect route that provides clean referral URL structure. The old PortalCalculator route has been removed from portal navigation.
 
 ```mermaid
 graph TB
@@ -203,11 +212,11 @@ Routes --> Partners["Partners Page Route"]
 Routes --> CreditIntake["Credit Intake Route"]
 Routes --> ThankYou["Thank You Route"]
 Routes --> Unsubscribe["Unsubscribe Route"]
+Routes --> ReferralRedirect["Referral Redirect Route<br/>/r/:ref -> /assessment?ref=:ref"]
 Routes --> Portal["Portal Layout Route"]
 Portal --> PortalIndex["Portal Dashboard"]
 Portal --> PortalLeads["Portal Leads"]
 Portal --> PortalCommissions["Portal Commissions"]
-Portal --> PortalCalculator["Portal Calculator"]
 Portal --> PortalResources["Portal Resources"]
 Portal --> PortalEvents["Portal Events"]
 Portal --> PortalSpeaking["Portal Speaking"]
@@ -225,9 +234,11 @@ Routes --> NotFound["Catch-all Not Found"]
 
 **Diagram sources**
 - [src/App.tsx:90-158](file://src/App.tsx#L90-L158)
+- [src/pages/ReferralRedirect.tsx:1-7](file://src/pages/ReferralRedirect.tsx#L1-L7)
 
 **Section sources**
 - [src/App.tsx:90-158](file://src/App.tsx#L90-L158)
+- [src/pages/ReferralRedirect.tsx:1-7](file://src/pages/ReferralRedirect.tsx#L1-L7)
 
 ## Detailed Component Analysis
 
@@ -301,6 +312,90 @@ Providers --> Ready(["Page Ready"])
 - [src/components/admin/AdminLayout.tsx:1-40](file://src/components/admin/AdminLayout.tsx#L1-L40)
 - [src/components/ScrollToTop.tsx:1-14](file://src/components/ScrollToTop.tsx#L1-L14)
 - [src/App.tsx:147-158](file://src/App.tsx#L147-L158)
+
+### Referral Redirect System
+**Updated** The application now includes a comprehensive referral redirect system that provides clean URL structure and enhanced attribution tracking.
+
+#### ReferralRedirect Component
+The new ReferralRedirect component provides a clean URL structure for referral links:
+
+```mermaid
+graph TB
+ReferralRedirect["ReferralRedirect.tsx"]
+ParamCapture["URL Parameter Capture<br/>/r/:ref"]
+ReferralStorage["LocalStorage Storage<br/>rp_ref key with 30-day expiry"]
+AssessmentRedirect["Assessment Redirect<br/>/assessment?ref=:ref"]
+ReferralRedirect --> ParamCapture
+ParamCapture --> ReferralStorage
+ReferralStorage --> AssessmentRedirect
+```
+
+**Diagram sources**
+- [src/pages/ReferralRedirect.tsx:1-7](file://src/pages/ReferralRedirect.tsx#L1-L7)
+- [src/lib/referralTracking.ts:13-23](file://src/lib/referralTracking.ts#L13-L23)
+
+#### Referral Tracking Integration
+The referral system integrates seamlessly with the Assessment page and GHL CRM:
+
+```mermaid
+sequenceDiagram
+participant User as "User with Referral Link"
+participant Browser as "Browser"
+participant ReferralRedirect as "ReferralRedirect"
+participant Assessment as "Assessment Page"
+participant LocalStorage as "localStorage"
+participant GHL as "GHL CRM"
+User->>Browser : Visit /r/ : ref
+Browser->>ReferralRedirect : Route match
+ReferralRedirect->>LocalStorage : Store referral data
+ReferralRedirect->>Assessment : Redirect to /assessment?ref= : ref
+Assessment->>LocalStorage : Retrieve referral data
+Assessment->>GHL : Sync contact with affiliate tags
+GHL-->>Assessment : Contact created/updated
+Assessment-->>User : Display personalized content
+```
+
+**Diagram sources**
+- [src/pages/ReferralRedirect.tsx:1-7](file://src/pages/ReferralRedirect.tsx#L1-L7)
+- [src/pages/Assessment.tsx:118-119](file://src/pages/Assessment.tsx#L118-L119)
+- [src/lib/referralTracking.ts:28-44](file://src/lib/referralTracking.ts#L28-L44)
+
+**Section sources**
+- [src/pages/ReferralRedirect.tsx:1-7](file://src/pages/ReferralRedirect.tsx#L1-L7)
+- [src/lib/referralTracking.ts:13-23](file://src/lib/referralTracking.ts#L13-L23)
+- [src/lib/referralTracking.ts:28-44](file://src/lib/referralTracking.ts#L28-L44)
+- [src/pages/Assessment.tsx:118-119](file://src/pages/Assessment.tsx#L118-L119)
+
+### Portal Navigation Updates
+**Updated** The portal navigation has been streamlined by removing the Calculator link, focusing on core functionality for partners.
+
+#### PortalSidebar Navigation Structure
+The portal sidebar now provides focused navigation for partner portal users:
+
+```mermaid
+graph TB
+PortalSidebar["PortalSidebar.tsx"]
+MainNav["Main Navigation<br/>Dashboard, Lead Tracker, Commissions"]
+SupportNav["Support Navigation<br/>Store, Events, Speaking"]
+AccountNav["Account Navigation<br/>Profile & Payouts"]
+PortalSidebar --> MainNav
+PortalSidebar --> SupportNav
+PortalSidebar --> AccountNav
+```
+
+**Diagram sources**
+- [src/components/portal/PortalSidebar.tsx:21-35](file://src/components/portal/PortalSidebar.tsx#L21-L35)
+
+#### Removed Calculator Link
+The Calculator link has been removed from portal navigation as it was moved to a separate component that is no longer routed:
+
+```typescript
+// Removed from portal navigation
+{ title: "Calculator", url: "/portal/calculator", icon: Calculator },
+```
+
+**Section sources**
+- [src/components/portal/PortalSidebar.tsx:21-35](file://src/components/portal/PortalSidebar.tsx#L21-L35)
 
 ### Enhanced Admin Portal Implementation
 
@@ -829,6 +924,11 @@ AppTSX --> Providers["Providers"]
 - Direct HTTP fetch bypasses Supabase SDK AbortError issues
 - Affiliate lead tracking is fire-and-forget for non-blocking user experience
 
+**Updated** The ReferralRedirect system provides efficient referral attribution:
+- Clean URL structure (/r/:ref) for better SEO and user experience
+- localStorage-based storage with 30-day expiry for referral data
+- Seamless integration with Assessment page and GHL CRM
+
 **Updated** The Credit Intake form implements efficient state management and validation:
 - Zod schemas provide immediate client-side validation feedback
 - Progressive disclosure reduces cognitive load and improves conversion rates
@@ -861,6 +961,8 @@ Recommendations:
 - [vite.config.ts:19-24](file://vite.config.ts#L19-L24)
 - [src/App.tsx:147-158](file://src/App.tsx#L147-L158)
 - [src/pages/Assessment.tsx:161-224](file://src/pages/Assessment.tsx#L161-L224)
+- [src/pages/ReferralRedirect.tsx:1-7](file://src/pages/ReferralRedirect.tsx#L1-L7)
+- [src/lib/referralTracking.ts:13-23](file://src/lib/referralTracking.ts#L13-L23)
 - [src/pages/CreditIntake.tsx:102-122](file://src/pages/CreditIntake.tsx#L102-L122)
 - [src/pages/ThankYou.tsx:26-80](file://src/pages/ThankYou.tsx#L26-L80)
 - [src/pages/Unsubscribe.tsx:16-56](file://src/pages/Unsubscribe.tsx#L16-L56)
@@ -886,6 +988,14 @@ Common issues and resolutions:
 - SEO metadata not updating per page
   - Integrate a head management solution to dynamically update meta tags for each route.
   - References: [index.html:23-39](file://index.html#L23-L39)
+- **Referral redirect not working**
+  - **Issue**: Referral links not redirecting to Assessment page
+  - **Solution**: Verify ReferralRedirect route is properly configured, check localStorage for referral data, ensure Assessment page captures referral on mount
+  - Reference: [src/pages/ReferralRedirect.tsx:1-7](file://src/pages/ReferralRedirect.tsx#L1-L7)
+- **Referral tracking not persisting**
+  - **Issue**: Referral data not stored in localStorage or expiring prematurely
+  - **Solution**: Check localStorage quota, verify 30-day expiry calculation, ensure captureReferral function is called on Assessment page mount
+  - Reference: [src/lib/referralTracking.ts:13-23](file://src/lib/referralTracking.ts#L13-L23)
 - **Assessment page GHL integration failures**
   - **Issue**: GHL synchronization errors or timeouts
   - **Solution**: Check edge function logs in Supabase dashboard, verify API keys are configured, ensure network connectivity to LeadConnectorHQ
@@ -937,6 +1047,8 @@ Common issues and resolutions:
 - [src/components/portal/PortalLayout.tsx:1-28](file://src/components/portal/PortalLayout.tsx#L1-L28)
 - [src/components/admin/AdminLayout.tsx:1-40](file://src/components/admin/AdminLayout.tsx#L1-L40)
 - [index.html:23-39](file://index.html#L23-L39)
+- [src/pages/ReferralRedirect.tsx:1-7](file://src/pages/ReferralRedirect.tsx#L1-L7)
+- [src/lib/referralTracking.ts:13-23](file://src/lib/referralTracking.ts#L13-L23)
 - [src/pages/Assessment.tsx:176-214](file://src/pages/Assessment.tsx#L176-L214)
 - [src/pages/Assessment.tsx:216-217](file://src/pages/Assessment.tsx#L216-L217)
 - [src/lib/referralTracking.ts:28-44](file://src/lib/referralTracking.ts#L28-L44)
@@ -950,7 +1062,7 @@ Common issues and resolutions:
 - [src/pages/admin/AdminCommissions.tsx:165-189](file://src/pages/admin/AdminCommissions.tsx#L165-L189)
 
 ## Conclusion
-The Ryland application employs a clean, centralized routing architecture with shared layouts and navigation utilities. Providers establish a robust foundation for state and UI behavior, while responsive and performance configurations support scalable growth. The Assessment page demonstrates advanced integration patterns with parallel processing capabilities that improve user experience while maintaining reliable data synchronization. The new Credit Intake form showcases comprehensive security measures and edge function integration for Scorexer webhook processing. The enhanced Thank You page provides sophisticated order processing with polling mechanisms and integration with the fetch-order edge function. The new Unsubscribe page delivers comprehensive email management with token-based validation and integration with the email suppression system. The addition of comprehensive admin portal functionality provides secure access control, detailed affiliate management interfaces, enhanced lead tracking capabilities, and robust commission management features. The new AdminAffiliateDetail page offers a tabbed interface for comprehensive affiliate oversight, while AdminAffiliates provides improved sorting and commission rate visualization. The enhanced AdminLeads page delivers better data presentation with statistics and filtering, and the new AdminCommissions page centralizes commission management with bulk actions. The updated email infrastructure integration ensures proper transactional email handling and compliance with email suppression requirements. The AdminLeadDetailDrawer provides comprehensive lead detail viewing with contact information, pipeline status, commission details, and assignment information. By following the patterns outlined here—consistent route declarations, shared layouts, SEO-aware meta management, robust integration architectures, comprehensive email management, strong security practices, and enhanced admin capabilities—you can reliably implement new pages, optimize performance, and deliver a seamless user experience across desktop and mobile devices.
+The Ryland application employs a clean, centralized routing architecture with shared layouts and navigation utilities. Providers establish a robust foundation for state and UI behavior, while responsive and performance configurations support scalable growth. The new ReferralRedirect route provides clean URL structure for referral links, seamlessly integrating with the Assessment page and GHL CRM for enhanced attribution tracking. The removal of the old PortalCalculator route streamlines portal navigation, focusing on core functionality for partners. The Assessment page demonstrates advanced integration patterns with parallel processing capabilities that improve user experience while maintaining reliable data synchronization. The enhanced Thank You page provides sophisticated order processing with polling mechanisms and integration with the fetch-order edge function. The new Unsubscribe page delivers comprehensive email management with token-based validation and integration with the email suppression system. The addition of comprehensive admin portal functionality provides secure access control, detailed affiliate management interfaces, enhanced lead tracking capabilities, and robust commission management features. The new AdminAffiliateDetail page offers a tabbed interface for comprehensive affiliate oversight, while AdminAffiliates provides improved sorting and commission rate visualization. The enhanced AdminLeads page delivers better data presentation with statistics and filtering, and the new AdminCommissions page centralizes commission management with bulk actions. The updated email infrastructure integration ensures proper transactional email handling and compliance with email suppression requirements. The AdminLeadDetailDrawer provides comprehensive lead detail viewing with contact information, pipeline status, commission details, and assignment information. The streamlined portal navigation removes redundant links while maintaining essential functionality for partner portal users. By following the patterns outlined here—consistent route declarations, shared layouts, SEO-aware meta management, robust integration architectures, comprehensive email management, strong security practices, and enhanced admin capabilities—you can reliably implement new pages, optimize performance, and deliver a seamless user experience across desktop and mobile devices.
 
 [No sources needed since this section summarizes without analyzing specific files]
 
@@ -960,6 +1072,13 @@ The Ryland application employs a clean, centralized routing architecture with sh
   - Register a route before the catch-all.
   - Use the custom NavLink for navigation.
   - Apply responsive utilities from Tailwind and the mobile hook where appropriate.
+- **Referral redirect integration checklist**:
+  - Verify ReferralRedirect route is properly configured in App.tsx
+  - Test referral URL structure (/r/:ref) and redirection logic
+  - Validate localStorage storage with 30-day expiry
+  - Test Assessment page referral capture on mount
+  - Verify GHL CRM integration with affiliate tags
+  - Test edge case scenarios (invalid refs, expired data)
 - **Assessment page integration checklist**:
   - Verify Supabase Edge Functions are deployed and configured
   - Test parallel processing implementation with network throttling

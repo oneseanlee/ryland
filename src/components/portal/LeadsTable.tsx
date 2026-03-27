@@ -1,6 +1,11 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Users } from "lucide-react";
+import { Users, MoreHorizontal, Eye, Mail, Phone, Pencil, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 import { memo } from "react";
 import type { Lead } from "@/types/leads";
 import { formatDateTime } from "@/utils/formatters";
@@ -64,6 +69,7 @@ function LeadsTable({ leads, isLoading, onSelectLead }: LeadsTableProps) {
             <TableHead className="text-xs font-medium text-slate-500 uppercase tracking-wider">Invoice</TableHead>
             <TableHead className="text-xs font-medium text-slate-500 uppercase tracking-wider">Referred</TableHead>
             <TableHead className="text-xs font-medium text-slate-500 uppercase tracking-wider hidden lg:table-cell">Next Step</TableHead>
+            <TableHead className="text-xs font-medium text-slate-500 uppercase tracking-wider text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -93,6 +99,46 @@ function LeadsTable({ leads, isLoading, onSelectLead }: LeadsTableProps) {
                 <TableCell className="text-sm text-slate-500">{formatDateTime(lead.referred_at)}</TableCell>
                 <TableCell className="text-sm text-slate-500 hidden lg:table-cell max-w-[160px] truncate">
                   {lead.next_step ?? "—"}
+                </TableCell>
+                <TableCell className="text-right">
+                  <div onClick={(e) => e.stopPropagation()}>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-slate-100">
+                          <MoreHorizontal className="h-4 w-4 text-slate-500" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-44 p-1.5">
+                        <DropdownMenuItem onClick={() => toast.info("Edit coming soon")} className="gap-3 px-3 py-2.5 rounded-md">
+                          <Pencil className="h-4 w-4 text-slate-400" />
+                          <span>Edit</span>
+                        </DropdownMenuItem>
+                        {lead.email && (
+                          <DropdownMenuItem onClick={() => window.open(`mailto:${lead.email}`)} className="gap-3 px-3 py-2.5 rounded-md">
+                            <Mail className="h-4 w-4 text-blue-500" />
+                            <span>Email</span>
+                          </DropdownMenuItem>
+                        )}
+                        {lead.phone && (
+                          <DropdownMenuItem onClick={() => window.open(`tel:${lead.phone}`)} className="gap-3 px-3 py-2.5 rounded-md">
+                            <Phone className="h-4 w-4 text-green-500" />
+                            <span>Call</span>
+                          </DropdownMenuItem>
+                        )}
+                        <DropdownMenuItem onClick={() => onSelectLead(lead)} className="gap-3 px-3 py-2.5 rounded-md">
+                          <Eye className="h-4 w-4 text-slate-400" />
+                          <span>View Details</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          className="gap-3 px-3 py-2.5 rounded-md text-red-600 focus:text-red-600 focus:bg-red-50"
+                          onClick={() => toast.info("Delete coming soon")}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                          <span>Delete</span>
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
                 </TableCell>
               </TableRow>
             );

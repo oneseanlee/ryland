@@ -5,10 +5,11 @@ import PortalSidebar from "./PortalSidebar";
 import AuthGuard from "./AuthGuard";
 import PortalContentLoader from "./PortalContentLoader";
 import { useAuth } from "@/hooks/useAuth";
+import NotificationBell from "@/components/NotificationBell";
 import { Menu } from "lucide-react";
 
 export default function PortalLayout() {
-  const { affiliate } = useAuth();
+  const { affiliate, user } = useAuth();
 
   return (
     <AuthGuard>
@@ -28,6 +29,7 @@ export default function PortalLayout() {
                 </span>
               </div>
               <div className="flex items-center gap-2">
+                {user && <NotificationBell userId={user.id} />}
                 <div className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-xs font-semibold text-white">
                   {affiliate?.full_name?.charAt(0) ?? "P"}
                 </div>

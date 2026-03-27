@@ -11,11 +11,15 @@ interface LeadDetailDrawerProps {
   onClose: () => void;
 }
 
-function DetailRow({ label, value }: { label: string; value: string }) {
+function DetailRow({ label, value, href }: { label: string; value: string; href?: string }) {
   return (
     <div className="flex justify-between items-start gap-4 py-2">
       <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider shrink-0">{label}</span>
-      <span className="text-sm text-foreground text-right">{value}</span>
+      {href && value !== "—" ? (
+        <a href={href} className="text-sm text-blue-600 hover:text-blue-800 hover:underline text-right">{value}</a>
+      ) : (
+        <span className="text-sm text-foreground text-right">{value}</span>
+      )}
     </div>
   );
 }
@@ -49,8 +53,8 @@ export default function LeadDetailDrawer({ lead, open, onClose }: LeadDetailDraw
           {/* Contact Info */}
           <SectionCard icon={User} title="Contact Info">
             <DetailRow label="Name" value={lead.full_name} />
-            <DetailRow label="Email" value={lead.email ?? "—"} />
-            <DetailRow label="Phone" value={lead.phone ?? "—"} />
+            <DetailRow label="Email" value={lead.email ?? "—"} href={lead.email ? `mailto:${lead.email}` : undefined} />
+            <DetailRow label="Phone" value={lead.phone ?? "—"} href={lead.phone ? `tel:${lead.phone}` : undefined} />
             <DetailRow label="Company" value={lead.company_name ?? "—"} />
           </SectionCard>
 

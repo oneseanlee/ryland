@@ -4,9 +4,12 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import AdminSidebar from "./AdminSidebar";
 import AdminGuard from "./AdminGuard";
 import PortalContentLoader from "@/components/portal/PortalContentLoader";
+import NotificationBell from "@/components/NotificationBell";
+import { useAuth } from "@/hooks/useAuth";
 import { Menu } from "lucide-react";
 
 export default function AdminLayout() {
+  const { user } = useAuth();
   return (
     <AdminGuard>
       <SidebarProvider>
@@ -23,6 +26,12 @@ export default function AdminLayout() {
                 <span className="text-sm text-slate-500 hidden sm:block">
                   Admin Dashboard
                 </span>
+              </div>
+              <div className="flex items-center gap-2">
+                {user && <NotificationBell userId={user.id} />}
+                <div className="h-8 w-8 rounded-full bg-gradient-to-br from-slate-700 to-slate-900 flex items-center justify-center text-xs font-semibold text-white">
+                  A
+                </div>
               </div>
             </header>
 

@@ -77,8 +77,8 @@ export default function PortalEvents() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground">Events</h1>
-        <p className="text-sm text-muted-foreground mt-1">Upcoming partner calls, webinars, and trainings.</p>
+        <h1 className="text-2xl font-bold tracking-tight text-slate-900">Events</h1>
+        <p className="text-sm text-slate-500 mt-1">Upcoming partner calls, webinars, and trainings.</p>
       </div>
 
       {isLoading ? (

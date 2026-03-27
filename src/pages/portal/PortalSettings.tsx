@@ -18,6 +18,10 @@ export default function PortalSettings() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [pwLoading, setPwLoading] = useState(false);
 
+  // Profile form
+  const [profileForm, setProfileForm] = useState({ full_name: "", email: "", phone: "" });
+  const [profileLoading, setProfileLoading] = useState(false);
+
   // Payout form
   const [paymentEmail, setPaymentEmail] = useState("");
   const [payoutLoading, setPayoutLoading] = useState(false);
@@ -28,7 +32,11 @@ export default function PortalSettings() {
 
   useEffect(() => {
     if (affiliate) {
-      // Fetch payment_email and w9_file_url from affiliates
+      setProfileForm({
+        full_name: affiliate.full_name ?? "",
+        email: affiliate.email ?? "",
+        phone: affiliate.phone ?? "",
+      });
       supabase
         .from("affiliates")
         .select("payment_email, w9_file_url")
@@ -42,6 +50,29 @@ export default function PortalSettings() {
         });
     }
   }, [affiliate]);
+
+  const handleSaveProfile = async () => {
+    if (!affiliate) return;
+    if (!profileForm.full_name.trim()) {
+      toast({ title: "Error", description: "Full name is required.", variant: "destructive" });
+      return;
+    }
+    setProfileLoading(true);
+    const { error } = await supabase
+      .from("affiliates")
+      .update({
+        full_name: profileForm.full_name.trim(),
+        email: profileForm.email.trim(),
+        phone: profileForm.phone.trim() || null,
+      })
+      .eq("id", affiliate.id);
+    setProfileLoading(false);
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Saved", description: "Profile information updated." });
+    }
+  };
 
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -135,33 +166,57 @@ export default function PortalSettings() {
             Profile Information
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
+            <div className="space-y-1.5">
               <Label className="text-xs text-slate-500">Full Name</Label>
-              <p className="text-sm font-medium text-slate-900 mt-0.5">{affiliate?.full_name ?? "—"}</p>
+              <Input
+                value={profileForm.full_name}
+                onChange={(e) => setProfileForm(prev => ({ ...prev, full_name: e.target.value }))}
+                placeholder="Your full name"
+                className="border-slate-200"
+              />
             </div>
-            <div>
+            <div className="space-y-1.5">
               <Label className="text-xs text-slate-500">Email</Label>
-              <p className="text-sm font-medium text-slate-900 mt-0.5">{affiliate?.email ?? "—"}</p>
+              <Input
+                type="email"
+                value={profileForm.email}
+                onChange={(e) => setProfileForm(prev => ({ ...prev, email: e.target.value }))}
+                placeholder="your@email.com"
+                className="border-slate-200"
+              />
             </div>
-            <div>
+            <div className="space-y-1.5">
               <Label className="text-xs text-slate-500">Phone</Label>
-              <p className="text-sm font-medium text-slate-900 mt-0.5">{affiliate?.phone ?? "—"}</p>
+              <Input
+                value={profileForm.phone}
+                onChange={(e) => setProfileForm(prev => ({ ...prev, phone: e.target.value }))}
+                placeholder="(555) 555-5555"
+                className="border-slate-200"
+              />
             </div>
-            <div>
+            <div className="space-y-1.5">
               <Label className="text-xs text-slate-500">Affiliate ID</Label>
-              <p className="text-sm font-mono font-semibold text-slate-900 mt-0.5">{affiliate?.affiliate_id ?? "—"}</p>
+              <Input
+                value={affiliate?.affiliate_id ?? "—"}
+                disabled
+                className="border-slate-200 bg-slate-50 text-slate-500 font-mono cursor-not-allowed"
+              />
             </div>
-            <div>
+            <div className="space-y-1.5">
               <Label className="text-xs text-slate-500">Status</Label>
-              <div className="mt-1">
+              <div className="mt-0.5">
                 <Badge className={`${statusColors[affiliate?.status ?? "pending"]} text-xs border`}>
                   {affiliate?.status ? affiliate.status.charAt(0).toUpperCase() + affiliate.status.slice(1) : "—"}
                 </Badge>
               </div>
             </div>
           </div>
+          <Button onClick={handleSaveProfile} disabled={profileLoading} variant="outline" className="border-slate-200 text-slate-700 hover:bg-slate-100">
+            {profileLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <CheckCircle2 className="h-4 w-4 mr-2" />}
+            Save Profile
+          </Button>
         </CardContent>
       </Card>
 

@@ -142,7 +142,7 @@ export default function AdminAffiliateDetail() {
         </TabsList>
 
         <TabsContent value="profile">
-          <AffiliateProfileTab affiliate={affiliate} />
+          <AffiliateProfileTab affiliate={affiliate} onUpdate={fetchAffiliate} />
         </TabsContent>
 
         <TabsContent value="commissions">

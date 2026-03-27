@@ -68,7 +68,7 @@ export default function PortalSpeaking() {
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">Speaking Request</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900">Speaking Request</h1>
         </div>
         <Card className="border-border/60">
           <CardContent className="py-16 text-center">
@@ -90,7 +90,7 @@ export default function PortalSpeaking() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight text-foreground">Speaking Request</h1>
-        <p className="text-sm text-muted-foreground mt-1">Invite Ryland Partners to speak at your event or training.</p>
+        <p className="text-sm text-slate-500 mt-1">Invite Ryland Partners to speak at your event or training.</p>
       </div>
 
       <Card className="border-border/60">

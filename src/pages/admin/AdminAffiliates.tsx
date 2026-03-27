@@ -11,7 +11,12 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import {
   Users, Search, CheckCircle2, XCircle, Clock, Percent, ArrowUpDown, ArrowUp, ArrowDown,
+  MoreHorizontal, Eye, Mail, Phone, Pencil, Trash2,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
@@ -220,12 +225,13 @@ export default function AdminAffiliates() {
                     <TableHead className="cursor-pointer select-none hover:text-slate-900 text-center" onClick={() => toggleSort("created_at")}>
                       <span className="flex items-center justify-center">Joined<SortIcon field="created_at" /></span>
                     </TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filteredAffiliates.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={6} className="text-center py-8 text-slate-500">
+                      <TableCell colSpan={7} className="text-center py-8 text-slate-500">
                         No affiliates found
                       </TableCell>
                     </TableRow>
@@ -263,6 +269,44 @@ export default function AdminAffiliates() {
                         </TableCell>
                         <TableCell className="text-center text-slate-500">
                           {new Date(affiliate.created_at).toLocaleDateString()}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div onClick={(e) => e.stopPropagation()}>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-slate-100">
+                                  <MoreHorizontal className="h-4 w-4 text-slate-500" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" className="w-44 p-1.5">
+                                <DropdownMenuItem onClick={() => toast.info("Edit coming soon")} className="gap-3 px-3 py-2.5 rounded-md">
+                                  <Pencil className="h-4 w-4 text-slate-400" />
+                                  <span>Edit</span>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => window.open(`mailto:${affiliate.email}`)} className="gap-3 px-3 py-2.5 rounded-md">
+                                  <Mail className="h-4 w-4 text-blue-500" />
+                                  <span>Email</span>
+                                </DropdownMenuItem>
+                                {affiliate.phone && (
+                                  <DropdownMenuItem onClick={() => window.open(`tel:${affiliate.phone}`)} className="gap-3 px-3 py-2.5 rounded-md">
+                                    <Phone className="h-4 w-4 text-green-500" />
+                                    <span>Call</span>
+                                  </DropdownMenuItem>
+                                )}
+                                <DropdownMenuItem onClick={() => navigate(`/portal/admin/affiliates/${affiliate.id}`)} className="gap-3 px-3 py-2.5 rounded-md">
+                                  <Eye className="h-4 w-4 text-slate-400" />
+                                  <span>View Details</span>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  className="gap-3 px-3 py-2.5 rounded-md text-red-600 focus:text-red-600 focus:bg-red-50"
+                                  onClick={() => toast.info("Delete coming soon")}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                  <span>Delete</span>
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))
