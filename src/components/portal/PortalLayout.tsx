@@ -28,7 +28,7 @@ export default function PortalLayout() {
                   Welcome back{affiliate ? `, ${affiliate.full_name.split(" ")[0]}` : ""}
                 </span>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3">
                 {user && <NotificationBell userId={user.id} />}
                 <div className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-xs font-semibold text-white">
                   {affiliate?.full_name?.charAt(0) ?? "P"}

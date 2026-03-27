@@ -27,10 +27,10 @@ export default function AdminLayout() {
                   Admin Dashboard
                 </span>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3">
                 {user && <NotificationBell userId={user.id} />}
-                <div className="h-8 w-8 rounded-full bg-gradient-to-br from-slate-700 to-slate-900 flex items-center justify-center text-xs font-semibold text-white">
-                  A
+                <div className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-xs font-semibold text-white">
+                  {user?.email?.charAt(0)?.toUpperCase() ?? "A"}
                 </div>
               </div>
             </header>
