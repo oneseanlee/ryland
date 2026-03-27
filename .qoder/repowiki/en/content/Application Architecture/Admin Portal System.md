@@ -12,6 +12,7 @@
 - [src/components/admin/AdminLayout.tsx](file://src/components/admin/AdminLayout.tsx)
 - [src/components/admin/AdminGuard.tsx](file://src/components/admin/AdminGuard.tsx)
 - [src/components/admin/AdminSidebar.tsx](file://src/components/admin/AdminSidebar.tsx)
+- [src/pages/admin/AdminLogin.tsx](file://src/pages/admin/AdminLogin.tsx)
 - [src/pages/admin/AdminDashboard.tsx](file://src/pages/admin/AdminDashboard.tsx)
 - [src/pages/admin/AdminLeads.tsx](file://src/pages/admin/AdminLeads.tsx)
 - [src/pages/admin/AdminAffiliates.tsx](file://src/pages/admin/AdminAffiliates.tsx)
@@ -19,15 +20,19 @@
 - [src/pages/admin/AdminPayouts.tsx](file://src/pages/admin/AdminPayouts.tsx)
 - [src/pages/admin/AdminReports.tsx](file://src/pages/admin/AdminReports.tsx)
 - [src/pages/portal/PortalLogin.tsx](file://src/pages/portal/PortalLogin.tsx)
+- [supabase/migrations/20260320000000_admin_policies.sql](file://supabase/migrations/20260320000000_admin_policies.sql)
+- [supabase/migrations/20260324201245_4681ef67-2bf0-4686-a4b6-1ae6c54189f9.sql](file://supabase/migrations/20260324201245_4681ef67-2bf0-4686-a4b6-1ae6c54189f9.sql)
 </cite>
 
 ## Update Summary
 **Changes Made**
-- Updated AdminGuard component to use modern hooks pattern with separate useAuth and useAdminRole hooks
-- Enhanced AdminSidebar with new modern design featuring gradient branding and improved styling
-- Improved commission management with better TypeScript type safety and enhanced status handling
-- Added new portal login system with role-based redirection functionality
-- Updated architecture to reflect new hook-based authentication system
+- Added new AdminLogin page with secure two-step authentication (credentials + admin role verification)
+- Enhanced AdminGuard with improved concurrent loading states and permission checking
+- Added AdminSidebar with integrated logout functionality and enhanced navigation
+- Implemented comprehensive database security policies with has_role function and RLS policies
+- Updated useAdminRole hook with sophisticated caching mechanisms and user ID tracking
+- Integrated new AdminLogin route (/portal/admin/login) with proper authentication flow
+- Enhanced database layer with app_role enum, user_roles table, and security definer functions
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -43,17 +48,18 @@
 ## Introduction
 This document provides comprehensive documentation for the Admin Portal System, a React-based administrative interface for managing an affiliate marketing program. The system integrates with Supabase for authentication, real-time database operations, and user management. It offers dashboard analytics, affiliate management, lead tracking, commission processing, payout management, and reporting capabilities.
 
-The Admin Portal is structured as a nested routing system under `/admin`, protected by role-based authentication ensuring only administrators can access sensitive controls. The frontend leverages modern React patterns including Suspense for route-level code splitting, React Query for data caching, and a comprehensive UI toolkit for responsive layouts.
+The Admin Portal is structured as a nested routing system under `/portal/admin`, protected by role-based authentication ensuring only administrators can access sensitive controls. The frontend leverages modern React patterns including Suspense for route-level code splitting, React Query for data caching, and a comprehensive UI toolkit for responsive layouts.
 
-**Updated** The system now features enhanced security with modern hooks-based authentication, improved user experience through redesigned sidebar navigation, and better type safety throughout the commission management system.
+**Updated** The system now features a comprehensive admin role management system with sophisticated caching mechanisms, dual-check role verification (local metadata + RPC fallback), intelligent caching to prevent re-checking roles on tab switches, and enhanced security through the new useAdminRole hook. A new AdminLogin page provides secure two-step authentication with credential verification followed by admin role validation.
 
 ## Project Structure
 The Admin Portal resides within a larger React application and follows a feature-based organization:
-- Root routing defines both public and admin routes
-- Admin routes are grouped under `/admin` with dedicated layout and guards
+- Root routing defines both public and admin routes with proper nesting
+- Admin routes are grouped under `/portal/admin` with dedicated layout and guards
 - Supabase integration provides authentication and data persistence
 - UI components use a consistent design system with shadcn/ui primitives
 - Modern hooks pattern separates authentication and authorization logic
+- Database layer includes comprehensive role management with security policies
 
 ```mermaid
 graph TB
@@ -63,18 +69,19 @@ App[src/App.tsx]
 end
 subgraph "Routing"
 PublicRoutes["Public Routes"]
-AdminRoutes["/admin Routes"]
+AdminRoutes["/portal/admin Routes"]
 end
 subgraph "Authentication Layer"
 AuthProvider[src/hooks/useAuth.tsx]
 AdminRoleHook[src/hooks/useAdminRole.ts]
 PortalLogin[src/pages/portal/PortalLogin.tsx]
+AdminLogin[src/pages/admin/AdminLogin.tsx]
 end
 subgraph "Admin Layer"
 AdminLayout[src/components/admin/AdminLayout.tsx]
 AdminGuard[src/components/admin/AdminGuard.tsx]
 AdminSidebar[src/components/admin/AdminSidebar.tsx]
-end
+</subgraph>
 subgraph "Admin Pages"
 Dashboard[src/pages/admin/AdminDashboard.tsx]
 Leads[src/pages/admin/AdminLeads.tsx]
@@ -85,11 +92,15 @@ Reports[src/pages/admin/AdminReports.tsx]
 end
 subgraph "Integration"
 SupabaseClient[src/integrations/supabase/client.ts]
+DatabaseLayer["Database Layer with Roles"]
+HasRoleFunction["has_role Security Function"]
+EndRolePolicy["Admin RLS Policies"]
 end
 Main --> App
 App --> PublicRoutes
 App --> AdminRoutes
 PublicRoutes --> PortalLogin
+AdminRoutes --> AdminLogin
 AdminRoutes --> AdminLayout
 AdminLayout --> AdminGuard
 AdminLayout --> AdminSidebar
@@ -102,6 +113,9 @@ AdminLayout --> Commissions
 AdminLayout --> Payouts
 AdminLayout --> Reports
 AdminLayout --> SupabaseClient
+SupabaseClient --> DatabaseLayer
+DatabaseLayer --> HasRoleFunction
+DatabaseLayer --> EndRolePolicy
 ```
 
 **Diagram sources**
@@ -110,6 +124,7 @@ AdminLayout --> SupabaseClient
 - [src/hooks/useAuth.tsx:32-187](file://src/hooks/useAuth.tsx#L32-L187)
 - [src/hooks/useAdminRole.ts](file://src/hooks/useAdminRole.ts)
 - [src/pages/portal/PortalLogin.tsx:14-43](file://src/pages/portal/PortalLogin.tsx#L14-L43)
+- [src/pages/admin/AdminLogin.tsx:14-52](file://src/pages/admin/AdminLogin.tsx#L14-L52)
 - [src/components/admin/AdminLayout.tsx:9-40](file://src/components/admin/AdminLayout.tsx#L9-L40)
 - [src/components/admin/AdminGuard.tsx:10-35](file://src/components/admin/AdminGuard.tsx#L10-L35)
 - [src/components/admin/AdminSidebar.tsx:30-92](file://src/components/admin/AdminSidebar.tsx#L30-L92)
@@ -130,7 +145,20 @@ AdminLayout --> SupabaseClient
 The Admin Portal consists of several interconnected components that work together to provide a comprehensive administrative interface:
 
 ### Enhanced Authentication and Authorization
-The system uses Supabase for authentication with role-based access control. The AdminGuard component now utilizes modern hooks pattern with separate useAuth and useAdminRole hooks for improved modularity and maintainability. The PortalLogin page provides role-based redirection after successful authentication.
+The system uses Supabase for authentication with role-based access control. The AdminGuard component now utilizes modern hooks pattern with separate useAuth and useAdminRole hooks for improved modularity and maintainability. The new AdminLogin page provides secure two-step authentication with credential verification followed by admin role validation.
+
+**Updated** The new AdminLogin page implements a secure authentication flow with:
+- Credential-based authentication using useAuth hook
+- Immediate admin role verification using Supabase RPC has_role function
+- Access denial with automatic sign-out for non-admin users
+- Enhanced error handling and user feedback
+- Password reset integration with email-based recovery
+
+The useAdminRole hook implements sophisticated caching mechanisms:
+- User ID tracking with checkedUserIdRef to prevent redundant role checks
+- Server-side RPC verification for security (never trust client-side metadata)
+- Concurrent loading states for authentication and role checking
+- Intelligent caching to prevent re-checking roles when switching tabs or navigating within the admin area
 
 ### Modern Sidebar Navigation
 The AdminSidebar features a completely redesigned navigation system with:
@@ -138,7 +166,8 @@ The AdminSidebar features a completely redesigned navigation system with:
 - Gradient branding with blue-to-indigo color scheme
 - Collapsible sidebar with icon-only mode
 - Active state tracking with data attributes
-- Sign out functionality integrated into footer
+- Integrated sign out functionality with localStorage cleanup
+- Enhanced hover effects and transitions
 
 ### Enhanced Data Management Pages
 - Dashboard: Real-time statistics with improved loading states and better error handling
@@ -154,6 +183,7 @@ The AdminSidebar features a completely redesigned navigation system with:
 - [src/components/admin/AdminGuard.tsx:10-35](file://src/components/admin/AdminGuard.tsx#L10-L35)
 - [src/components/admin/AdminLayout.tsx:9-40](file://src/components/admin/AdminLayout.tsx#L9-L40)
 - [src/components/admin/AdminSidebar.tsx:30-92](file://src/components/admin/AdminSidebar.tsx#L30-L92)
+- [src/pages/admin/AdminLogin.tsx:24-52](file://src/pages/admin/AdminLogin.tsx#L24-L52)
 - [src/pages/admin/AdminDashboard.tsx:23-194](file://src/pages/admin/AdminDashboard.tsx#L23-L194)
 - [src/pages/admin/AdminLeads.tsx:54-351](file://src/pages/admin/AdminLeads.tsx#L54-L351)
 - [src/pages/admin/AdminAffiliates.tsx:52-385](file://src/pages/admin/AdminAffiliates.tsx#L52-L385)
@@ -170,28 +200,33 @@ graph TB
 subgraph "Presentation Layer"
 AdminLayout
 AdminSidebar
+AdminLogin
 PageComponents["Admin Page Components"]
 PortalLogin
-end
+</subgraph>
 subgraph "Authentication Layer"
 AuthProvider
 AdminRoleHook
 AuthContext
-end
+</subgraph>
 subgraph "Business Logic Layer"
 AuthGuard
 DataServices
 Validation
-end
+</subgraph>
 subgraph "Data Access Layer"
 SupabaseClient
 DatabaseTables
-end
+DatabaseLayer["Database Layer with Roles"]
+HasRoleFunction["has_role Security Function"]
+EndRolePolicy["Admin RLS Policies"]
+</subgraph>
 subgraph "External Integrations"
 Auth0
 PaymentSystems
-end
+</subgraph>
 AdminLayout --> AdminSidebar
+AdminLayout --> AdminLogin
 AdminLayout --> PageComponents
 PortalLogin --> AuthProvider
 PageComponents --> AuthGuard
@@ -202,6 +237,9 @@ DataServices --> SupabaseClient
 SupabaseClient --> DatabaseTables
 SupabaseClient --> Auth0
 DataServices --> PaymentSystems
+DatabaseTables --> DatabaseLayer
+DatabaseLayer --> HasRoleFunction
+DatabaseLayer --> EndRolePolicy
 ```
 
 **Diagram sources**
@@ -210,6 +248,7 @@ DataServices --> PaymentSystems
 - [src/hooks/useAuth.tsx:32-187](file://src/hooks/useAuth.tsx#L32-L187)
 - [src/hooks/useAdminRole.ts](file://src/hooks/useAdminRole.ts)
 - [src/pages/portal/PortalLogin.tsx:24-43](file://src/pages/portal/PortalLogin.tsx#L24-L43)
+- [src/pages/admin/AdminLogin.tsx:24-52](file://src/pages/admin/AdminLogin.tsx#L24-L52)
 - [src/integrations/supabase/client.ts:11-17](file://src/integrations/supabase/client.ts#L11-L17)
 
 The architecture emphasizes:
@@ -219,44 +258,85 @@ The architecture emphasizes:
 - Responsive UI components with consistent design patterns
 - Modular page components for maintainability
 - Enhanced type safety throughout the application
+- Intelligent caching mechanisms to prevent redundant role checks
+- Comprehensive database security policies with RLS
 
 ## Detailed Component Analysis
 
-### Enhanced AdminGuard Component
-The AdminGuard serves as the primary security mechanism for the Admin Portal, now utilizing modern hooks for improved performance and maintainability:
+### Secure Admin Authentication Flow
+The new AdminLogin page implements a comprehensive two-step authentication system:
 
 ```mermaid
 sequenceDiagram
 participant User as "Admin User"
-participant PortalLogin as "PortalLogin"
-participant AdminGuard as "AdminGuard"
+participant AdminLogin as "AdminLogin Component"
 participant AuthProvider as "useAuth Hook"
-participant AdminRoleHook as "useAdminRole Hook"
 participant Supabase as "Supabase Auth"
-participant Router as "React Router"
-User->>PortalLogin : Navigate to /portal/login
-PortalLogin->>AuthProvider : signIn()
+participant Database as "Database Layer"
+User->>AdminLogin : Enter credentials
+AdminLogin->>AuthProvider : signIn(email, password)
 AuthProvider->>Supabase : signInWithPassword()
 Supabase-->>AuthProvider : Auth success/failure
-AuthProvider-->>PortalLogin : Auth result
+AuthProvider-->>AdminLogin : Auth result
 alt Auth success
-PortalLogin->>Supabase : getUser()
-Supabase-->>PortalLogin : User object
-PortalLogin->>AdminRoleHook : Check admin role
-AdminRoleHook->>Supabase : getUserMetadata()
-Supabase-->>AdminRoleHook : Role info
-alt Role is admin
-PortalLogin->>Router : Navigate to /admin
-else Not admin
-PortalLogin->>Router : Navigate to /portal
+AdminLogin->>Supabase : auth.getUser()
+Supabase-->>AdminLogin : Current user object
+AdminLogin->>Database : rpc("has_role", {user_id, "admin"})
+Database-->>AdminLogin : Role verification result
+alt User has admin role
+AdminLogin->>AdminLogin : Navigate to /portal/admin
+else User does not have admin role
+AdminLogin->>Supabase : auth.signOut()
+AdminLogin->>AdminLogin : Show access denied message
 end
 else Auth failure
-PortalLogin->>PortalLogin : Show error message
+AdminLogin->>AdminLogin : Show invalid credentials message
 end
 ```
 
 **Diagram sources**
-- [src/pages/portal/PortalLogin.tsx:24-43](file://src/pages/portal/PortalLogin.tsx#L24-L43)
+- [src/pages/admin/AdminLogin.tsx:24-52](file://src/pages/admin/AdminLogin.tsx#L24-L52)
+- [src/hooks/useAuth.tsx:150-153](file://src/hooks/useAuth.tsx#L150-L153)
+
+Key security features:
+- Two-step authentication: credentials + admin role verification
+- Immediate role validation using server-side RPC function
+- Automatic sign-out for non-admin users
+- Enhanced error handling and user feedback
+- Password reset integration with email-based recovery
+- Loading states with permission checking messaging
+
+**Section sources**
+- [src/pages/admin/AdminLogin.tsx:24-52](file://src/pages/admin/AdminLogin.tsx#L24-L52)
+
+### Enhanced Admin Role Management System
+The useAdminRole hook implements a sophisticated role verification system with caching mechanisms and dual-check approach:
+
+```mermaid
+sequenceDiagram
+participant User as "Admin User"
+participant AdminGuard as "AdminGuard"
+participant AuthProvider as "useAuth Hook"
+participant AdminRoleHook as "useAdminRole Hook"
+participant Supabase as "Supabase Auth"
+participant Database as "Database Layer"
+User->>AdminGuard : Access /portal/admin
+AdminGuard->>AuthProvider : Get user and auth status
+AuthProvider-->>AdminGuard : User object and loading state
+AdminGuard->>AdminRoleHook : Check admin role
+AdminRoleHook->>AdminRoleHook : Check cached user ID
+alt User ID cached
+AdminRoleHook-->>AdminGuard : Return cached role status
+else User ID not cached
+AdminRoleHook->>Database : has_role RPC call
+Database-->>AdminRoleHook : Role verification result
+AdminRoleHook->>AdminRoleHook : Cache user ID
+AdminRoleHook-->>AdminGuard : Return role status
+end
+AdminGuard->>AdminGuard : Render protected content or redirect
+```
+
+**Diagram sources**
 - [src/components/admin/AdminGuard.tsx:10-35](file://src/components/admin/AdminGuard.tsx#L10-L35)
 - [src/hooks/useAuth.tsx:150-153](file://src/hooks/useAuth.tsx#L150-L153)
 - [src/hooks/useAdminRole.ts](file://src/hooks/useAdminRole.ts)
@@ -264,13 +344,15 @@ end
 Key security features:
 - Modern hooks-based authentication with useAuth and useAdminRole
 - Concurrent loading states for authentication and role checking
+- Intelligent caching with checkedUserIdRef to prevent redundant RPC calls
+- Server-side RPC verification for security (never trust client-side metadata)
+- Immediate user verification with loading states
 - Improved error handling and user feedback
-- Role-based redirection after successful login
-- Loading spinner with permission checking message
 
 **Section sources**
 - [src/components/admin/AdminGuard.tsx:10-35](file://src/components/admin/AdminGuard.tsx#L10-L35)
 - [src/pages/portal/PortalLogin.tsx:24-43](file://src/pages/portal/PortalLogin.tsx#L24-L43)
+- [src/hooks/useAdminRole.ts](file://src/hooks/useAdminRole.ts)
 
 ### Modern AdminSidebar Component
 The AdminSidebar features a completely redesigned navigation system with enhanced styling and functionality:
@@ -280,8 +362,8 @@ classDiagram
 class AdminSidebar {
 +location : Location
 +menuItems : MenuItem[]
++handleAdminSignOut() : void
 +render() : JSX.Element
-+handleSignOut() : void
 }
 class MenuItem {
 +icon : Icon
@@ -295,8 +377,14 @@ class SidebarDesign {
 +activeState : "white/10"
 +hoverState : "white/5"
 }
+class LogoutFunctionality {
++removeLocalStorage() : void
++redirect() : void
++signOut() : void
+}
 AdminSidebar --> MenuItem : contains
 AdminSidebar --> SidebarDesign : styled with
+AdminSidebar --> LogoutFunctionality : includes
 ```
 
 **Diagram sources**
@@ -309,7 +397,8 @@ Key design features:
 - Collapsible sidebar with icon-only mode
 - Active state tracking with data attributes
 - Enhanced hover effects and transitions
-- Sign out button integrated into footer section
+- Integrated sign out button with localStorage cleanup
+- Footer section containing logout functionality
 
 **Section sources**
 - [src/components/admin/AdminSidebar.tsx:30-92](file://src/components/admin/AdminSidebar.tsx#L30-L92)
@@ -393,7 +482,7 @@ Enhanced features include:
 - [src/pages/admin/AdminAffiliates.tsx:143-163](file://src/pages/admin/AdminAffiliates.tsx#L143-L163)
 
 ### Portal Login with Role-Based Redirection
-The new PortalLogin component provides enhanced authentication with automatic role-based redirection:
+The existing PortalLogin component provides enhanced authentication with automatic role-based redirection:
 
 ```mermaid
 flowchart TD
@@ -405,7 +494,7 @@ AuthSuccess --> |No| ShowError["Display error message"]
 ShowError --> LoginForm
 GetUser --> CheckRole["Extract user role from metadata"]
 CheckRole --> IsAdmin{"Role === 'admin'?"}
-IsAdmin --> |Yes| RedirectAdmin["Navigate to /admin"]
+IsAdmin --> |Yes| RedirectAdmin["Navigate to /portal/admin"]
 IsAdmin --> |No| RedirectPortal["Navigate to /portal"]
 RedirectAdmin --> Success["Admin access granted"]
 RedirectPortal --> Success["Portal access granted"]
@@ -423,6 +512,68 @@ Key features:
 **Section sources**
 - [src/pages/portal/PortalLogin.tsx:24-43](file://src/pages/portal/PortalLogin.tsx#L24-L43)
 
+### Comprehensive Database Security Policies
+The system includes comprehensive database-level role management with security policies:
+
+```mermaid
+graph TB
+subgraph "Database Schema"
+AppRoleEnum["app_role ENUM<br/>('admin', 'user')"]
+UserRolesTable["user_roles TABLE<br/>user_id + role"]
+HasRoleFunction["has_role RPC FUNCTION<br/>Security Definer"]
+IsAdminFunction["is_admin() FUNCTION<br/>Security Definer"]
+</subgraph>
+subgraph "Security Policies"
+AdminAffiliatesPolicy["Admins can view/update affiliates"]
+AdminLeadsPolicy["Admins can view/update leads"]
+AdminCommissionsPolicy["Admins can view/insert/update commissions"]
+AdminPayoutsPolicy["Admins can manage payouts"]
+AdminResourcesPolicy["Admins can manage resources"]
+AdminEventsPolicy["Admins can manage events"]
+OwnRolesPolicy["Users can view own roles"]
+</subgraph
+subgraph "Indexes"
+AffiliateStatusIndex["idx_affiliates_status"]
+CommissionStatusIndex["idx_commissions_status"]
+PayoutStatusIndex["idx_payouts_status"]
+</subgraph
+AppRoleEnum --> UserRolesTable
+UserRolesTable --> HasRoleFunction
+IsAdminFunction --> AdminAffiliatesPolicy
+IsAdminFunction --> AdminLeadsPolicy
+IsAdminFunction --> AdminCommissionsPolicy
+IsAdminFunction --> AdminPayoutsPolicy
+IsAdminFunction --> AdminResourcesPolicy
+IsAdminFunction --> AdminEventsPolicy
+HasRoleFunction --> AdminAffiliatesPolicy
+HasRoleFunction --> AdminLeadsPolicy
+HasRoleFunction --> AdminCommissionsPolicy
+HasRoleFunction --> AdminPayoutsPolicy
+UserRolesTable --> OwnRolesPolicy
+AffiliateStatusIndex --> AdminAffiliatesPolicy
+CommissionStatusIndex --> AdminCommissionsPolicy
+PayoutStatusIndex --> AdminPayoutsPolicy
+```
+
+**Diagram sources**
+- [supabase/migrations/20260324201245_4681ef67-2bf0-4686-a4b6-1ae6c54189f9.sql:2-30](file://supabase/migrations/20260324201245_4681ef67-2bf0-4686-a4b6-1ae6c54189f9.sql#L2-L30)
+- [supabase/migrations/20260324201245_4681ef67-2bf0-4686-a4b6-1ae6c54189f9.sql:37-82](file://supabase/migrations/20260324201245_4681ef67-2bf0-4686-a4b6-1ae6c54189f9.sql#L37-L82)
+- [supabase/migrations/20260320000000_admin_policies.sql:12-56](file://supabase/migrations/20260320000000_admin_policies.sql#L12-L56)
+
+Key database features:
+- app_role ENUM with 'admin' and 'user' values
+- user_roles table with unique constraints and RLS
+- has_role security definer function for role verification
+- is_admin function for JWT-based role checking
+- Comprehensive Row Level Security policies for data access control
+- Performance indexes for common status queries
+- Commission rate column addition for affiliate management
+
+**Section sources**
+- [supabase/migrations/20260324201245_4681ef67-2bf0-4686-a4b6-1ae6c54189f9.sql:2-30](file://supabase/migrations/20260324201245_4681ef67-2bf0-4686-a4b6-1ae6c54189f9.sql#L2-L30)
+- [supabase/migrations/20260324201245_4681ef67-2bf0-4686-a4b6-1ae6c54189f9.sql:37-82](file://supabase/migrations/20260324201245_4681ef67-2bf0-4686-a4b6-1ae6c54189f9.sql#L37-L82)
+- [supabase/migrations/20260320000000_admin_policies.sql:12-56](file://supabase/migrations/20260320000000_admin_policies.sql#L12-L56)
+
 ## Dependency Analysis
 The Admin Portal relies on several key dependencies for functionality and performance:
 
@@ -433,26 +584,26 @@ React["react@^18.3.1"]
 Router["react-router-dom@^6.30.1"]
 Query["@tanstack/react-query@^5.83.0"]
 Hooks["Custom Hooks Pattern"]
-end
+</subgraph>
 subgraph "UI Framework"
 Shadcn["shadcn/ui components"]
 Tailwind["tailwindcss"]
 Lucide["lucide-react icons"]
-end
+</subgraph>
 subgraph "Database & Auth"
 Supabase["@supabase/supabase-js@^2.95.3"]
 Auth0["Supabase Auth"]
-end
+</subgraph>
 subgraph "Utilities"
 DateFns["date-fns@^3.6.0"]
 Zod["zod@^3.25.76"]
 Framer["framer-motion@^12.34.0"]
 Sonner["sonner@^1.7.4"]
-end
+</subgraph>
 subgraph "Build Tools"
 Vite["vite@^5.4.19"]
 SWC["@vitejs/plugin-react-swc"]
-end
+</subgraph>
 AdminPortal --> React
 AdminPortal --> Router
 AdminPortal --> Query
@@ -489,6 +640,8 @@ The Admin Portal implements several performance optimization strategies with enh
 - Optimistic updates for immediate UI feedback
 - Automatic background refetching on focus
 - Separate hooks for authentication and role checking enable concurrent loading
+- **New**: useAdminRole hook implements intelligent caching to prevent redundant role checks
+- **New**: AdminLogin page implements immediate role verification to prevent unnecessary navigation
 
 ### Advanced Rendering Optimizations
 - Route-level code splitting with Suspense boundaries
@@ -502,7 +655,16 @@ The Admin Portal implements several performance optimization strategies with enh
 - Batch operations for bulk updates with better error handling
 - Debounced search functionality to reduce API calls
 - Local state management for frequently accessed data
-- Improved authentication flow with concurrent loading states
+- **New**: Dual-check role verification system prevents unnecessary RPC calls
+- **New**: Caching mechanism stores user IDs to avoid repeated role checks
+- **New**: AdminLogin page caches role verification results during session
+
+### Intelligent Role Verification
+- **New**: Local metadata check before RPC call for instant role verification
+- **New**: Caching system prevents re-checking roles when switching tabs
+- **New**: Smart user ID tracking to avoid redundant role validation
+- **New**: Concurrent loading states for authentication and role checking
+- **New**: Server-side RPC verification ensures security compliance
 
 ## Troubleshooting Guide
 Common issues and their solutions with enhanced debugging capabilities:
@@ -512,32 +674,61 @@ Common issues and their solutions with enhanced debugging capabilities:
 - **Solution**: Verify user role in Supabase user_metadata/app_metadata
 - **Debug**: Check browser localStorage for auth tokens and Supabase session restoration
 - **New**: Monitor useAdminRole hook loading states for better debugging
+- **New**: Check if user ID is properly cached in checkedUserIdRef
+- **New**: Verify has_role function is properly deployed in database
 
 ### Enhanced Data Loading Issues
 - **Issue**: Dashboard shows empty statistics
 - **Solution**: Verify database connectivity and table permissions
 - **Debug**: Check network tab for failed API requests and console errors
 - **New**: Monitor individual hook loading states for better troubleshooting
+- **New**: Verify has_role function is properly deployed in database
 
 ### Performance Issues
 - **Issue**: Slow page loads with large datasets
 - **Solution**: Implement pagination or virtualization for tables
 - **Debug**: Monitor React Query cache and network request timing
 - **New**: Check concurrent loading states from multiple hooks
+- **New**: Verify useAdminRole hook is properly caching user IDs
+- **New**: Monitor AdminLogin page role verification caching
 
 ### UI Responsiveness
 - **Issue**: Components not responding to user interactions
 - **Solution**: Verify proper event handler binding and state updates
 - **Debug**: Check for unhandled exceptions in component lifecycle
 - **New**: Monitor loading states from useAuth and useAdminRole hooks
+- **New**: Verify role verification caching is working correctly
+
+### Role Verification Issues
+- **New**: **Issue**: useAdminRole hook keeps re-checking roles unnecessarily
+- **New**: **Solution**: Check if user ID caching is working properly
+- **New**: **Debug**: Verify checkedUserIdRef.current is being set correctly
+- **New**: **Issue**: Role verification fails even though user has admin role
+- **New**: **Solution**: Check has_role function deployment and user_roles table
+- **New**: **Debug**: Verify user has proper entry in user_roles table
+- **New**: **Issue**: AdminLogin page shows access denied immediately
+- **New**: **Solution**: Verify has_role RPC function is deployed and accessible
+- **New**: **Debug**: Check database connection and RPC function permissions
+
+### Database Security Policy Issues
+- **New**: **Issue**: Admins cannot access certain tables despite having admin role
+- **New**: **Solution**: Verify has_role function and RLS policies are properly deployed
+- **New**: **Debug**: Check database migration status and policy assignments
+- **New**: **Issue**: Performance issues with admin queries
+- **New**: **Solution**: Verify database indexes are properly created
+- **New**: **Debug**: Check EXPLAIN ANALYZE output for slow queries
 
 **Section sources**
 - [src/components/admin/AdminGuard.tsx:15-24](file://src/components/admin/AdminGuard.tsx#L15-L24)
 - [src/pages/admin/AdminDashboard.tsx:77-81](file://src/pages/admin/AdminDashboard.tsx#L77-L81)
+- [src/hooks/useAdminRole.ts](file://src/hooks/useAdminRole.ts)
+- [src/pages/admin/AdminLogin.tsx:35-48](file://src/pages/admin/AdminLogin.tsx#L35-L48)
 
 ## Conclusion
-The Admin Portal System provides a robust, scalable solution for managing affiliate marketing programs with significant enhancements. The new modern hooks-based architecture improves maintainability and performance, while the enhanced sidebar design provides a better user experience. The improved commission management system offers better type safety and functionality, and the new portal login system provides seamless role-based redirection.
+The Admin Portal System provides a robust, scalable solution for managing affiliate marketing programs with significant enhancements. The new comprehensive admin role management system demonstrates sophisticated engineering with intelligent caching mechanisms, dual-check role verification, and improved performance through caching to prevent redundant role checks.
 
 Key strengths include comprehensive reporting capabilities, automated payout processing, intuitive management interfaces, and enhanced security through modern authentication patterns. The system's modular design with separate authentication and authorization hooks allows for easy extension and customization to meet evolving business requirements.
 
-The recent updates demonstrate a commitment to modern React development practices, improved developer experience, and enhanced user experience through thoughtful design improvements.
+The recent updates demonstrate a commitment to modern React development practices, improved developer experience, and enhanced user experience through thoughtful design improvements. The new AdminLogin page with its two-step authentication flow, the enhanced AdminGuard with improved concurrent loading states, the AdminSidebar with integrated logout functionality, and the comprehensive database security policies represent significant advances in administrative interface security and usability.
+
+The new useAdminRole hook with its caching mechanisms and dual-check system, combined with the database-level security policies including the has_role function and comprehensive RLS policies, creates a secure, performant, and maintainable administrative interface for managing complex affiliate marketing operations. The system's architecture supports future growth while maintaining strong security boundaries and optimal user experience.

@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import AdminLeadDetailDrawer from "@/components/admin/AdminLeadDetailDrawer";
 import {
   Table,
   TableBody,
@@ -19,17 +19,32 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { 
-  UserCheck, 
-  Search, 
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import {
+  UserCheck,
+  Search,
   Mail,
   Phone,
   Calendar,
   DollarSign,
-  TrendingUp
+  TrendingUp,
+  MoreHorizontal,
+  Eye,
+  Pencil,
+  Trash2,
+  ExternalLink,
+  FileText
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
+import { toast } from "sonner";
 
 interface Lead {
   id: string;
@@ -39,12 +54,20 @@ interface Lead {
   full_name: string;
   email: string | null;
   phone: string | null;
+  company_name: string | null;
   status: string;
   pipeline_stage: string;
   deal_amount: number | null;
+  commission_amount: number | null;
+  commission_status: string | null;
+  assigned_rep: string | null;
+  next_appointment_at: string | null;
+  next_step: string | null;
+  latest_update: string | null;
   notes: string | null;
   referred_at: string;
   created_at: string;
+  updated_at: string;
   affiliate: {
     full_name: string;
     affiliate_id: string;
@@ -56,6 +79,7 @@ export default function AdminLeads() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [stats, setStats] = useState({
     totalLeads: 0,
     totalValue: 0,
@@ -81,42 +105,34 @@ export default function AdminLeads() {
           full_name,
           email,
           phone,
+          company_name,
           status,
           pipeline_stage,
           deal_amount,
+          commission_amount,
+          commission_status,
+          assigned_rep,
+          next_appointment_at,
+          next_step,
+          latest_update,
           notes,
           referred_at,
           created_at,
+          updated_at,
           affiliates(full_name, affiliate_id)
         `)
         .order('created_at', { ascending: false });
 
       if (statusFilter !== 'all') {
-        query = query.eq('status', statusFilter);
+        query = query.eq('pipeline_stage', statusFilter);
       }
 
       const { data, error } = await query;
 
       if (error) throw error;
 
-      interface RawLead {
-        id: string;
-        affiliate_id: string;
-        ghl_contact_id: string | null;
-        ghl_opportunity_id: string | null;
-        full_name: string;
-        email: string | null;
-        phone: string | null;
-        status: string;
-        pipeline_stage: string;
-        deal_amount: number | null;
-        notes: string | null;
-        referred_at: string;
-        created_at: string;
-        affiliates: { full_name: string; affiliate_id: string } | null;
-      }
-
-      const transformedData: Lead[] = (data || []).map((item: RawLead) => ({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const transformedData: Lead[] = (data || []).map((item: any) => ({
         id: item.id,
         affiliate_id: item.affiliate_id,
         ghl_contact_id: item.ghl_contact_id,
@@ -124,12 +140,20 @@ export default function AdminLeads() {
         full_name: item.full_name,
         email: item.email,
         phone: item.phone,
+        company_name: item.company_name,
         status: item.status,
         pipeline_stage: item.pipeline_stage,
         deal_amount: item.deal_amount,
+        commission_amount: item.commission_amount,
+        commission_status: item.commission_status,
+        assigned_rep: item.assigned_rep,
+        next_appointment_at: item.next_appointment_at,
+        next_step: item.next_step,
+        latest_update: item.latest_update,
         notes: item.notes,
         referred_at: item.referred_at,
         created_at: item.created_at,
+        updated_at: item.updated_at,
         affiliate: item.affiliates,
       }));
 
@@ -154,16 +178,18 @@ export default function AdminLeads() {
     }
   };
 
-  const getStatusBadge = (status: string) => {
-    const statusColors: Record<string, string> = {
+  const getStageBadge = (stage: string) => {
+    const stageColors: Record<string, string> = {
       'New Lead': 'bg-blue-100 text-blue-700',
-      'Contacted': 'bg-yellow-100 text-yellow-700',
-      'Qualified': 'bg-purple-100 text-purple-700',
-      'Proposal': 'bg-orange-100 text-orange-700',
+      'Contacted': 'bg-sky-100 text-sky-700',
+      'Credit Optimization': 'bg-violet-100 text-violet-700',
+      'Funding': 'bg-amber-100 text-amber-700',
+      'Approved': 'bg-emerald-100 text-emerald-700',
+      'Funded': 'bg-green-100 text-green-700',
       'Closed Won': 'bg-green-100 text-green-700',
       'Closed Lost': 'bg-red-100 text-red-700',
     };
-    return <Badge className={statusColors[status] || 'bg-slate-100 text-slate-700'}>{status}</Badge>;
+    return <Badge className={stageColors[stage] || 'bg-slate-100 text-slate-700'}>{stage}</Badge>;
   };
 
   const filteredLeads = leads.filter(lead =>
@@ -199,7 +225,7 @@ export default function AdminLeads() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-slate-500">Total Pipeline Value</p>
-                <p className="text-2xl font-bold text-slate-900">${stats.totalValue.toLocaleString()}</p>
+                <p className="text-2xl font-bold text-slate-900">${stats.totalValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
               </div>
               <DollarSign className="h-8 w-8 text-green-500" />
             </div>
@@ -210,7 +236,7 @@ export default function AdminLeads() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-slate-500">Avg Deal Size</p>
-                <p className="text-2xl font-bold text-slate-900">${stats.avgDealSize.toFixed(0)}</p>
+                <p className="text-2xl font-bold text-slate-900">${stats.avgDealSize.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
               </div>
               <TrendingUp className="h-8 w-8 text-purple-500" />
             </div>
@@ -244,15 +270,17 @@ export default function AdminLeads() {
                 />
               </div>
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-40">
-                  <SelectValue placeholder="Filter by status" />
+                <SelectTrigger className="w-48">
+                  <SelectValue placeholder="Filter by stage" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="all">All Stages</SelectItem>
                   <SelectItem value="New Lead">New Lead</SelectItem>
                   <SelectItem value="Contacted">Contacted</SelectItem>
-                  <SelectItem value="Qualified">Qualified</SelectItem>
-                  <SelectItem value="Proposal">Proposal</SelectItem>
+                  <SelectItem value="Credit Optimization">Credit Optimization</SelectItem>
+                  <SelectItem value="Funding">Funding</SelectItem>
+                  <SelectItem value="Approved">Approved</SelectItem>
+                  <SelectItem value="Funded">Funded</SelectItem>
                   <SelectItem value="Closed Won">Closed Won</SelectItem>
                   <SelectItem value="Closed Lost">Closed Lost</SelectItem>
                 </SelectContent>
@@ -272,32 +300,34 @@ export default function AdminLeads() {
                   <TableRow>
                     <TableHead>Lead</TableHead>
                     <TableHead>Referred By</TableHead>
-                    <TableHead>Status</TableHead>
                     <TableHead>Stage</TableHead>
                     <TableHead>Deal Amount</TableHead>
                     <TableHead>Referred</TableHead>
-                    <TableHead>Contact</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filteredLeads.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={7} className="text-center py-8 text-slate-500">
+                      <TableCell colSpan={6} className="text-center py-8 text-slate-500">
                         No leads found
                       </TableCell>
                     </TableRow>
                   ) : (
                     filteredLeads.map((lead) => (
-                      <TableRow key={lead.id}>
+                      <TableRow key={lead.id} className="cursor-pointer hover:bg-slate-50" onClick={() => setSelectedLead(lead)}>
                         <TableCell>
                           <div className="flex items-center gap-3">
                             <div className="h-9 w-9 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-sm font-semibold text-white">
                               {lead.full_name.charAt(0)}
                             </div>
-                            <div>
+                            <div className="flex items-center gap-2">
                               <p className="font-medium text-slate-900">{lead.full_name}</p>
                               {lead.notes && (
-                                <p className="text-xs text-slate-500 truncate max-w-xs">{lead.notes}</p>
+                                <span className="inline-flex items-center gap-1 rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium text-slate-500">
+                                  <FileText className="h-2.5 w-2.5" />
+                                  Notes
+                                </span>
                               )}
                             </div>
                           </div>
@@ -312,28 +342,57 @@ export default function AdminLeads() {
                             </p>
                           </div>
                         </TableCell>
-                        <TableCell>{getStatusBadge(lead.status)}</TableCell>
-                        <TableCell>
-                          <span className="text-sm text-slate-600">{lead.pipeline_stage}</span>
-                        </TableCell>
+                        <TableCell>{getStageBadge(lead.pipeline_stage)}</TableCell>
                         <TableCell className="font-medium text-slate-900">
                           {lead.deal_amount ? `$${lead.deal_amount.toLocaleString()}` : '-'}
                         </TableCell>
                         <TableCell className="text-slate-500">
-                          {format(new Date(lead.referred_at), 'MMM d, yyyy')}
+                          {format(new Date(lead.referred_at), 'MMM dd, yyyy')}
                         </TableCell>
-                        <TableCell>
-                          <div className="flex gap-2">
-                            {lead.email && (
-                              <a href={`mailto:${lead.email}`} className="text-blue-600 hover:text-blue-800">
-                                <Mail className="h-4 w-4" />
-                              </a>
-                            )}
-                            {lead.phone && (
-                              <a href={`tel:${lead.phone}`} className="text-green-600 hover:text-green-800">
-                                <Phone className="h-4 w-4" />
-                              </a>
-                            )}
+                        <TableCell className="text-right">
+                          <div onClick={(e) => e.stopPropagation()}>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-slate-100">
+                                  <MoreHorizontal className="h-4 w-4 text-slate-500" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" className="w-44 p-1.5">
+                                <DropdownMenuItem onClick={() => toast.info("Edit coming soon")} className="gap-3 px-3 py-2.5 rounded-md">
+                                  <Pencil className="h-4 w-4 text-slate-400" />
+                                  <span>Edit</span>
+                                </DropdownMenuItem>
+                                {lead.email && (
+                                  <DropdownMenuItem onClick={() => window.open(`mailto:${lead.email}`)} className="gap-3 px-3 py-2.5 rounded-md">
+                                    <Mail className="h-4 w-4 text-blue-500" />
+                                    <span>Email</span>
+                                  </DropdownMenuItem>
+                                )}
+                                {lead.phone && (
+                                  <DropdownMenuItem onClick={() => window.open(`tel:${lead.phone}`)} className="gap-3 px-3 py-2.5 rounded-md">
+                                    <Phone className="h-4 w-4 text-green-500" />
+                                    <span>Call</span>
+                                  </DropdownMenuItem>
+                                )}
+                                {lead.ghl_contact_id && (
+                                  <DropdownMenuItem onClick={() => toast.info("GHL link coming soon")} className="gap-3 px-3 py-2.5 rounded-md">
+                                    <ExternalLink className="h-4 w-4 text-slate-400" />
+                                    <span>Open in GHL</span>
+                                  </DropdownMenuItem>
+                                )}
+                                <DropdownMenuItem onClick={() => setSelectedLead(lead)} className="gap-3 px-3 py-2.5 rounded-md">
+                                  <Eye className="h-4 w-4 text-slate-400" />
+                                  <span>View Details</span>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  className="gap-3 px-3 py-2.5 rounded-md text-red-600 focus:text-red-600 focus:bg-red-50"
+                                  onClick={() => toast.info("Delete coming soon")}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                  <span>Delete</span>
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
                           </div>
                         </TableCell>
                       </TableRow>
@@ -345,6 +404,12 @@ export default function AdminLeads() {
           )}
         </CardContent>
       </Card>
+
+      <AdminLeadDetailDrawer
+        lead={selectedLead}
+        open={!!selectedLead}
+        onClose={() => setSelectedLead(null)}
+      />
     </div>
   );
 }

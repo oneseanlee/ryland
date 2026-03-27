@@ -96,7 +96,9 @@ export type Database = {
       }
       affiliates: {
         Row: {
+          admin_notes: string | null
           affiliate_id: string
+          backend_commission_rate: number
           company_name: string | null
           created_at: string
           email: string
@@ -107,12 +109,15 @@ export type Database = {
           phone: string | null
           status: Database["public"]["Enums"]["affiliate_status"]
           updated_at: string
+          upfront_commission_rate: number
           user_id: string
           w9_file_url: string | null
           website: string | null
         }
         Insert: {
+          admin_notes?: string | null
           affiliate_id: string
+          backend_commission_rate?: number
           company_name?: string | null
           created_at?: string
           email: string
@@ -123,12 +128,15 @@ export type Database = {
           phone?: string | null
           status?: Database["public"]["Enums"]["affiliate_status"]
           updated_at?: string
+          upfront_commission_rate?: number
           user_id: string
           w9_file_url?: string | null
           website?: string | null
         }
         Update: {
+          admin_notes?: string | null
           affiliate_id?: string
+          backend_commission_rate?: number
           company_name?: string | null
           created_at?: string
           email?: string
@@ -139,6 +147,7 @@ export type Database = {
           phone?: string | null
           status?: Database["public"]["Enums"]["affiliate_status"]
           updated_at?: string
+          upfront_commission_rate?: number
           user_id?: string
           w9_file_url?: string | null
           website?: string | null

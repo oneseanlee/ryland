@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
@@ -93,6 +94,8 @@ export default function AdminDashboard() {
     }).format(amount);
   };
 
+  const navigate = useNavigate();
+
   const statCards = [
     {
       title: "Total Affiliates",
@@ -101,6 +104,7 @@ export default function AdminDashboard() {
       trend: "+12%",
       trendUp: true,
       subtitle: `${stats?.pendingApprovals || 0} pending approval`,
+      link: "/portal/admin/affiliates",
     },
     {
       title: "Total Leads",
@@ -109,6 +113,7 @@ export default function AdminDashboard() {
       trend: "+8%",
       trendUp: true,
       subtitle: "Across all affiliates",
+      link: "/portal/admin/leads",
     },
     {
       title: "Total Commissions",
@@ -117,6 +122,7 @@ export default function AdminDashboard() {
       trend: "+23%",
       trendUp: true,
       subtitle: `${stats?.pendingPayouts || 0} pending payout`,
+      link: "/portal/admin/commissions",
     },
     {
       title: "This Month",
@@ -125,6 +131,7 @@ export default function AdminDashboard() {
       trend: "+15%",
       trendUp: true,
       subtitle: "Revenue generated",
+      link: "/portal/admin/commissions?period=month",
     },
   ];
 
@@ -141,7 +148,11 @@ export default function AdminDashboard() {
           const TrendIcon = card.trendUp ? ArrowUpRight : ArrowDownRight;
           
           return (
-            <Card key={index}>
+            <Card
+              key={index}
+              className="cursor-pointer hover:shadow-md hover:border-blue-200 transition-all group"
+              onClick={() => navigate(card.link)}
+            >
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium text-slate-600">
                   {card.title}
@@ -194,6 +205,7 @@ export default function AdminDashboard() {
 }
 
 interface Affiliate {
+  id: string;
   full_name: string;
   email: string;
   status: string;
@@ -201,6 +213,7 @@ interface Affiliate {
 }
 
 function RecentAffiliates() {
+  const navigate = useNavigate();
   const [affiliates, setAffiliates] = useState<Affiliate[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -208,10 +221,10 @@ function RecentAffiliates() {
     const fetchRecent = async () => {
       const { data } = await supabase
         .from('affiliates')
-        .select('full_name, email, status, created_at')
+        .select('id, full_name, email, status, created_at')
         .order('created_at', { ascending: false })
         .limit(5);
-      
+
       setAffiliates(data || []);
       setLoading(false);
     };
@@ -229,9 +242,13 @@ function RecentAffiliates() {
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-1">
       {affiliates.map((affiliate) => (
-        <div key={affiliate.email} className="flex items-center justify-between py-2 border-b border-slate-100 last:border-0">
+        <div
+          key={affiliate.id}
+          className="flex items-center justify-between py-2 px-2 -mx-2 rounded-md border-b border-slate-100 last:border-0 cursor-pointer hover:bg-slate-50 transition-colors"
+          onClick={() => navigate(`/portal/admin/affiliates/${affiliate.id}`)}
+        >
           <div>
             <p className="text-sm font-medium text-slate-900">{affiliate.full_name}</p>
             <p className="text-xs text-slate-500">{affiliate.email}</p>

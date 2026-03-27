@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, useCallback, useRef, type ReactNode } from "react";
 
 import { supabase } from "@/integrations/supabase/client";
 import type { User, Session } from "@supabase/supabase-js";
@@ -30,38 +30,50 @@ interface AuthContextValue extends AuthState {
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [state, setState] = useState<AuthState>({
-    user: null,
-    session: null,
-    affiliate: null,
-    loading: true,
+  const [state, setState] = useState<AuthState>(() => {
+    // Synchronous initial state: try to read user from localStorage immediately
+    // so the very first render already has the user (prevents flash of login page)
+    try {
+      const storageKey = Object.keys(localStorage).find(key =>
+        key.startsWith('sb-') && key.endsWith('-auth-token')
+      );
+      if (storageKey) {
+        const stored = localStorage.getItem(storageKey);
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (parsed?.user && parsed?.access_token) {
+            return {
+              user: parsed.user as User,
+              session: parsed as unknown as Session,
+              affiliate: null,
+              loading: true, // still loading — need to verify with Supabase
+            };
+          }
+        }
+      }
+    } catch {
+      // ignore
+    }
+    return { user: null, session: null, affiliate: null, loading: true };
   });
 
+  const initializedRef = useRef(false);
+
   const fetchAffiliate = useCallback(async (userId: string) => {
-    
-    
     try {
-      // Remove timeout - let Supabase handle it, but add abort controller for cleanup
       const { data, error } = await supabase
         .from("affiliates")
         .select("id, affiliate_id, full_name, email, phone, company_name, website, status")
         .eq("user_id", userId)
         .maybeSingle();
-      
-      if (error) {
-        
-        throw error;
-      }
-      
-      
+
+      if (error) throw error;
       return data as Affiliate | null;
     } catch (err) {
       const errorMessage = (err as Error)?.message || String(err);
-      // Ignore abort errors from component unmounting
       if (errorMessage.includes('aborted') || errorMessage.includes('AbortError')) {
         return null;
       }
-      // Return null instead of throwing - allows portal to work without affiliate data
       return null;
     }
   }, []);
@@ -69,72 +81,103 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let cancelled = false;
 
-    // Try to restore session from localStorage synchronously first
-    const restoreSessionFromStorage = () => {
+    const initialize = async () => {
+      // Use getSession() — this tells Supabase SDK to load the session
+      // from localStorage and set it as the active session internally.
+      // This is critical: without this, RPC calls won't have auth context.
       try {
-        // Supabase stores auth in localStorage with key pattern: sb-<project-ref>-auth-token
-        const storageKey = Object.keys(localStorage).find(key => 
-          key.startsWith('sb-') && key.endsWith('-auth-token')
-        );
-        
-        if (storageKey) {
-          const stored = localStorage.getItem(storageKey);
-          if (stored) {
-            const parsed = JSON.parse(stored);
-            if (parsed?.user && parsed?.access_token) {
-              
-              return { user: parsed.user, session: parsed };
+        const { data: { session } } = await supabase.auth.getSession();
+
+        if (cancelled) return;
+
+        if (session?.user) {
+          initializedRef.current = true;
+          setState(prev => ({
+            ...prev,
+            user: session.user,
+            session,
+            loading: false,
+          }));
+
+          fetchAffiliate(session.user.id).then((affiliate) => {
+            if (!cancelled) {
+              setState(prev => ({ ...prev, affiliate }));
+            }
+          }).catch(() => {});
+          return;
+        }
+      } catch {
+        // getSession() was aborted (StrictMode) or failed
+        if (cancelled) return;
+      }
+
+      // If getSession() failed but we have a user from localStorage (set in initialState),
+      // try setSession() to force Supabase SDK to recognize it
+      if (!cancelled && !initializedRef.current && state.user) {
+        try {
+          const storageKey = Object.keys(localStorage).find(key =>
+            key.startsWith('sb-') && key.endsWith('-auth-token')
+          );
+          if (storageKey) {
+            const stored = localStorage.getItem(storageKey);
+            if (stored) {
+              const parsed = JSON.parse(stored);
+              if (parsed?.access_token && parsed?.refresh_token) {
+                const { data } = await supabase.auth.setSession({
+                  access_token: parsed.access_token,
+                  refresh_token: parsed.refresh_token,
+                });
+                if (!cancelled && data?.session?.user) {
+                  initializedRef.current = true;
+                  setState(prev => ({
+                    ...prev,
+                    user: data.session!.user,
+                    session: data.session,
+                    loading: false,
+                  }));
+                  fetchAffiliate(data.session!.user.id).then((affiliate) => {
+                    if (!cancelled) {
+                      setState(prev => ({ ...prev, affiliate }));
+                    }
+                  }).catch(() => {});
+                  return;
+                }
+              }
             }
           }
+        } catch {
+          if (cancelled) return;
         }
-      } catch (e) {
-        console.error('Failed to restore from localStorage:', e);
       }
-      return null;
+
+      // If we still have a user from initial localStorage read, keep it
+      // and just mark loading as done. The session may still work for basic queries.
+      if (!cancelled && !initializedRef.current) {
+        initializedRef.current = true;
+        setState(prev => ({ ...prev, loading: false }));
+      }
     };
 
-    // Immediately try to restore from localStorage (synchronous - can't be aborted)
-    const restored = restoreSessionFromStorage();
-    if (restored) {
-      setState((prev) => ({ 
-        ...prev, 
-        user: restored.user, 
-        session: restored.session as Session, 
-        loading: false 
-      }));
-      
-      // Fetch affiliate in background
-      if (restored.user) {
-        fetchAffiliate(restored.user.id).then((affiliate) => {
-          if (!cancelled) {
-            setState((prev) => ({ ...prev, affiliate }));
-          }
-        }).catch(() => {});
-      }
-    } else {
-      // No stored session - set loading to false
-      
-      setState((prev) => ({ ...prev, loading: false }));
-    }
+    initialize();
 
-    // Set up auth state change listener for login/logout events
+    // Listen for subsequent auth events only (SIGN_IN, SIGN_OUT, TOKEN_REFRESHED)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         if (cancelled) return;
-        
-        
-        
+        // Skip INITIAL_SESSION — we handle initialization above
+        if (event === 'INITIAL_SESSION') return;
+
         const user = session?.user ?? null;
-        setState((prev) => ({ ...prev, user, session, loading: false }));
+        setState(prev => ({ ...prev, user, session, loading: false }));
 
         if (user) {
           fetchAffiliate(user.id).then((affiliate) => {
             if (!cancelled) {
-              setState((prev) => ({ ...prev, affiliate }));
+              setState(prev => ({ ...prev, affiliate }));
             }
           }).catch(() => {});
         } else {
-          setState((prev) => ({ ...prev, affiliate: null }));
+          setState(prev => ({ ...prev, affiliate: null }));
         }
       }
     );
@@ -151,25 +194,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signOut = async () => {
-    // Clear localStorage FIRST (instant)
     try {
-      const storageKey = Object.keys(localStorage).find(key => 
+      const storageKey = Object.keys(localStorage).find(key =>
         key.startsWith('sb-') && key.endsWith('-auth-token')
       );
       if (storageKey) {
         localStorage.removeItem(storageKey);
       }
-    } catch (e) {
+    } catch {
       // Ignore
     }
-    
-    // Clear state immediately
+
     setState({ user: null, session: null, affiliate: null, loading: false });
-    
-    // Redirect immediately (don't wait for Supabase)
     window.location.href = '/portal/login';
-    
-    // Call Supabase signOut in background (fire and forget)
     supabase.auth.signOut().catch(() => {});
   };
 

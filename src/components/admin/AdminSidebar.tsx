@@ -61,8 +61,9 @@ export default function AdminSidebar() {
           <SidebarMenu>
             {menuItems.map((item) => {
               const Icon = item.icon;
-              const isActive = location.pathname === item.path || 
-                (item.path !== "/admin" && location.pathname.startsWith(item.path));
+              const isActive = item.path === "/portal/admin"
+                ? location.pathname === "/portal/admin" || location.pathname === "/portal/admin/"
+                : location.pathname.startsWith(item.path);
               
               return (
                 <SidebarMenuItem key={item.path}>

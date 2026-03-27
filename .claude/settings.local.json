@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(xargs -I {} basename {})",
+      "Bash(grep -n \"AdminGuard\\\\|useAdminRole\\\\|has_role\" src/pages/admin/*.tsx src/components/admin/*.tsx)",
+      "Bash(pip install python-docx)",
+      "Bash(python3 -c \":*)",
+      "Bash(python -c \":*)",
+      "Bash(node -e \"require\\(''docx''\\)\")",
+      "Bash(npm install -g docx)",
+      "Bash(node -e \"require\\(''docx''\\); console.log\\(''docx available''\\)\")",
+      "Bash(node generate-proposal.cjs)",
+      "Bash(npm install --no-save docx)",
+      "Bash(node -e \"require\\(''docx''\\); console.log\\(''docx OK''\\)\")",
+      "Read(//dev/**)",
+      "Bash(\"F:/Work/Webdevelopment_Projects/SEAN_2025/Lovable Sites/Ryland/generate-proposal.cjs\")",
+      "Bash(wc -l \"F:/Work/Webdevelopment_Projects/SEAN_2025/Lovable Sites/Ryland/.qoder/repowiki/en/content/\"*.md)",
+      "Bash(head -80 \"F:/Work/Webdevelopment_Projects/SEAN_2025/Lovable Sites/Ryland/.qoder/repowiki/en/content/Data Layer & Supabase Integration.md\")",
+      "Bash(npx tsc --noEmit)",
+      "Bash(npx vite build)"
+    ]
+  }
+}

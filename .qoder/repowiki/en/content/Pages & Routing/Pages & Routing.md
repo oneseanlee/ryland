@@ -18,20 +18,25 @@
 - [src/hooks/use-mobile.tsx](file://src/hooks/use-mobile.tsx)
 - [src/pages/Assessment.tsx](file://src/pages/Assessment.tsx)
 - [src/pages/CreditIntake.tsx](file://src/pages/CreditIntake.tsx)
+- [src/pages/ThankYou.tsx](file://src/pages/ThankYou.tsx)
+- [src/pages/Unsubscribe.tsx](file://src/pages/Unsubscribe.tsx)
 - [src/lib/referralTracking.ts](file://src/lib/referralTracking.ts)
 - [src/integrations/supabase/client.ts](file://src/integrations/supabase/client.ts)
 - [supabase/functions/ghl-create-contact/index.ts](file://supabase/functions/ghl-create-contact/index.ts)
 - [supabase/functions/ghl-affiliate-webhook/index.ts](file://supabase/functions/ghl-affiliate-webhook/index.ts)
 - [supabase/functions/scorexer-intake/index.ts](file://supabase/functions/scorexer-intake/index.ts)
+- [supabase/functions/fetch-order/index.ts](file://supabase/functions/fetch-order/index.ts)
+- [supabase/functions/handle-email-unsubscribe/index.ts](file://supabase/functions/handle-email-unsubscribe/index.ts)
+- [supabase/functions/download-ebook/index.ts](file://supabase/functions/download-ebook/index.ts)
 </cite>
 
 ## Update Summary
 **Changes Made**
-- Added comprehensive documentation for the new `/credit-intake` route and client intake form
-- Updated routing architecture to include admin portal routes with dedicated admin layout and sidebar
-- Enhanced portal navigation documentation with partner portal routes and authentication guards
-- Added security considerations for sensitive data handling in the credit intake process
-- Updated integration architecture to include Scorexer webhook integration and GHL CRM synchronization
+- Enhanced Thank You page with new fetch-order edge function integration for Shopify order processing
+- Added Unsubscribe page functionality with token-based validation and email suppression handling
+- Improved routing architecture with dedicated portal/admin route separation
+- Updated email infrastructure integration with transactional email system and email suppression handling
+- Enhanced page lifecycle management with polling mechanisms for order processing
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -60,6 +65,7 @@ The repository provides a minimal but functional foundation for a modern React a
 - Build configuration with Vite, including code-splitting strategies
 - Tailwind CSS configuration supporting responsive design and animations
 - Core routing and layout components under src/
+- Enhanced page structure with dedicated Thank You and Unsubscribe pages
 
 ```mermaid
 graph TB
@@ -77,6 +83,9 @@ Comps --> PortalLayout["portal/PortalLayout.tsx"]
 Comps --> AdminLayout["admin/AdminLayout.tsx"]
 Src --> Hooks["hooks/"]
 Hooks --> UseMobile["use-mobile.tsx"]
+Src --> Pages["pages/"]
+Pages --> ThankYou["ThankYou.tsx"]
+Pages --> Unsubscribe["Unsubscribe.tsx"]
 ```
 
 **Diagram sources**
@@ -84,19 +93,21 @@ Hooks --> UseMobile["use-mobile.tsx"]
 - [vite.config.ts:1-43](file://vite.config.ts#L1-L43)
 - [tailwind.config.ts:1-97](file://tailwind.config.ts#L1-L97)
 - [postcss.config.js:1-7](file://postcss.config.js#L1-L7)
-- [src/App.tsx:90-123](file://src/App.tsx#L90-L123)
+- [src/App.tsx:90-158](file://src/App.tsx#L90-L158)
 - [src/components/ScrollToTop.tsx:1-14](file://src/components/ScrollToTop.tsx#L1-L14)
 - [src/components/NavLink.tsx:1-28](file://src/components/NavLink.tsx#L1-L28)
 - [src/components/portal/PortalLayout.tsx:1-28](file://src/components/portal/PortalLayout.tsx#L1-L28)
 - [src/components/admin/AdminLayout.tsx:1-40](file://src/components/admin/AdminLayout.tsx#L1-L40)
 - [src/hooks/use-mobile.tsx:1-19](file://src/hooks/use-mobile.tsx#L1-L19)
+- [src/pages/ThankYou.tsx:1-197](file://src/pages/ThankYou.tsx#L1-L197)
+- [src/pages/Unsubscribe.tsx:1-119](file://src/pages/Unsubscribe.tsx#L1-L119)
 
 **Section sources**
 - [index.html:14-40](file://index.html#L14-L40)
 - [vite.config.ts:31-41](file://vite.config.ts#L31-L41)
 - [tailwind.config.ts:4-96](file://tailwind.config.ts#L4-L96)
 - [postcss.config.js:1-7](file://postcss.config.js#L1-L7)
-- [src/App.tsx:90-123](file://src/App.tsx#L90-L123)
+- [src/App.tsx:90-158](file://src/App.tsx#L90-L158)
 
 ## Core Components
 This section outlines the core building blocks for pages and routing in the application.
@@ -117,21 +128,29 @@ This section outlines the core building blocks for pages and routing in the appl
 - Admin Layout
   - A dedicated admin layout provides secure access to administrative functions with role-based access control.
 
+- Enhanced Page Components
+  - Thank You page with order processing and polling mechanisms
+  - Unsubscribe page with token validation and email suppression handling
+
 Implementation references:
-- [src/App.tsx:90-123](file://src/App.tsx#L90-L123)
+- [src/App.tsx:90-158](file://src/App.tsx#L90-L158)
 - [src/components/NavLink.tsx:1-28](file://src/components/NavLink.tsx#L1-L28)
 - [src/components/ScrollToTop.tsx:1-14](file://src/components/ScrollToTop.tsx#L1-L14)
 - [src/hooks/use-mobile.tsx:1-19](file://src/hooks/use-mobile.tsx#L1-L19)
 - [src/components/portal/PortalLayout.tsx:1-28](file://src/components/portal/PortalLayout.tsx#L1-L28)
 - [src/components/admin/AdminLayout.tsx:1-40](file://src/components/admin/AdminLayout.tsx#L1-L40)
+- [src/pages/ThankYou.tsx:29-80](file://src/pages/ThankYou.tsx#L29-L80)
+- [src/pages/Unsubscribe.tsx:10-56](file://src/pages/Unsubscribe.tsx#L10-L56)
 
 **Section sources**
-- [src/App.tsx:90-123](file://src/App.tsx#L90-L123)
+- [src/App.tsx:90-158](file://src/App.tsx#L90-L158)
 - [src/components/NavLink.tsx:1-28](file://src/components/NavLink.tsx#L1-L28)
 - [src/components/ScrollToTop.tsx:1-14](file://src/components/ScrollToTop.tsx#L1-L14)
 - [src/hooks/use-mobile.tsx:1-19](file://src/hooks/use-mobile.tsx#L1-L19)
 - [src/components/portal/PortalLayout.tsx:1-28](file://src/components/portal/PortalLayout.tsx#L1-L28)
 - [src/components/admin/AdminLayout.tsx:1-40](file://src/components/admin/AdminLayout.tsx#L1-L40)
+- [src/pages/ThankYou.tsx:29-80](file://src/pages/ThankYou.tsx#L29-L80)
+- [src/pages/Unsubscribe.tsx:10-56](file://src/pages/Unsubscribe.tsx#L10-L56)
 
 ## Architecture Overview
 The routing architecture centers around React Router DOM with a provider-based setup. Static pages are mapped to routes, and nested routes encapsulate portal-related functionality. Providers manage global state and UI behavior.
@@ -150,6 +169,8 @@ Routes --> About["About Page Route"]
 Routes --> Contact["Contact Page Route"]
 Routes --> Partners["Partners Page Route"]
 Routes --> CreditIntake["Credit Intake Route"]
+Routes --> ThankYou["Thank You Route"]
+Routes --> Unsubscribe["Unsubscribe Route"]
 Routes --> Portal["Portal Layout Route"]
 Portal --> PortalIndex["Portal Dashboard"]
 Portal --> PortalLeads["Portal Leads"]
@@ -170,10 +191,10 @@ Routes --> NotFound["Catch-all Not Found"]
 ```
 
 **Diagram sources**
-- [src/App.tsx:90-123](file://src/App.tsx#L90-L123)
+- [src/App.tsx:90-158](file://src/App.tsx#L90-L158)
 
 **Section sources**
-- [src/App.tsx:90-123](file://src/App.tsx#L90-L123)
+- [src/App.tsx:90-158](file://src/App.tsx#L90-L158)
 
 ## Detailed Component Analysis
 
@@ -186,7 +207,7 @@ Routes --> NotFound["Catch-all Not Found"]
   - The ScrollToTop component resets scroll position on route changes, ensuring a consistent user experience across pages.
 
 References:
-- [src/App.tsx:90-123](file://src/App.tsx#L90-L123)
+- [src/App.tsx:90-158](file://src/App.tsx#L90-L158)
 - [src/components/NavLink.tsx:1-28](file://src/components/NavLink.tsx#L1-L28)
 - [src/components/ScrollToTop.tsx:1-14](file://src/components/ScrollToTop.tsx#L1-L14)
 
@@ -208,10 +229,10 @@ P-->>U : Display updated page content
 **Diagram sources**
 - [src/components/NavLink.tsx:1-28](file://src/components/NavLink.tsx#L1-L28)
 - [src/components/ScrollToTop.tsx:1-14](file://src/components/ScrollToTop.tsx#L1-L14)
-- [src/App.tsx:90-123](file://src/App.tsx#L90-L123)
+- [src/App.tsx:90-158](file://src/App.tsx#L90-L158)
 
 **Section sources**
-- [src/App.tsx:90-123](file://src/App.tsx#L90-L123)
+- [src/App.tsx:90-158](file://src/App.tsx#L90-L158)
 - [src/components/NavLink.tsx:1-28](file://src/components/NavLink.tsx#L1-L28)
 - [src/components/ScrollToTop.tsx:1-14](file://src/components/ScrollToTop.tsx#L1-L14)
 
@@ -227,7 +248,7 @@ References:
 - [src/components/portal/PortalLayout.tsx:1-28](file://src/components/portal/PortalLayout.tsx#L1-L28)
 - [src/components/admin/AdminLayout.tsx:1-40](file://src/components/admin/AdminLayout.tsx#L1-L40)
 - [src/components/ScrollToTop.tsx:1-14](file://src/components/ScrollToTop.tsx#L1-L14)
-- [src/App.tsx:113-123](file://src/App.tsx#L113-L123)
+- [src/App.tsx:147-158](file://src/App.tsx#L147-L158)
 
 ```mermaid
 flowchart TD
@@ -240,13 +261,159 @@ Providers --> Ready(["Page Ready"])
 
 **Diagram sources**
 - [src/components/ScrollToTop.tsx:1-14](file://src/components/ScrollToTop.tsx#L1-L14)
-- [src/App.tsx:113-123](file://src/App.tsx#L113-L123)
+- [src/App.tsx:147-158](file://src/App.tsx#L147-L158)
 
 **Section sources**
 - [src/components/portal/PortalLayout.tsx:1-28](file://src/components/portal/PortalLayout.tsx#L1-L28)
 - [src/components/admin/AdminLayout.tsx:1-40](file://src/components/admin/AdminLayout.tsx#L1-L40)
 - [src/components/ScrollToTop.tsx:1-14](file://src/components/ScrollToTop.tsx#L1-L14)
-- [src/App.tsx:113-123](file://src/App.tsx#L113-L123)
+- [src/App.tsx:147-158](file://src/App.tsx#L147-L158)
+
+### Enhanced Thank You Page Implementation
+**Updated** The Thank You page now features sophisticated order processing with polling mechanisms and integration with the fetch-order edge function for Shopify order synchronization.
+
+#### Order Processing Architecture
+The Thank You page implements a robust order validation and retrieval system with intelligent polling:
+
+```mermaid
+graph TB
+OrderRequest["Order Request<br/>?order=shopify_id"]
+Polling["Polling Mechanism<br/>Max 10 attempts @ 3s intervals"]
+FetchOrder["fetch-order Edge Function<br/>Supabase Functions"]
+OrderData["Order Data<br/>Customer Name, Items, Tokens"]
+DownloadLinks["Download Links<br/>Direct ebook access"]
+Success["Success State<br/>Download Ready"]
+OrderRequest --> Polling
+Polling --> FetchOrder
+FetchOrder --> OrderData
+OrderData --> DownloadLinks
+DownloadLinks --> Success
+```
+
+**Diagram sources**
+- [src/pages/ThankYou.tsx:26-80](file://src/pages/ThankYou.tsx#L26-L80)
+- [src/pages/ThankYou.tsx:44-80](file://src/pages/ThankYou.tsx#L44-L80)
+
+#### Edge Function Integration
+The Thank You page integrates with the fetch-order edge function for real-time order processing:
+
+```typescript
+const fetchOrder = async () => {
+  try {
+    const { data, error: fetchErr } = await supabase.functions.invoke(
+      "fetch-order",
+      { body: { shopify_order_id: orderId } }
+    );
+
+    if (fetchErr) throw fetchErr;
+
+    if (data?.found && data.order) {
+      setOrder(data.order as Order);
+      setLoading(false);
+      return;
+    }
+
+    // Order not found yet — webhook may still be processing
+    pollCount.current += 1;
+    if (pollCount.current < MAX_POLL_ATTEMPTS) {
+      pollTimer.current = setTimeout(fetchOrder, POLL_INTERVAL_MS);
+    } else {
+      setError(
+        "Your order is still being processed. Check your email shortly for download links."
+      );
+      setLoading(false);
+    }
+  } catch {
+    setError("Something went wrong. Check your email for download links.");
+    setLoading(false);
+  }
+};
+```
+
+#### Download Management System
+The page provides direct download access through token-based URLs:
+
+```typescript
+const downloadUrl = (token: string) =>
+  `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/download-ebook?token=${token}`;
+```
+
+**Section sources**
+- [src/pages/ThankYou.tsx:26-80](file://src/pages/ThankYou.tsx#L26-L80)
+- [src/pages/ThankYou.tsx:44-80](file://src/pages/ThankYou.tsx#L44-L80)
+- [src/pages/ThankYou.tsx:82-83](file://src/pages/ThankYou.tsx#L82-L83)
+- [supabase/functions/fetch-order/index.ts](file://supabase/functions/fetch-order/index.ts)
+- [supabase/functions/download-ebook/index.ts](file://supabase/functions/download-ebook/index.ts)
+
+### Unsubscribe Page Implementation
+**Updated** The new Unsubscribe page provides comprehensive email management with token-based validation and integration with the handle-email-unsubscribe edge function.
+
+#### Token-Based Validation System
+The Unsubscribe page implements a multi-state validation system:
+
+```mermaid
+graph TB
+Token["Token Validation<br/>?token=unsubscribe_token"]
+Valid["Valid Token<br/>Display Unsubscribe Form"]
+Already["Already Unsubscribed<br/>Show Success Message"]
+Invalid["Invalid Token<br/>Show Error Message"]
+Success["Unsubscribe Success<br/>Confirm Unsubscription"]
+Error["Processing Error<br/>Show Error Message"]
+Token --> Valid
+Token --> Already
+Token --> Invalid
+Valid --> Success
+Success --> Success
+Error --> Error
+```
+
+**Diagram sources**
+- [src/pages/Unsubscribe.tsx:16-56](file://src/pages/Unsubscribe.tsx#L16-L56)
+
+#### Email Suppression Integration
+The Unsubscribe page integrates with the email suppression system:
+
+```typescript
+const validate = async () => {
+  try {
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+    const anonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+    const res = await fetch(
+      `${supabaseUrl}/functions/v1/handle-email-unsubscribe?token=${token}`,
+      { headers: { apikey: anonKey } }
+    );
+    const data = await res.json();
+    if (data.valid === true) setStatus("valid");
+    else if (data.reason === "already_unsubscribed") setStatus("already");
+    else setStatus("invalid");
+  } catch {
+    setStatus("invalid");
+  }
+};
+
+const handleUnsubscribe = async () => {
+  if (!token) return;
+  setProcessing(true);
+  try {
+    const { data, error } = await supabase.functions.invoke("handle-email-unsubscribe", {
+      body: { token },
+    });
+    if (error) throw error;
+    if (data?.success) setStatus("success");
+    else if (data?.reason === "already_unsubscribed") setStatus("already");
+    else setStatus("error");
+  } catch {
+    setStatus("error");
+  } finally {
+    setProcessing(false);
+  }
+};
+```
+
+**Section sources**
+- [src/pages/Unsubscribe.tsx:16-56](file://src/pages/Unsubscribe.tsx#L16-L56)
+- [src/pages/Unsubscribe.tsx:40-56](file://src/pages/Unsubscribe.tsx#L40-L56)
+- [supabase/functions/handle-email-unsubscribe/index.ts](file://supabase/functions/handle-email-unsubscribe/index.ts)
 
 ### Credit Intake Form Implementation
 **Updated** The new `/credit-intake` route provides a comprehensive client intake form for Scorexer integration with multi-step validation and secure data handling.
@@ -398,11 +565,11 @@ To add a new static page (e.g., a new informational page):
 4. Use the custom NavLink component for navigation to maintain consistent active/pending styles.
 
 Reference:
-- [src/App.tsx:90-123](file://src/App.tsx#L90-L123)
+- [src/App.tsx:90-158](file://src/App.tsx#L90-L158)
 - [src/components/NavLink.tsx:1-28](file://src/components/NavLink.tsx#L1-L28)
 
 **Section sources**
-- [src/App.tsx:90-123](file://src/App.tsx#L90-L123)
+- [src/App.tsx:90-158](file://src/App.tsx#L90-L158)
 - [src/components/NavLink.tsx:1-28](file://src/components/NavLink.tsx#L1-L28)
 
 ### Handling Page Transitions and Animations
@@ -421,13 +588,17 @@ Reference:
 
 References:
 - [index.html:23-39](file://index.html#L23-L39)
+- [src/pages/ThankYou.tsx:87-90](file://src/pages/ThankYou.tsx#L87-L90)
+- [src/pages/Unsubscribe.tsx:60](file://src/pages/Unsubscribe.tsx#L60)
 
 **Section sources**
 - [index.html:23-39](file://index.html#L23-L39)
+- [src/pages/ThankYou.tsx:87-90](file://src/pages/ThankYou.tsx#L87-L90)
+- [src/pages/Unsubscribe.tsx:60](file://src/pages/Unsubscribe.tsx#L60)
 
 ### Responsive Design Patterns
 - Tailwind CSS is configured to support responsive breakpoints and animations.
-- The use-is-mobile hook detects mobile widths and can be used to adapt UI behavior.
+- The use-mobile hook detects mobile widths and can be used to adapt UI behavior.
 
 References:
 - [tailwind.config.ts:4-96](file://tailwind.config.ts#L4-L96)
@@ -502,12 +673,12 @@ AppTSX --> Providers["Providers"]
 **Diagram sources**
 - [package.json:15-69](file://package.json#L15-L69)
 - [vite.config.ts:16-25](file://vite.config.ts#L16-L25)
-- [src/App.tsx:113-123](file://src/App.tsx#L113-L123)
+- [src/App.tsx:147-158](file://src/App.tsx#L147-L158)
 
 **Section sources**
 - [package.json:15-69](file://package.json#L15-L69)
 - [vite.config.ts:16-25](file://vite.config.ts#L16-L25)
-- [src/App.tsx:113-123](file://src/App.tsx#L113-L123)
+- [src/App.tsx:147-158](file://src/App.tsx#L147-L158)
 
 ## Performance Considerations
 - Code splitting and chunking are configured to separate vendor libraries, UI libraries, and Supabase dependencies, reducing initial bundle size and improving load performance.
@@ -524,6 +695,16 @@ AppTSX --> Providers["Providers"]
 - Progressive disclosure reduces cognitive load and improves conversion rates
 - Edge function integration minimizes server-side processing time
 
+**Updated** The Thank You page implements intelligent polling with configurable limits:
+- Maximum 10 polling attempts with 3-second intervals
+- Graceful fallback for processing delays
+- Optimized loading states and user feedback
+
+**Updated** The Unsubscribe page implements efficient token validation:
+- Direct HTTP fetch for token verification
+- State management for different validation outcomes
+- User-friendly error handling and success states
+
 Recommendations:
 - Lazy-load heavy page components using React.lazy and Suspense boundaries around route elements.
 - Defer non-critical resources and leverage browser caching strategies.
@@ -533,9 +714,11 @@ Recommendations:
 **Section sources**
 - [vite.config.ts:31-41](file://vite.config.ts#L31-L41)
 - [vite.config.ts:19-24](file://vite.config.ts#L19-L24)
-- [src/App.tsx:113-123](file://src/App.tsx#L113-L123)
+- [src/App.tsx:147-158](file://src/App.tsx#L147-L158)
 - [src/pages/Assessment.tsx:161-224](file://src/pages/Assessment.tsx#L161-L224)
 - [src/pages/CreditIntake.tsx:102-122](file://src/pages/CreditIntake.tsx#L102-L122)
+- [src/pages/ThankYou.tsx:26-80](file://src/pages/ThankYou.tsx#L26-L80)
+- [src/pages/Unsubscribe.tsx:16-56](file://src/pages/Unsubscribe.tsx#L16-L56)
 
 ## Troubleshooting Guide
 Common issues and resolutions:
@@ -570,6 +753,18 @@ Common issues and resolutions:
   - **Issue**: Affiliate IDs not being captured or processed
   - **Solution**: Check localStorage for referral data, verify getReferralAffiliateId function, ensure affiliate webhook is configured
   - Reference: [src/lib/referralTracking.ts:28-44](file://src/lib/referralTracking.ts#L28-L44)
+- **Thank You page order polling failures**
+  - **Issue**: Order not found after multiple polling attempts
+  - **Solution**: Verify fetch-order edge function is deployed, check Shopify webhook processing, monitor Supabase function logs
+  - Reference: [src/pages/ThankYou.tsx:59-72](file://src/pages/ThankYou.tsx#L59-L72)
+- **Unsubscribe page token validation failures**
+  - **Issue**: Invalid or expired unsubscribe tokens
+  - **Solution**: Verify token generation process, check handle-email-unsubscribe function, ensure proper API key configuration
+  - Reference: [src/pages/Unsubscribe.tsx:16-38](file://src/pages/Unsubscribe.tsx#L16-L38)
+- **Email suppression not working**
+  - **Issue**: Subscribers still receiving emails after unsubscribing
+  - **Solution**: Check handle-email-unsubscribe edge function logs, verify email infrastructure integration, confirm suppression list updates
+  - Reference: [supabase/functions/handle-email-unsubscribe/index.ts](file://supabase/functions/handle-email-unsubscribe/index.ts)
 
 **Section sources**
 - [src/components/ScrollToTop.tsx:1-14](file://src/components/ScrollToTop.tsx#L1-L14)
@@ -581,9 +776,12 @@ Common issues and resolutions:
 - [src/pages/Assessment.tsx:216-217](file://src/pages/Assessment.tsx#L216-L217)
 - [src/lib/referralTracking.ts:28-44](file://src/lib/referralTracking.ts#L28-L44)
 - [supabase/functions/scorexer-intake/index.ts:22-26](file://supabase/functions/scorexer-intake/index.ts#L22-L26)
+- [src/pages/ThankYou.tsx:59-72](file://src/pages/ThankYou.tsx#L59-L72)
+- [src/pages/Unsubscribe.tsx:16-38](file://src/pages/Unsubscribe.tsx#L16-L38)
+- [supabase/functions/handle-email-unsubscribe/index.ts](file://supabase/functions/handle-email-unsubscribe/index.ts)
 
 ## Conclusion
-The Ryland application employs a clean, centralized routing architecture with shared layouts and navigation utilities. Providers establish a robust foundation for state and UI behavior, while responsive and performance configurations support scalable growth. The Assessment page demonstrates advanced integration patterns with parallel processing capabilities that improve user experience while maintaining reliable data synchronization. The new Credit Intake form showcases comprehensive security measures and edge function integration for Scorexer webhook processing. The addition of admin portal functionality provides secure access control and comprehensive administrative capabilities. By following the patterns outlined here—consistent route declarations, shared layouts, SEO-aware meta management, robust integration architectures, and strong security practices—you can reliably implement new pages, optimize performance, and deliver a seamless user experience across desktop and mobile devices.
+The Ryland application employs a clean, centralized routing architecture with shared layouts and navigation utilities. Providers establish a robust foundation for state and UI behavior, while responsive and performance configurations support scalable growth. The Assessment page demonstrates advanced integration patterns with parallel processing capabilities that improve user experience while maintaining reliable data synchronization. The new Credit Intake form showcases comprehensive security measures and edge function integration for Scorexer webhook processing. The enhanced Thank You page provides sophisticated order processing with polling mechanisms and integration with the fetch-order edge function. The new Unsubscribe page delivers comprehensive email management with token-based validation and integration with the email suppression system. The addition of admin portal functionality provides secure access control and comprehensive administrative capabilities. The updated email infrastructure integration ensures proper transactional email handling and compliance with email suppression requirements. By following the patterns outlined here—consistent route declarations, shared layouts, SEO-aware meta management, robust integration architectures, comprehensive email management, and strong security practices—you can reliably implement new pages, optimize performance, and deliver a seamless user experience across desktop and mobile devices.
 
 [No sources needed since this section summarizes without analyzing specific files]
 
@@ -606,5 +804,18 @@ The Ryland application employs a clean, centralized routing architecture with sh
   - Test multi-step form navigation and validation
   - Verify edge function error handling and logging
   - Test success state and user feedback mechanisms
+- **Thank You page integration checklist**:
+  - Verify fetch-order edge function is deployed and functioning
+  - Test polling mechanism with various order processing scenarios
+  - Validate download token generation and access
+  - Test error handling for processing delays and failures
+  - Verify Supabase function logs and monitoring
+- **Unsubscribe page integration checklist**:
+  - Verify handle-email-unsubscribe edge function is deployed
+  - Test token validation for various scenarios (valid, invalid, expired)
+  - Validate email suppression list updates
+  - Test user feedback for success, error, and already unsubscribed states
+  - Verify API key configuration and security headers
+  - Test integration with email infrastructure systems
 
 [No sources needed since this section provides general guidance]

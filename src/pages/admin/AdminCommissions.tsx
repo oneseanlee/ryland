@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -19,13 +20,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { 
-  DollarSign, 
-  CheckCircle2, 
-  Clock, 
+import {
+  DollarSign,
+  CheckCircle2,
+  Clock,
   Ban,
   TrendingUp,
-  Calendar
+  Calendar,
+  X
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
@@ -53,10 +55,14 @@ interface Commission {
 }
 
 export default function AdminCommissions() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [commissions, setCommissions] = useState<Commission[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<'all' | CommissionStatus>('all');
   const [selectedCommissions, setSelectedCommissions] = useState<string[]>([]);
+  const [periodFilter, setPeriodFilter] = useState<'all' | 'month'>(
+    searchParams.get('period') === 'month' ? 'month' : 'all'
+  );
   const [stats, setStats] = useState({
     totalPending: 0,
     totalApproved: 0,
@@ -66,7 +72,7 @@ export default function AdminCommissions() {
 
   useEffect(() => {
     fetchCommissions();
-  }, [statusFilter]);
+  }, [statusFilter, periodFilter]);
 
   const fetchCommissions = async () => {
     try {
@@ -90,6 +96,13 @@ export default function AdminCommissions() {
 
       if (statusFilter !== 'all') {
         query = query.eq('commission_status', statusFilter);
+      }
+
+      if (periodFilter === 'month') {
+        const startOfMonth = new Date();
+        startOfMonth.setDate(1);
+        startOfMonth.setHours(0, 0, 0, 0);
+        query = query.gte('created_at', startOfMonth.toISOString());
       }
 
       const { data, error } = await query;
@@ -216,6 +229,25 @@ export default function AdminCommissions() {
           <p className="text-slate-500 mt-1">Review, approve, and process affiliate commissions</p>
         </div>
       </div>
+
+      {/* Period Filter Chip */}
+      {periodFilter === 'month' && (
+        <div className="flex items-center gap-2">
+          <Badge className="bg-blue-100 text-blue-700 px-3 py-1.5 text-sm">
+            <Calendar className="h-3.5 w-3.5 mr-1.5" />
+            Showing: This Month
+            <button
+              className="ml-2 hover:bg-blue-200 rounded-full p-0.5"
+              onClick={() => {
+                setPeriodFilter('all');
+                setSearchParams({});
+              }}
+            >
+              <X className="h-3 w-3" />
+            </button>
+          </Badge>
+        </div>
+      )}
 
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-4">
@@ -377,7 +409,13 @@ export default function AdminCommissions() {
                           )}
                         </TableCell>
                         <TableCell>
-                          <span className="capitalize">{commission.commission_type}</span>
+                          <Badge className={
+                            commission.commission_type === 'backend'
+                              ? 'bg-purple-100 text-purple-700'
+                              : 'bg-blue-100 text-blue-700'
+                          }>
+                            {commission.commission_type === 'backend' ? 'Backend' : 'Upfront'}
+                          </Badge>
                         </TableCell>
                         <TableCell className="font-medium text-slate-900">
                           ${commission.commission_amount.toFixed(2)}

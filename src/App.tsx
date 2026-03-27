@@ -60,6 +60,7 @@ const AdminLeads = lazy(() => import("./pages/admin/AdminLeads"));
 const AdminCommissions = lazy(() => import("./pages/admin/AdminCommissions"));
 const AdminPayouts = lazy(() => import("./pages/admin/AdminPayouts"));
 const AdminReports = lazy(() => import("./pages/admin/AdminReports"));
+const AdminAffiliateDetail = lazy(() => import("./pages/admin/AdminAffiliateDetail"));
 
 import ScrollToTop from "./components/ScrollToTop";
 
@@ -130,6 +131,7 @@ const AppContent = () => {
             <Route path="/portal/admin" element={<AdminLayout />}>
               <Route index element={<AdminDashboard />} />
               <Route path="affiliates" element={<AdminAffiliates />} />
+              <Route path="affiliates/:id" element={<AdminAffiliateDetail />} />
               <Route path="leads" element={<AdminLeads />} />
               <Route path="commissions" element={<AdminCommissions />} />
               <Route path="payouts" element={<AdminPayouts />} />
