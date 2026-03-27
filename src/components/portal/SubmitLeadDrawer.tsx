@@ -20,17 +20,36 @@ export default function SubmitLeadDrawer({ open, onClose, onSuccess }: SubmitLea
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({ full_name: "", email: "", phone: "", company_name: "", notes: "" });
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [submitted, setSubmitted] = useState(false);
 
-  const update = (field: string, value: string) => setForm((prev) => ({ ...prev, [field]: value }));
+  const update = (field: string, value: string) => {
+    setForm((prev) => ({ ...prev, [field]: value }));
+    if (submitted) {
+      setErrors((prev) => {
+        const next = { ...prev };
+        if (field === "full_name" && value.trim()) delete next.full_name;
+        if (field === "email" && value.trim()) delete next.email;
+        return next;
+      });
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmitted(true);
     if (!affiliate) return;
 
-    if (!form.full_name.trim() || !form.email.trim()) {
-      toast({ title: "Error", description: "Name and email are required.", variant: "destructive" });
+    const newErrors: Record<string, string> = {};
+    if (!form.full_name.trim()) newErrors.full_name = "Full name is required";
+    if (!form.email.trim()) newErrors.email = "Email is required";
+    else if (!/\S+@\S+\.\S+/.test(form.email.trim())) newErrors.email = "Enter a valid email address";
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
       return;
     }
+    setErrors({});
 
     setLoading(true);
     const { error } = await supabase.from("affiliate_leads").insert({
@@ -50,6 +69,8 @@ export default function SubmitLeadDrawer({ open, onClose, onSuccess }: SubmitLea
     } else {
       toast({ title: "Lead submitted", description: `${form.full_name} has been added to your pipeline.` });
       setForm({ full_name: "", email: "", phone: "", company_name: "", notes: "" });
+      setErrors({});
+      setSubmitted(false);
       onSuccess();
       onClose();
     }
@@ -66,11 +87,13 @@ export default function SubmitLeadDrawer({ open, onClose, onSuccess }: SubmitLea
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-1.5">
             <Label className="text-xs font-medium text-slate-600">Full Name *</Label>
-            <Input value={form.full_name} onChange={(e) => update("full_name", e.target.value)} placeholder="John Smith" required className="border-slate-200" />
+            <Input value={form.full_name} onChange={(e) => update("full_name", e.target.value)} placeholder="John Smith" className={errors.full_name ? "border-red-400 focus-visible:ring-red-400" : "border-slate-200"} />
+            {errors.full_name && <p className="text-xs text-red-500 mt-1">{errors.full_name}</p>}
           </div>
           <div className="space-y-1.5">
             <Label className="text-xs font-medium text-slate-600">Email *</Label>
-            <Input type="email" value={form.email} onChange={(e) => update("email", e.target.value)} placeholder="john@example.com" required className="border-slate-200" />
+            <Input type="email" value={form.email} onChange={(e) => update("email", e.target.value)} placeholder="john@example.com" className={errors.email ? "border-red-400 focus-visible:ring-red-400" : "border-slate-200"} />
+            {errors.email && <p className="text-xs text-red-500 mt-1">{errors.email}</p>}
           </div>
           <div className="space-y-1.5">
             <Label className="text-xs font-medium text-slate-600">Phone</Label>

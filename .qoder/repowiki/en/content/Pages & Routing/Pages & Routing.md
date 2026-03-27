@@ -15,11 +15,21 @@
 - [src/components/portal/PortalSidebar.tsx](file://src/components/portal/PortalSidebar.tsx)
 - [src/components/admin/AdminLayout.tsx](file://src/components/admin/AdminLayout.tsx)
 - [src/components/admin/AdminSidebar.tsx](file://src/components/admin/AdminSidebar.tsx)
+- [src/components/admin/AdminLeadDetailDrawer.tsx](file://src/components/admin/AdminLeadDetailDrawer.tsx)
+- [src/components/admin/affiliate-detail/AffiliateProfileTab.tsx](file://src/components/admin/affiliate-detail/AffiliateProfileTab.tsx)
+- [src/components/admin/affiliate-detail/AffiliateCommissionsTab.tsx](file://src/components/admin/affiliate-detail/AffiliateCommissionsTab.tsx)
+- [src/components/admin/affiliate-detail/AffiliateLeadsTab.tsx](file://src/components/admin/affiliate-detail/AffiliateLeadsTab.tsx)
+- [src/components/admin/affiliate-detail/AffiliatePayoutsTab.tsx](file://src/components/admin/affiliate-detail/AffiliatePayoutsTab.tsx)
+- [src/components/admin/affiliate-detail/AffiliateSettingsTab.tsx](file://src/components/admin/affiliate-detail/AffiliateSettingsTab.tsx)
 - [src/hooks/use-mobile.tsx](file://src/hooks/use-mobile.tsx)
 - [src/pages/Assessment.tsx](file://src/pages/Assessment.tsx)
 - [src/pages/CreditIntake.tsx](file://src/pages/CreditIntake.tsx)
 - [src/pages/ThankYou.tsx](file://src/pages/ThankYou.tsx)
 - [src/pages/Unsubscribe.tsx](file://src/pages/Unsubscribe.tsx)
+- [src/pages/admin/AdminAffiliateDetail.tsx](file://src/pages/admin/AdminAffiliateDetail.tsx)
+- [src/pages/admin/AdminAffiliates.tsx](file://src/pages/admin/AdminAffiliates.tsx)
+- [src/pages/admin/AdminLeads.tsx](file://src/pages/admin/AdminLeads.tsx)
+- [src/pages/admin/AdminCommissions.tsx](file://src/pages/admin/AdminCommissions.tsx)
 - [src/lib/referralTracking.ts](file://src/lib/referralTracking.ts)
 - [src/integrations/supabase/client.ts](file://src/integrations/supabase/client.ts)
 - [supabase/functions/ghl-create-contact/index.ts](file://supabase/functions/ghl-create-contact/index.ts)
@@ -32,11 +42,13 @@
 
 ## Update Summary
 **Changes Made**
-- Enhanced Thank You page with new fetch-order edge function integration for Shopify order processing
-- Added Unsubscribe page functionality with token-based validation and email suppression handling
-- Improved routing architecture with dedicated portal/admin route separation
-- Updated email infrastructure integration with transactional email system and email suppression handling
-- Enhanced page lifecycle management with polling mechanisms for order processing
+- Enhanced admin pages with comprehensive affiliate management interface
+- Added new AdminAffiliateDetail page with tabbed affiliate management
+- Updated AdminAffiliates page with improved sorting and commission rate display
+- Enhanced AdminLeads page with better data presentation and statistics
+- Added new AdminCommissions page for commission management
+- Implemented AdminLeadDetailDrawer for lead detail viewing
+- Added comprehensive affiliate detail tabs (Profile, Commissions, Leads, Payouts, Settings)
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -66,6 +78,7 @@ The repository provides a minimal but functional foundation for a modern React a
 - Tailwind CSS configuration supporting responsive design and animations
 - Core routing and layout components under src/
 - Enhanced page structure with dedicated Thank You and Unsubscribe pages
+- Comprehensive admin portal with affiliate management capabilities
 
 ```mermaid
 graph TB
@@ -81,9 +94,21 @@ Comps --> ScrollToTop["ScrollToTop.tsx"]
 Comps --> NavLink["NavLink.tsx"]
 Comps --> PortalLayout["portal/PortalLayout.tsx"]
 Comps --> AdminLayout["admin/AdminLayout.tsx"]
+Comps --> AdminLeadDetailDrawer["AdminLeadDetailDrawer.tsx"]
+Comps --> AffiliateDetailTabs["affiliate-detail/"]
+Comps --> AffiliateDetailTabs --> ProfileTab["AffiliateProfileTab.tsx"]
+Comps --> AffiliateDetailTabs --> CommissionsTab["AffiliateCommissionsTab.tsx"]
+Comps --> AffiliateDetailTabs --> LeadsTab["AffiliateLeadsTab.tsx"]
+Comps --> AffiliateDetailTabs --> PayoutsTab["AffiliatePayoutsTab.tsx"]
+Comps --> AffiliateDetailTabs --> SettingsTab["AffiliateSettingsTab.tsx"]
 Src --> Hooks["hooks/"]
 Hooks --> UseMobile["use-mobile.tsx"]
 Src --> Pages["pages/"]
+Pages --> AdminPages["admin/"]
+AdminPages --> AdminAffiliateDetail["AdminAffiliateDetail.tsx"]
+AdminPages --> AdminAffiliates["AdminAffiliates.tsx"]
+AdminPages --> AdminLeads["AdminLeads.tsx"]
+AdminPages --> AdminCommissions["AdminCommissions.tsx"]
 Pages --> ThankYou["ThankYou.tsx"]
 Pages --> Unsubscribe["Unsubscribe.tsx"]
 ```
@@ -98,6 +123,12 @@ Pages --> Unsubscribe["Unsubscribe.tsx"]
 - [src/components/NavLink.tsx:1-28](file://src/components/NavLink.tsx#L1-L28)
 - [src/components/portal/PortalLayout.tsx:1-28](file://src/components/portal/PortalLayout.tsx#L1-L28)
 - [src/components/admin/AdminLayout.tsx:1-40](file://src/components/admin/AdminLayout.tsx#L1-L40)
+- [src/components/admin/AdminLeadDetailDrawer.tsx:1-134](file://src/components/admin/AdminLeadDetailDrawer.tsx#L1-L134)
+- [src/components/admin/affiliate-detail/AffiliateProfileTab.tsx:1-82](file://src/components/admin/affiliate-detail/AffiliateProfileTab.tsx#L1-L82)
+- [src/components/admin/affiliate-detail/AffiliateCommissionsTab.tsx:1-174](file://src/components/admin/affiliate-detail/AffiliateCommissionsTab.tsx#L1-L174)
+- [src/components/admin/affiliate-detail/AffiliateLeadsTab.tsx:1-133](file://src/components/admin/affiliate-detail/AffiliateLeadsTab.tsx#L1-L133)
+- [src/components/admin/affiliate-detail/AffiliatePayoutsTab.tsx:1-155](file://src/components/admin/affiliate-detail/AffiliatePayoutsTab.tsx#L1-L155)
+- [src/components/admin/affiliate-detail/AffiliateSettingsTab.tsx:1-187](file://src/components/admin/affiliate-detail/AffiliateSettingsTab.tsx#L1-L187)
 - [src/hooks/use-mobile.tsx:1-19](file://src/hooks/use-mobile.tsx#L1-L19)
 - [src/pages/ThankYou.tsx:1-197](file://src/pages/ThankYou.tsx#L1-L197)
 - [src/pages/Unsubscribe.tsx:1-119](file://src/pages/Unsubscribe.tsx#L1-L119)
@@ -126,11 +157,12 @@ This section outlines the core building blocks for pages and routing in the appl
   - A dedicated layout composes a sidebar, top bar, and outlet for authenticated portal routes.
 
 - Admin Layout
-  - A dedicated admin layout provides secure access to administrative functions with role-based access control.
+  - A dedicated admin layout provides secure access to administrative functions with role-based access control and comprehensive navigation for admin operations.
 
 - Enhanced Page Components
   - Thank You page with order processing and polling mechanisms
   - Unsubscribe page with token validation and email suppression handling
+  - Comprehensive admin portal with affiliate management capabilities
 
 Implementation references:
 - [src/App.tsx:90-158](file://src/App.tsx#L90-L158)
@@ -182,9 +214,10 @@ Portal --> PortalSpeaking["Portal Speaking"]
 Portal --> PortalSettings["Portal Settings"]
 Routes --> Admin["Admin Layout Route"]
 Admin --> AdminIndex["Admin Dashboard"]
-Admin --> AdminAffiliates["Admin Affiliates"]
-Admin --> AdminLeads["Admin Leads"]
-Admin --> AdminCommissions["Admin Commissions"]
+Admin --> AdminAffiliates["Admin Affiliates<br/>Enhanced with sorting & commission rates"]
+Admin --> AdminAffiliateDetail["Admin Affiliate Detail<br/>Tabbed interface with 5 tabs"]
+Admin --> AdminLeads["Admin Leads<br/>Enhanced with statistics & filters"]
+Admin --> AdminCommissions["Admin Commissions<br/>New page for commission management"]
 Admin --> AdminPayouts["Admin Payouts"]
 Admin --> AdminReports["Admin Reports"]
 Routes --> NotFound["Catch-all Not Found"]
@@ -268,6 +301,112 @@ Providers --> Ready(["Page Ready"])
 - [src/components/admin/AdminLayout.tsx:1-40](file://src/components/admin/AdminLayout.tsx#L1-L40)
 - [src/components/ScrollToTop.tsx:1-14](file://src/components/ScrollToTop.tsx#L1-L14)
 - [src/App.tsx:147-158](file://src/App.tsx#L147-L158)
+
+### Enhanced Admin Portal Implementation
+
+**Updated** The admin portal has been significantly enhanced with comprehensive affiliate management capabilities, new commission management features, and improved lead tracking functionality.
+
+#### AdminAffiliateDetail Page Architecture
+The new AdminAffiliateDetail page provides a comprehensive affiliate management interface with five distinct tabs:
+
+```mermaid
+graph TB
+AffiliateDetail["AdminAffiliateDetail.tsx"]
+ProfileTab["Profile Tab<br/>Personal & Business Information"]
+CommissionsTab["Commissions Tab<br/>Commission History & Statistics"]
+LeadsTab["Leads Tab<br/>Referred Leads Management"]
+PayoutsTab["Payouts Tab<br/>Payment History & W-9 Status"]
+SettingsTab["Settings Tab<br/>Commission Rates & Status Management"]
+AffiliateDetail --> ProfileTab
+AffiliateDetail --> CommissionsTab
+AffiliateDetail --> LeadsTab
+AffiliateDetail --> PayoutsTab
+AffiliateDetail --> SettingsTab
+```
+
+**Diagram sources**
+- [src/pages/admin/AdminAffiliateDetail.tsx:144-178](file://src/pages/admin/AdminAffiliateDetail.tsx#L144-L178)
+- [src/components/admin/affiliate-detail/AffiliateProfileTab.tsx:40-82](file://src/components/admin/affiliate-detail/AffiliateProfileTab.tsx#L40-L82)
+- [src/components/admin/affiliate-detail/AffiliateCommissionsTab.tsx:28-174](file://src/components/admin/affiliate-detail/AffiliateCommissionsTab.tsx#L28-L174)
+- [src/components/admin/affiliate-detail/AffiliateLeadsTab.tsx:40-133](file://src/components/admin/affiliate-detail/AffiliateLeadsTab.tsx#L40-L133)
+- [src/components/admin/affiliate-detail/AffiliatePayoutsTab.tsx:27-155](file://src/components/admin/affiliate-detail/AffiliatePayoutsTab.tsx#L27-L155)
+- [src/components/admin/affiliate-detail/AffiliateSettingsTab.tsx:25-187](file://src/components/admin/affiliate-detail/AffiliateSettingsTab.tsx#L25-L187)
+
+#### AdminAffiliates Page Enhancements
+The AdminAffiliates page now features improved sorting capabilities and enhanced commission rate display:
+
+```mermaid
+graph TB
+AffiliatesPage["AdminAffiliates.tsx"]
+SearchFilter["Search & Filter<br/>Name, Email, Affiliate ID"]
+StatusFilter["Status Filter<br/>Approved, Pending, Suspended"]
+SortColumns["Sortable Columns<br/>Name, Status, Commission Rates, Leads, Earnings"]
+CommissionDisplay["Commission Display<br/>Upfront / Backend Rates"]
+StatsCards["Statistics Cards<br/>Total Affiliates Count"]
+AffiliatesPage --> SearchFilter
+AffiliatesPage --> StatusFilter
+AffiliatesPage --> SortColumns
+AffiliatesPage --> CommissionDisplay
+AffiliatesPage --> StatsCards
+```
+
+**Diagram sources**
+- [src/pages/admin/AdminAffiliates.tsx:113-137](file://src/pages/admin/AdminAffiliates.tsx#L113-L137)
+- [src/pages/admin/AdminAffiliates.tsx:204-223](file://src/pages/admin/AdminAffiliates.tsx#L204-L223)
+- [src/pages/admin/AdminAffiliates.tsx:251-258](file://src/pages/admin/AdminAffiliates.tsx#L251-L258)
+
+#### AdminLeads Page Improvements
+The AdminLeads page now includes comprehensive statistics and enhanced data presentation:
+
+```mermaid
+graph TB
+LeadsPage["AdminLeads.tsx"]
+StatsCards["Stats Cards<br/>Total Leads, Total Value, Avg Deal Size, Conversion Rate"]
+EnhancedFilters["Enhanced Filters<br/>Search by Lead Name, Email, Affiliate Name"]
+StageBadges["Stage Badges<br/>Color-coded pipeline stages"]
+LeadDetailDrawer["Lead Detail Drawer<br/>Comprehensive lead information"]
+BulkActions["Bulk Actions<br/>Email, Call, View Details, Delete"]
+LeadsPage --> StatsCards
+LeadsPage --> EnhancedFilters
+LeadsPage --> StageBadges
+LeadsPage --> LeadDetailDrawer
+LeadsPage --> BulkActions
+```
+
+**Diagram sources**
+- [src/pages/admin/AdminLeads.tsx:211-256](file://src/pages/admin/AdminLeads.tsx#L211-L256)
+- [src/pages/admin/AdminLeads.tsx:181-193](file://src/pages/admin/AdminLeads.tsx#L181-L193)
+- [src/pages/admin/AdminLeads.tsx:408-413](file://src/pages/admin/AdminLeads.tsx#L408-L413)
+
+#### AdminCommissions Page
+The new AdminCommissions page provides comprehensive commission management capabilities:
+
+```mermaid
+graph TB
+CommissionsPage["AdminCommissions.tsx"]
+PeriodFilter["Period Filter<br/>This Month / All Time"]
+StatsCards["Stats Cards<br/>Pending, Approved, Paid, Pending Amount"]
+BulkActions["Bulk Actions<br/>Approve Selected, Mark as Paid"]
+CommissionTable["Commission Table<br/>Affiliate, Lead/Deal, Type, Amount, Status, Date"]
+IndividualActions["Individual Actions<br/>Approve, Pay Buttons"]
+CommissionsPage --> PeriodFilter
+CommissionsPage --> StatsCards
+CommissionsPage --> BulkActions
+CommissionsPage --> CommissionTable
+CommissionsPage --> IndividualActions
+```
+
+**Diagram sources**
+- [src/pages/admin/AdminCommissions.tsx:234-250](file://src/pages/admin/AdminCommissions.tsx#L234-L250)
+- [src/pages/admin/AdminCommissions.tsx:253-298](file://src/pages/admin/AdminCommissions.tsx#L253-L298)
+- [src/pages/admin/AdminCommissions.tsx:301-322](file://src/pages/admin/AdminCommissions.tsx#L301-L322)
+- [src/pages/admin/AdminCommissions.tsx:351-368](file://src/pages/admin/AdminCommissions.tsx#L351-L368)
+
+**Section sources**
+- [src/pages/admin/AdminAffiliateDetail.tsx:35-182](file://src/pages/admin/AdminAffiliateDetail.tsx#L35-L182)
+- [src/pages/admin/AdminAffiliates.tsx:35-279](file://src/pages/admin/AdminAffiliates.tsx#L35-L279)
+- [src/pages/admin/AdminLeads.tsx:77-416](file://src/pages/admin/AdminLeads.tsx#L77-L416)
+- [src/pages/admin/AdminCommissions.tsx:57-466](file://src/pages/admin/AdminCommissions.tsx#L57-L466)
 
 ### Enhanced Thank You Page Implementation
 **Updated** The Thank You page now features sophisticated order processing with polling mechanisms and integration with the fetch-order edge function for Shopify order synchronization.
@@ -705,6 +844,12 @@ AppTSX --> Providers["Providers"]
 - State management for different validation outcomes
 - User-friendly error handling and success states
 
+**Updated** The new admin pages implement optimized data fetching and display:
+- AdminAffiliates: Efficient parallel processing for lead counts and earnings calculation
+- AdminLeads: Real-time statistics calculation and enhanced filtering
+- AdminCommissions: Bulk action selection with efficient state management
+- AdminAffiliateDetail: Tab-based lazy loading for improved performance
+
 Recommendations:
 - Lazy-load heavy page components using React.lazy and Suspense boundaries around route elements.
 - Defer non-critical resources and leverage browser caching strategies.
@@ -719,6 +864,10 @@ Recommendations:
 - [src/pages/CreditIntake.tsx:102-122](file://src/pages/CreditIntake.tsx#L102-L122)
 - [src/pages/ThankYou.tsx:26-80](file://src/pages/ThankYou.tsx#L26-L80)
 - [src/pages/Unsubscribe.tsx:16-56](file://src/pages/Unsubscribe.tsx#L16-L56)
+- [src/pages/admin/AdminAffiliates.tsx:62-86](file://src/pages/admin/AdminAffiliates.tsx#L62-L86)
+- [src/pages/admin/AdminLeads.tsx:162-174](file://src/pages/admin/AdminLeads.tsx#L162-L174)
+- [src/pages/admin/AdminCommissions.tsx:141-152](file://src/pages/admin/AdminCommissions.tsx#L141-L152)
+- [src/pages/admin/AdminAffiliateDetail.tsx:42-65](file://src/pages/admin/AdminAffiliateDetail.tsx#L42-L65)
 
 ## Troubleshooting Guide
 Common issues and resolutions:
@@ -765,6 +914,22 @@ Common issues and resolutions:
   - **Issue**: Subscribers still receiving emails after unsubscribing
   - **Solution**: Check handle-email-unsubscribe edge function logs, verify email infrastructure integration, confirm suppression list updates
   - Reference: [supabase/functions/handle-email-unsubscribe/index.ts](file://supabase/functions/handle-email-unsubscribe/index.ts)
+- **AdminAffiliateDetail page loading issues**
+  - **Issue**: Affiliate data not loading or displaying incorrectly
+  - **Solution**: Verify Supabase connection, check affiliate ID parameter, ensure all tab components are properly imported and rendered
+  - Reference: [src/pages/admin/AdminAffiliateDetail.tsx:42-65](file://src/pages/admin/AdminAffiliateDetail.tsx#L42-L65)
+- **AdminAffiliates sorting not working**
+  - **Issue**: Sorting columns not responding or incorrect sorting behavior
+  - **Solution**: Verify sortField and sortDir state management, check column click handlers, ensure proper data comparison logic
+  - Reference: [src/pages/admin/AdminAffiliates.tsx:97-104](file://src/pages/admin/AdminAffiliates.tsx#L97-L104)
+- **AdminLeads filter not working**
+  - **Issue**: Search or stage filters not affecting results
+  - **Solution**: Verify filter state updates, check filteredAffiliates computation, ensure proper search term matching
+  - Reference: [src/pages/admin/AdminLeads.tsx:195](file://src/pages/admin/AdminLeads.tsx#L195)
+- **AdminCommissions bulk actions failing**
+  - **Issue**: Bulk selection or status updates not working
+  - **Solution**: Verify selectedCommissions state management, check updateCommissionStatus function, ensure proper error handling
+  - Reference: [src/pages/admin/AdminCommissions.tsx:165-189](file://src/pages/admin/AdminCommissions.tsx#L165-L189)
 
 **Section sources**
 - [src/components/ScrollToTop.tsx:1-14](file://src/components/ScrollToTop.tsx#L1-L14)
@@ -779,9 +944,13 @@ Common issues and resolutions:
 - [src/pages/ThankYou.tsx:59-72](file://src/pages/ThankYou.tsx#L59-L72)
 - [src/pages/Unsubscribe.tsx:16-38](file://src/pages/Unsubscribe.tsx#L16-L38)
 - [supabase/functions/handle-email-unsubscribe/index.ts](file://supabase/functions/handle-email-unsubscribe/index.ts)
+- [src/pages/admin/AdminAffiliateDetail.tsx:42-65](file://src/pages/admin/AdminAffiliateDetail.tsx#L42-L65)
+- [src/pages/admin/AdminAffiliates.tsx:97-104](file://src/pages/admin/AdminAffiliates.tsx#L97-L104)
+- [src/pages/admin/AdminLeads.tsx:195](file://src/pages/admin/AdminLeads.tsx#L195)
+- [src/pages/admin/AdminCommissions.tsx:165-189](file://src/pages/admin/AdminCommissions.tsx#L165-L189)
 
 ## Conclusion
-The Ryland application employs a clean, centralized routing architecture with shared layouts and navigation utilities. Providers establish a robust foundation for state and UI behavior, while responsive and performance configurations support scalable growth. The Assessment page demonstrates advanced integration patterns with parallel processing capabilities that improve user experience while maintaining reliable data synchronization. The new Credit Intake form showcases comprehensive security measures and edge function integration for Scorexer webhook processing. The enhanced Thank You page provides sophisticated order processing with polling mechanisms and integration with the fetch-order edge function. The new Unsubscribe page delivers comprehensive email management with token-based validation and integration with the email suppression system. The addition of admin portal functionality provides secure access control and comprehensive administrative capabilities. The updated email infrastructure integration ensures proper transactional email handling and compliance with email suppression requirements. By following the patterns outlined here—consistent route declarations, shared layouts, SEO-aware meta management, robust integration architectures, comprehensive email management, and strong security practices—you can reliably implement new pages, optimize performance, and deliver a seamless user experience across desktop and mobile devices.
+The Ryland application employs a clean, centralized routing architecture with shared layouts and navigation utilities. Providers establish a robust foundation for state and UI behavior, while responsive and performance configurations support scalable growth. The Assessment page demonstrates advanced integration patterns with parallel processing capabilities that improve user experience while maintaining reliable data synchronization. The new Credit Intake form showcases comprehensive security measures and edge function integration for Scorexer webhook processing. The enhanced Thank You page provides sophisticated order processing with polling mechanisms and integration with the fetch-order edge function. The new Unsubscribe page delivers comprehensive email management with token-based validation and integration with the email suppression system. The addition of comprehensive admin portal functionality provides secure access control, detailed affiliate management interfaces, enhanced lead tracking capabilities, and robust commission management features. The new AdminAffiliateDetail page offers a tabbed interface for comprehensive affiliate oversight, while AdminAffiliates provides improved sorting and commission rate visualization. The enhanced AdminLeads page delivers better data presentation with statistics and filtering, and the new AdminCommissions page centralizes commission management with bulk actions. The updated email infrastructure integration ensures proper transactional email handling and compliance with email suppression requirements. The AdminLeadDetailDrawer provides comprehensive lead detail viewing with contact information, pipeline status, commission details, and assignment information. By following the patterns outlined here—consistent route declarations, shared layouts, SEO-aware meta management, robust integration architectures, comprehensive email management, strong security practices, and enhanced admin capabilities—you can reliably implement new pages, optimize performance, and deliver a seamless user experience across desktop and mobile devices.
 
 [No sources needed since this section summarizes without analyzing specific files]
 
@@ -817,5 +986,13 @@ The Ryland application employs a clean, centralized routing architecture with sh
   - Test user feedback for success, error, and already unsubscribed states
   - Verify API key configuration and security headers
   - Test integration with email infrastructure systems
+- **Admin portal integration checklist**:
+  - Verify AdminGuard is properly protecting admin routes
+  - Test affiliate detail tab navigation and data loading
+  - Validate admin statistics calculations and display
+  - Test lead detail drawer functionality and information display
+  - Verify commission status updates and bulk action handling
+  - Test admin sidebar navigation and responsive behavior
+  - Verify proper error handling for admin data operations
 
 [No sources needed since this section provides general guidance]

@@ -20,6 +20,9 @@
 - [AdminAffiliates.tsx](file://src/pages/admin/AdminAffiliates.tsx)
 - [AdminPayouts.tsx](file://src/pages/admin/AdminPayouts.tsx)
 - [AdminReports.tsx](file://src/pages/admin/AdminReports.tsx)
+- [AdminAffiliateDetail.tsx](file://src/pages/admin/AdminAffiliateDetail.tsx)
+- [AffiliateSettingsTab.tsx](file://src/components/admin/affiliate-detail/AffiliateSettingsTab.tsx)
+- [AffiliateCommissionsTab.tsx](file://src/components/admin/affiliate-detail/AffiliateCommissionsTab.tsx)
 - [index.ts](file://supabase/functions/ghl-affiliate-webhook/index.ts)
 - [index.ts](file://supabase/functions/ghl-calendar/index.ts)
 - [ConsultationCalendar.tsx](file://src/components/funnel/ConsultationCalendar.tsx)
@@ -32,6 +35,7 @@
 - [20260325024643_email_infra.sql](file://supabase/migrations/20260325024643_email_infra.sql)
 - [20260325035304_c2ee4398-7ffa-4021-bbda-9671e2f04eb7.sql](file://supabase/migrations/20260325035304_c2ee4398-7ffa-4021-bbda-9671e2f04eb7.sql)
 - [20260325042306_4ee0e761-11f9-4bbb-a6b4-4438b51fe81b.sql](file://supabase/migrations/20260325042306_4ee0e761-11f9-4bbb-a6b4-4438b51fe81b.sql)
+- [20260327_admin_enhancements.sql](file://supabase/migrations/20260327_admin_enhancements.sql)
 - [index.html](file://index.html)
 - [config.toml](file://supabase/config.toml)
 - [index.ts](file://supabase/functions/process-email-queue/index.ts)
@@ -45,13 +49,11 @@
 
 ## Update Summary
 **Changes Made**
-- Added comprehensive email infrastructure with transactional email system
-- Implemented email queue system using pgmq with auth and transactional priority queues
-- Added suppression management with suppressed_emails, email_unsubscribe_tokens, and email_send_log tables
-- Enhanced Shopify order webhook with bundle purchase handling and download email integration
-- Created transactional email template system with React Email components
-- Implemented email processing pipeline with rate limiting, retry logic, and dead letter queues
-- Added comprehensive email suppression handling and unsubscribe token management
+- Added dual commission rate columns (upfront_commission_rate and backend_commission_rate) to affiliates table
+- Added admin_notes column to affiliates table for internal administrative tracking
+- Standardized commission_type values by converting 'referral' to 'upfront' in existing records
+- Updated admin interfaces to display and manage dual commission rate structure
+- Enhanced affiliate management with comprehensive rate and notes editing capabilities
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -72,7 +74,7 @@
 ## Introduction
 This document describes the data model and Supabase integration for the project. It focuses on the database schema design, entity relationships, field definitions for user accounts, affiliate leads, and application data. It also documents authentication setup, real-time features, data validation rules, data access patterns, caching strategies, performance considerations, data lifecycle, security measures, access control mechanisms, synchronization, offline capabilities, and error handling strategies for database operations.
 
-**Updated**: The system now includes a comprehensive email infrastructure with transactional email processing, queue management, suppression handling, and integration with Shopify order processing for automated download email delivery.
+**Updated**: The system now includes comprehensive administrative enhancements with dual commission rate management, admin notes functionality, and standardized commission type handling. The database schema has been enhanced to support both upfront and backend commission structures while maintaining backward compatibility.
 
 ## Project Structure
 The project is a frontend-first React application that integrates with Supabase for authentication and data persistence. Key integration points include:
@@ -86,6 +88,7 @@ The project is a frontend-first React application that integrates with Supabase 
 - **New**: Email queue system with priority handling and rate limiting
 - **New**: Suppression management for bounce, complaint, and unsubscribe handling
 - **New**: Shopify order webhook with bundle purchase detection and download email automation
+- **New**: Dual commission rate management system with admin notes
 - Network optimization through preconnect hints for reduced latency
 - External API integration with GHL for calendar management and appointment booking
 - Administrative dashboard with comprehensive management capabilities
@@ -102,6 +105,10 @@ LoginPage["Portal Login Page<br/>PortalLogin.tsx"]
 ResetPage["Reset Password Page<br/>ResetPassword.tsx"]
 ConsultCal["Consultation Calendar<br/>ConsultationCalendar.tsx"]
 PartnerCal["Partner Calendar<br/>PartnerOnboardingCalendar.tsx"]
+AdminAffiliates["Admin Affiliates<br/>AdminAffiliates.tsx"]
+AdminDetail["Admin Affiliate Detail<br/>AdminAffiliateDetail.tsx"]
+SettingsTab["Settings Tab<br/>AffiliateSettingsTab.tsx"]
+CommissionsTab["Commissions Tab<br/>AffiliateCommissionsTab.tsx"]
 HTML["HTML Entry Point<br/>index.html"]
 end
 subgraph "Supabase Integration"
@@ -110,6 +117,11 @@ Types["Typed Schema<br/>types.ts"]
 Func["Webhook Function<br/>ghl-affiliate-webhook/index.ts"]
 CalFunc["Calendar Function<br/>ghl-calendar/index.ts"]
 ShopifyWebhook["Shopify Order Webhook<br/>shopify-order-webhook/index.ts"]
+end
+subgraph "Enhanced Database Schema"
+Mig20260327["Admin Enhancements Migration<br/>20260327_admin_enhancements.sql"]
+Affiliates["Affiliates Table<br/>Dual Commission Rates + Admin Notes"]
+Commissions["Commissions Table<br/>Standardized Types"]
 end
 subgraph "Email Infrastructure"
 EmailQueue["Email Queue System<br/>pgmq"]
@@ -121,12 +133,6 @@ SendEmail["Transactional Sender<br/>send-transactional-email/index.ts"]
 SuppressHandler["Suppression Handler<br/>handle-email-suppression/index.ts"]
 UnsubscribeHandler["Unsubscribe Handler<br/>handle-email-unsubscribe/index.ts"]
 Templates["Email Templates<br/>React Email Components"]
-end
-subgraph "Database"
-Migs["Migrations<br/>RLS Policies"]
-AdminMig["Admin Policies<br/>20260324201245_4681ef67-2bf0-4686-a4b6-1ae6c54189f9.sql"]
-EmailMig["Email Infrastructure<br/>20260325024643_email_infra.sql"]
-Tables["Tables<br/>affiliates, affiliate_leads, commissions, payouts, speaker_requests, orders, order_items, user_roles, email_send_log, suppressed_emails, email_unsubscribe_tokens"]
 end
 subgraph "External APIs"
 GHL["GHL Services<br/>LeadConnectorHQ"]
@@ -143,14 +149,18 @@ LoginPage --> Client
 ResetPage --> Client
 ConsultCal --> Client
 PartnerCal --> Client
+AdminAffiliates --> Client
+AdminDetail --> Client
+SettingsTab --> Client
+CommissionsTab --> Client
 Client --> Types
 Func --> Client
 CalFunc --> Client
 ShopifyWebhook --> Client
-Client --> Tables
-Migs --> Tables
-AdminMig --> Tables
-EmailMig --> Tables
+Client --> Affiliates
+Client --> Commissions
+Mig20260327 --> Affiliates
+Mig20260327 --> Commissions
 Client --> GHL
 Client --> Shopify
 Client --> Lovable
@@ -176,9 +186,14 @@ UnsubscribeHandler --> Tokens
 - [ResetPassword.tsx:1-60](file://src/pages/ResetPassword.tsx#L1-L60)
 - [ConsultationCalendar.tsx:1-461](file://src/components/funnel/ConsultationCalendar.tsx#L1-L461)
 - [PartnerOnboardingCalendar.tsx:1-357](file://src/components/funnel/PartnerOnboardingCalendar.tsx#L1-L357)
+- [AdminAffiliates.tsx:1-279](file://src/pages/admin/AdminAffiliates.tsx#L1-L279)
+- [AdminAffiliateDetail.tsx:1-182](file://src/pages/admin/AdminAffiliateDetail.tsx#L1-L182)
+- [AffiliateSettingsTab.tsx:1-187](file://src/components/admin/affiliate-detail/AffiliateSettingsTab.tsx#L1-L187)
+- [AffiliateCommissionsTab.tsx:1-174](file://src/components/admin/affiliate-detail/AffiliateCommissionsTab.tsx#L1-L174)
 - [index.ts:41-174](file://supabase/functions/ghl-affiliate-webhook/index.ts#L41-L174)
 - [index.ts:16-240](file://supabase/functions/ghl-calendar/index.ts#L16-L240)
 - [index.ts:74-105](file://supabase/functions/shopify-order-webhook/index.ts#L74-L105)
+- [20260327_admin_enhancements.sql:1-19](file://supabase/migrations/20260327_admin_enhancements.sql#L1-L19)
 - [index.ts:1-361](file://supabase/functions/process-email-queue/index.ts#L1-L361)
 - [index.ts:1-360](file://supabase/functions/send-transactional-email/index.ts#L1-L360)
 - [index.ts:1-163](file://supabase/functions/handle-email-suppression/index.ts#L1-L163)
@@ -207,6 +222,9 @@ UnsubscribeHandler --> Tokens
 - **New**: Email queue system using pgmq with priority handling for auth and transactional emails.
 - **New**: Suppression management system for handling bounces, complaints, and unsubscribes.
 - **New**: Shopify order webhook with bundle purchase detection and automated download email delivery.
+- **New**: Dual commission rate management system with upfront and backend rate tracking.
+- **New**: Admin notes functionality for internal affiliate tracking and management.
+- **New**: Standardized commission type handling with 'referral' converted to 'upfront'.
 - Network optimization through preconnect hints for reduced database connection latency.
 - External API integration with GHL for calendar management and appointment booking.
 - Administrative dashboard with comprehensive management capabilities.
@@ -226,11 +244,12 @@ UnsubscribeHandler --> Tokens
 - [20260319194628_4e5f50a6-8cb3-40d1-b56d-a5bacde2a132.sql:1-5](file://supabase/migrations/20260319194628_4e5f50a6-8cb3-40d1-b56d-a5bacde2a132.sql#L1-L5)
 - [20260324201245_4681ef67-2bf0-4686-a4b6-1ae6c54189f9.sql:1-82](file://supabase/migrations/20260324201245_4681ef67-2bf0-4686-a4b6-1ae6c54189f9.sql#L1-L82)
 - [20260325024643_email_infra.sql:1-293](file://supabase/migrations/20260325024643_email_infra.sql#L1-L293)
+- [20260327_admin_enhancements.sql:1-19](file://supabase/migrations/20260327_admin_enhancements.sql#L1-L19)
 
 ## Architecture Overview
 The data layer architecture centers on a typed Supabase client, React Query for caching and reactivity, and Supabase RLS for access control. Authentication events drive state updates, while external webhooks synchronize data into affiliate leads. The architecture now includes comprehensive external API integration with GHL services for calendar management and appointment booking, and **New**: a complete email infrastructure with transactional email processing, queue management, and suppression handling. The email system uses a priority-based queue system with pgmq, rate limiting, and dead letter queues for reliable email delivery. Network optimization through preconnect hints reduces latency for database operations and improves real-time feature responsiveness.
 
-**Updated**: The architecture now incorporates a comprehensive administrative framework with role-based access control, enabling granular permissions for different user roles.
+**Updated**: The architecture now incorporates comprehensive administrative enhancements with dual commission rate management, admin notes functionality, and standardized commission type handling. The system supports both upfront and backend commission structures while maintaining backward compatibility with existing data.
 
 ```mermaid
 sequenceDiagram
@@ -241,6 +260,7 @@ participant AdminGuard as "Admin Guard<br/>AdminGuard.tsx"
 participant Client as "Supabase Client<br/>client.ts"
 participant CalComp as "Calendar Components<br/>ConsultationCalendar.tsx"
 participant DB as "PostgreSQL Tables<br/>types.ts"
+participant Mig20260327 as "Admin Enhancements<br/>20260327_admin_enhancements.sql"
 participant Func as "Webhook Function<br/>index.ts"
 participant CalFunc as "Calendar Function<br/>ghl-calendar/index.ts"
 participant Shopify as "Shopify Order Webhook<br/>shopify-order-webhook/index.ts"
@@ -253,8 +273,8 @@ Auth->>Client : Subscribe to auth state changes
 Client-->>Auth : User/session events
 Auth->>Client : Lookup affiliate profile
 Client->>DB : SELECT affiliates WHERE user_id
-DB-->>Client : Affiliate record
-Client-->>Auth : Affiliate data
+DB-->>Client : Affiliate record with dual rates
+Client-->>Auth : Affiliate data with admin_notes
 UI->>AdminGuard : Check admin permissions
 AdminGuard->>Client : Check has_role(auth.uid(), 'admin')
 Client->>DB : SELECT user_roles WHERE user_id
@@ -267,6 +287,8 @@ Client-->>UI : Typed leads data
 Func->>Client : Service role insert/update
 Client->>DB : INSERT/UPDATE affiliate_leads
 DB-->>Client : Acknowledgement
+Mig20260327->>DB : ALTER TABLE affiliates ADD dual rates + admin_notes
+Mig20260327->>DB : UPDATE commissions SET commission_type = 'upfront'
 CalComp->>Client : Invoke ghl-calendar function
 Client->>CalFunc : Function invocation
 CalFunc->>GHL : GET free-slots with timestamp conversion
@@ -292,6 +314,7 @@ Client-->>UI : Order processed with email
 - [client.ts:11-17](file://src/integrations/supabase/client.ts#L11-L17)
 - [ConsultationCalendar.tsx:76-96](file://src/components/funnel/ConsultationCalendar.tsx#L76-L96)
 - [types.ts:16-147](file://src/integrations/supabase/types.ts#L16-L147)
+- [20260327_admin_enhancements.sql:4-19](file://supabase/migrations/20260327_admin_enhancements.sql#L4-L19)
 - [index.ts:155-166](file://supabase/functions/ghl-affiliate-webhook/index.ts#L155-L166)
 - [index.ts:16-240](file://supabase/functions/ghl-calendar/index.ts#L16-L240)
 - [index.ts:74-105](file://supabase/functions/shopify-order-webhook/index.ts#L74-L105)
@@ -323,7 +346,7 @@ Page->>Auth : signIn(email, password)
 Auth->>Client : auth.signInWithPassword
 Client-->>Auth : Session
 Auth->>DB : SELECT affiliates WHERE user_id
-DB-->>Auth : Affiliate record
+DB-->>Auth : Affiliate record with dual rates
 Auth-->>Page : Auth state updated
 ```
 
@@ -393,7 +416,7 @@ Func-->>Ext : JSON response
 ### Database Schema and Entity Relationships
 The schema defines core tables and enums used by the application. Below is a focused ER diagram for the most relevant entities in the data layer.
 
-**Updated**: Enhanced with user_roles table for comprehensive role-based access control and new email infrastructure tables.
+**Updated**: Enhanced with user_roles table for comprehensive role-based access control, dual commission rate columns in affiliates table, admin_notes functionality, and standardized commission types.
 
 ```mermaid
 erDiagram
@@ -410,6 +433,9 @@ string w9_file_url
 string ghl_contact_id
 string user_id
 enum status
+numeric upfront_commission_rate
+numeric backend_commission_rate
+text admin_notes
 timestamp created_at
 timestamp updated_at
 }
@@ -529,6 +555,7 @@ USER_ROLES ||--|| AFFILIATES : "grants"
 - [types.ts:97-640](file://src/integrations/supabase/types.ts#L97-L640)
 - [20260324201245_4681ef67-2bf0-4686-a4b6-1ae6c54189f9.sql:5-11](file://supabase/migrations/20260324201245_4681ef67-2bf0-4686-a4b6-1ae6c54189f9.sql#L5-L11)
 - [20260325024643_email_infra.sql:27-271](file://supabase/migrations/20260325024643_email_infra.sql#L27-L271)
+- [20260327_admin_enhancements.sql:4-19](file://supabase/migrations/20260327_admin_enhancements.sql#L4-L19)
 
 **Section sources**
 - [types.ts:9-657](file://src/integrations/supabase/types.ts#L9-L657)
@@ -538,6 +565,9 @@ USER_ROLES ||--|| AFFILIATES : "grants"
 - **Updated**: Added app_role enumeration with 'admin' and 'user' values for role-based access control.
 - **Updated**: Email infrastructure includes status validation for email_send_log with 'pending', 'sent', 'suppressed', 'failed', 'bounced', 'complained', 'dlq' values.
 - **Updated**: Suppressed emails table includes reason validation for 'unsubscribe', 'bounce', 'complaint'.
+- **Updated**: Affiliates table now includes dual commission rate fields (upfront_commission_rate, backend_commission_rate) with numeric precision and scale.
+- **Updated**: Admin notes field for internal tracking and management.
+- **Updated**: Commission types standardized with 'upfront' replacing 'referral' for consistency.
 - Strong typing ensures compile-time safety for inserts and updates.
 - Migrations add columns and default values to support evolving business needs.
 
@@ -547,6 +577,7 @@ USER_ROLES ||--|| AFFILIATES : "grants"
 - [20260324201245_4681ef67-2bf0-4686-a4b6-1ae6c54189f9.sql:2-3](file://supabase/migrations/20260324201245_4681ef67-2bf0-4686-a4b6-1ae6c54189f9.sql#L2-L3)
 - [20260325024643_email_infra.sql:32-84](file://supabase/migrations/20260325024643_email_infra.sql#L32-L84)
 - [20260325024643_email_infra.sql:212-216](file://supabase/migrations/20260325024643_email_infra.sql#L212-L216)
+- [20260327_admin_enhancements.sql:4-19](file://supabase/migrations/20260327_admin_enhancements.sql#L4-L19)
 
 ### Real-Time Features and Data Lifecycle
 - Auth state changes trigger immediate UI updates and background affiliate profile loading.
@@ -556,6 +587,9 @@ USER_ROLES ||--|| AFFILIATES : "grants"
 - **Updated**: Email processing system provides asynchronous transactional email delivery with queue management.
 - **Updated**: Suppression handling automatically manages email suppression lists and unsubscribe tokens.
 - **Updated**: Shopify order webhook processes purchases, detects bundles, generates download links, and triggers email delivery.
+- **Updated**: Dual commission rate management enables flexible commission structures with upfront and backend components.
+- **Updated**: Admin notes functionality provides internal tracking and management capabilities.
+- **Updated**: Standardized commission types ensure consistent commission classification across the system.
 
 **Section sources**
 - [useAuth.tsx:68-106](file://src/hooks/useAuth.tsx#L68-L106)
@@ -566,6 +600,7 @@ USER_ROLES ||--|| AFFILIATES : "grants"
 - [index.ts:1-361](file://supabase/functions/process-email-queue/index.ts#L1-L361)
 - [index.ts:1-163](file://supabase/functions/handle-email-suppression/index.ts#L1-L163)
 - [index.ts:74-105](file://supabase/functions/shopify-order-webhook/index.ts#L74-L105)
+- [20260327_admin_enhancements.sql:4-19](file://supabase/migrations/20260327_admin_enhancements.sql#L4-L19)
 
 ## Administrative Framework
 
@@ -666,9 +701,10 @@ Handles commission management:
 #### AdminAffiliates
 Manages affiliate relationships:
 - Affiliate listing with performance metrics
-- Commission rate management
+- Commission rate management with dual rate structure
 - Status updates and approval workflows
 - Performance analytics and reporting
+- Admin notes functionality for internal tracking
 
 #### AdminPayouts and Reports
 Provides financial oversight:
@@ -683,6 +719,74 @@ Provides financial oversight:
 - [AdminCommissions.tsx:49-99](file://src/pages/admin/AdminCommissions.tsx#L49-L99)
 - [AdminAffiliates.tsx:54-96](file://src/pages/admin/AdminAffiliates.tsx#L54-L96)
 - [AdminReports.tsx:76-114](file://src/pages/admin/AdminReports.tsx#L76-L114)
+
+### Enhanced Affiliate Management Interface
+**New**: Comprehensive dual commission rate management system with admin notes functionality.
+
+#### AdminAffiliates Component
+The main affiliate management interface now displays dual commission rates:
+- Shows both upfront and backend commission rates side-by-side
+- Provides sorting and filtering capabilities by rate tiers
+- Displays total leads and earnings for performance tracking
+- Integrates with admin notes for internal tracking
+
+#### AdminAffiliateDetail Component
+Detailed affiliate view with enhanced management capabilities:
+- Displays dual commission rates with visual indicators
+- Shows admin notes in dedicated section
+- Provides comprehensive affiliate information and statistics
+- Integrates with all management tabs including settings
+
+#### AffiliateSettingsTab Component
+Enhanced settings management with dual commission rate editing:
+- Separate input fields for upfront and backend commission rates
+- Real-time validation with percentage constraints (0-100%)
+- Admin notes editing with rich text support
+- Status management with approval/suspension controls
+- Save operations with error handling and success feedback
+
+#### AffiliateCommissionsTab Component
+Commission tracking with dual rate visualization:
+- Displays upfront and backend commission totals separately
+- Shows commission history with type differentiation
+- Provides summary cards for total earned and pending amounts
+- Handles standardized commission types ('upfront' and 'backend')
+
+```mermaid
+sequenceDiagram
+participant AdminUI as "Admin UI Components"
+participant SettingsTab as "AffiliateSettingsTab.tsx"
+participant CommissionsTab as "AffiliateCommissionsTab.tsx"
+participant Client as "Supabase Client"
+participant DB as "PostgreSQL Database"
+AdminUI->>SettingsTab : Load affiliate data with dual rates
+SettingsTab->>Client : Query affiliates with upfront/backend rates
+Client->>DB : SELECT affiliates WITH dual rates + admin_notes
+DB-->>Client : Affiliate data with enhanced fields
+Client-->>SettingsTab : Dual rates + admin_notes
+SettingsTab->>Client : Update rates (upfront/backend)
+Client->>DB : UPDATE affiliates SET rates + admin_notes
+DB-->>Client : Success
+Client-->>SettingsTab : Confirmation
+SettingsTab->>CommissionsTab : Pass rate data for visualization
+CommissionsTab->>Client : Query commissions with standardized types
+Client->>DB : SELECT commissions WHERE affiliate_id
+DB-->>Client : Commission data with 'upfront'/'backend' types
+Client-->>CommissionsTab : Commission history
+CommissionsTab-->>AdminUI : Dual rate visualization
+```
+
+**Diagram sources**
+- [AdminAffiliates.tsx:28-84](file://src/pages/admin/AdminAffiliates.tsx#L28-L84)
+- [AdminAffiliateDetail.tsx:28-33](file://src/pages/admin/AdminAffiliateDetail.tsx#L28-L33)
+- [AffiliateSettingsTab.tsx:25-69](file://src/components/admin/affiliate-detail/AffiliateSettingsTab.tsx#L25-L69)
+- [AffiliateCommissionsTab.tsx:28-49](file://src/components/admin/affiliate-detail/AffiliateCommissionsTab.tsx#L28-L49)
+
+**Section sources**
+- [AdminAffiliates.tsx:1-279](file://src/pages/admin/AdminAffiliates.tsx#L1-L279)
+- [AdminAffiliateDetail.tsx:1-182](file://src/pages/admin/AdminAffiliateDetail.tsx#L1-L182)
+- [AffiliateSettingsTab.tsx:1-187](file://src/components/admin/affiliate-detail/AffiliateSettingsTab.tsx#L1-L187)
+- [AffiliateCommissionsTab.tsx:1-174](file://src/components/admin/affiliate-detail/AffiliateCommissionsTab.tsx#L1-L174)
 
 ## Email Infrastructure
 
@@ -1020,11 +1124,20 @@ The application implements proactive network optimization through HTML preconnec
 - **Idempotent Operations**: Duplicate suppression and atomic token updates
 - **Index Optimization**: Strategic indexing on email_send_log and suppression tables
 
+### Database Schema Enhancement Performance Considerations
+**New**: Enhanced database schema performance optimizations:
+- **Dual Commission Rate Columns**: Separate numeric fields for upfront and backend rates eliminate complex calculations
+- **Admin Notes Column**: Dedicated text field for internal tracking without joins
+- **Standardized Commission Types**: Consistent 'upfront'/'backend' values improve query performance
+- **Default Values**: Automatic defaults for new affiliates eliminate NULL checks
+- **Numeric Precision**: Proper NUMERIC(5,2) types ensure accurate commission calculations
+
 **Section sources**
 - [index.html:17](file://index.html#L17)
 - [ConsultationCalendar.tsx:12-38](file://src/components/funnel/ConsultationCalendar.tsx#L12-L38)
 - [index.ts:37-45](file://supabase/functions/ghl-calendar/index.ts#L37-L45)
 - [index.ts:1-361](file://supabase/functions/process-email-queue/index.ts#L1-L361)
+- [20260327_admin_enhancements.sql:4-19](file://supabase/migrations/20260327_admin_enhancements.sql#L4-L19)
 
 ### Network Optimization Best Practices
 - Implement preconnect for critical third-party domains (Supabase, external APIs)
@@ -1038,6 +1151,8 @@ The application implements proactive network optimization through HTML preconnec
 - **Updated**: Optimize role-based access control queries with proper indexing
 - **Updated**: Cache email queue RPC wrapper results to reduce function call overhead
 - **Updated**: Implement email processing batching for improved throughput
+- **Updated**: Optimize database schema with proper indexing on dual commission rate columns
+- **Updated**: Use connection pooling for external email API calls to improve throughput
 
 **Section sources**
 - [index.html:15-18](file://index.html#L15-L18)
@@ -1045,7 +1160,7 @@ The application implements proactive network optimization through HTML preconnec
 ## Dependency Analysis
 The frontend depends on Supabase for identity and data, React Query for caching, and TypeScript for type safety. Supabase functions depend on the Supabase runtime and service role credentials. External API integrations depend on GHL services and proper environment configuration. Network optimization through preconnect hints provides transparent performance benefits across all Supabase operations.
 
-**Updated**: Enhanced dependency graph includes role-based access control components, administrative framework, and comprehensive email infrastructure.
+**Updated**: Enhanced dependency graph includes role-based access control components, administrative framework, comprehensive email infrastructure, and dual commission rate management system.
 
 ```mermaid
 graph LR
@@ -1066,6 +1181,10 @@ SuppressHandler["handle-email-suppression/index.ts"]
 UnsubscribeHandler["handle-email-unsubscribe/index.ts"]
 ConsultCal["ConsultationCalendar.tsx"]
 PartnerCal["PartnerOnboardingCalendar.tsx"]
+AdminAffiliates["AdminAffiliates.tsx"]
+AdminDetail["AdminAffiliateDetail.tsx"]
+SettingsTab["AffiliateSettingsTab.tsx"]
+CommissionsTab["AffiliateCommissionsTab.tsx"]
 HTML["index.html"]
 GHL["GHL Services"]
 Shopify["Shopify Commerce"]
@@ -1073,6 +1192,7 @@ Lovable["Lovable Email API"]
 AdminPages["Admin Pages<br/>AdminDashboard.tsx, AdminLeads.tsx, etc."]
 AdminMig["Admin Policies<br/>20260324201245_4681ef67-2bf0-4686-a4b6-1ae6c54189f9.sql"]
 EmailMig["Email Infrastructure<br/>20260325024643_email_infra.sql"]
+AdminEnhMig["Admin Enhancements<br/>20260327_admin_enhancements.sql"]
 Package --> Client
 Package --> Auth
 Package --> AdminGuard
@@ -1097,9 +1217,14 @@ SuppressHandler --> Client
 UnsubscribeHandler --> Client
 ConsultCal --> Client
 PartnerCal --> Client
+AdminAffiliates --> Client
+AdminDetail --> Client
+SettingsTab --> Client
+CommissionsTab --> Client
 Client --> AdminPages
 Client --> AdminMig
 Client --> EmailMig
+Client --> AdminEnhMig
 Client --> GHL
 Client --> Shopify
 Client --> Lovable
@@ -1116,6 +1241,10 @@ Client --> Lovable
 - [useAffiliateLeads.ts:1-4](file://src/hooks/useAffiliateLeads.ts#L1-L4)
 - [ConsultationCalendar.tsx:1-14](file://src/components/funnel/ConsultationCalendar.tsx#L1-L14)
 - [PartnerOnboardingCalendar.tsx:1-14](file://src/components/funnel/PartnerOnboardingCalendar.tsx#L1-L14)
+- [AdminAffiliates.tsx:1-4](file://src/pages/admin/AdminAffiliates.tsx#L1-L4)
+- [AdminAffiliateDetail.tsx:1-4](file://src/pages/admin/AdminAffiliateDetail.tsx#L1-L4)
+- [AffiliateSettingsTab.tsx:1-4](file://src/components/admin/affiliate-detail/AffiliateSettingsTab.tsx#L1-L4)
+- [AffiliateCommissionsTab.tsx:1-4](file://src/components/admin/affiliate-detail/AffiliateCommissionsTab.tsx#L1-L4)
 - [index.ts:42-44](file://supabase/functions/ghl-affiliate-webhook/index.ts#L42-L44)
 - [index.ts:21-51](file://supabase/functions/ghl-calendar/index.ts#L21-L51)
 - [index.ts:74-105](file://supabase/functions/shopify-order-webhook/index.ts#L74-L105)
@@ -1126,6 +1255,7 @@ Client --> Lovable
 - [index.html:17](file://index.html#L17)
 - [20260324201245_4681ef67-2bf0-4686-a4b6-1ae6c54189f9.sql:1-82](file://supabase/migrations/20260324201245_4681ef67-2bf0-4686-a4b6-1ae6c54189f9.sql#L1-L82)
 - [20260325024643_email_infra.sql:1-293](file://supabase/migrations/20260325024643_email_infra.sql#L1-L293)
+- [20260327_admin_enhancements.sql:1-19](file://supabase/migrations/20260327_admin_enhancements.sql#L1-L19)
 
 **Section sources**
 - [package.json:15-69](file://package.json#L15-L69)
@@ -1151,6 +1281,10 @@ Client --> Lovable
 - **Updated**: Monitor email queue depths and adjust processing intervals for optimal performance.
 - **Updated**: Implement email suppression list caching to reduce database lookups during send operations.
 - **Updated**: Use connection pooling for external email API calls to improve throughput.
+- **Updated**: Optimize database schema with proper indexing on dual commission rate columns (upfront_commission_rate, backend_commission_rate).
+- **Updated**: Use numeric precision and scale (NUMERIC(5,2)) for commission rate calculations to ensure accuracy.
+- **Updated**: Implement default values for new affiliate records to eliminate NULL checks and improve query performance.
+- **Updated**: Standardize commission types ('upfront'/'backend') to improve query performance and reduce complexity.
 
 ## Troubleshooting Guide
 Common issues and strategies:
@@ -1176,6 +1310,9 @@ Common issues and strategies:
 - **Updated**: Unsubscribe token processing failures: Check atomic update logic and token uniqueness constraints.
 - **Updated**: Shopify order webhook errors: Verify HMAC signatures, bundle mappings, and email delivery status.
 - **Updated**: Template rendering failures: Check React Email component compilation and template registry configuration.
+- **Updated**: Dual commission rate not displaying: Verify database migration completion and frontend type definitions.
+- **Updated**: Admin notes not saving: Check database permissions and frontend form validation.
+- **Updated**: Commission type conversion issues: Verify migration execution and frontend type handling.
 
 **Section sources**
 - [client.ts:5-17](file://src/integrations/supabase/client.ts#L5-L17)
@@ -1190,17 +1327,18 @@ Common issues and strategies:
 - [index.ts:1-163](file://supabase/functions/handle-email-suppression/index.ts#L1-L163)
 - [index.ts:1-131](file://supabase/functions/handle-email-unsubscribe/index.ts#L1-L131)
 - [index.ts:74-251](file://supabase/functions/shopify-order-webhook/index.ts#L74-L251)
+- [20260327_admin_enhancements.sql:4-19](file://supabase/migrations/20260327_admin_enhancements.sql#L4-L19)
 
 ## Conclusion
-The data layer leverages a strongly typed Supabase client, robust authentication, and RLS policies to provide secure, scalable data access. React Query enables efficient caching and reactivity, while Supabase functions facilitate reliable synchronization from external systems. **Updated**: The GHL calendar integration provides comprehensive appointment management with proper timestamp conversion for external API compatibility and enhanced environment variable validation. **Updated**: The new direct fetch implementation eliminates SDK-related issues and provides better performance and error control. **Updated**: Network optimization through preconnect hints significantly reduces database connection latency and improves real-time feature responsiveness. **Updated**: External API integration patterns ensure reliable communication with third-party services while maintaining performance and error resilience. **Updated**: Enhanced logging and monitoring capabilities provide comprehensive operational visibility and debugging support. **Updated**: The comprehensive administrative framework with role-based access control provides granular permissions and secure management capabilities. **Updated**: The new admin guard components and dashboard provide intuitive management interfaces with proper access control enforcement. **Updated**: The comprehensive email infrastructure provides reliable transactional email delivery with queue management, suppression handling, and automated bundle purchase processing. **Updated**: The Shopify order webhook integration delivers seamless automated download email delivery for bundle purchases. Adhering to the outlined patterns and safeguards ensures predictable performance, maintainability, and security.
+The data layer leverages a strongly typed Supabase client, robust authentication, and RLS policies to provide secure, scalable data access. React Query enables efficient caching and reactivity, while Supabase functions facilitate reliable synchronization from external systems. **Updated**: The GHL calendar integration provides comprehensive appointment management with proper timestamp conversion for external API compatibility and enhanced environment variable validation. **Updated**: The new direct fetch implementation eliminates SDK-related issues and provides better performance and error control. **Updated**: Network optimization through preconnect hints significantly reduces database connection latency and improves real-time feature responsiveness. **Updated**: External API integration patterns ensure reliable communication with third-party services while maintaining performance and error resilience. **Updated**: Enhanced logging and monitoring capabilities provide comprehensive operational visibility and debugging support. **Updated**: The comprehensive administrative framework with role-based access control provides granular permissions and secure management capabilities. **Updated**: The new admin guard components and dashboard provide intuitive management interfaces with proper access control enforcement. **Updated**: The comprehensive email infrastructure provides reliable transactional email delivery with queue management, suppression handling, and automated bundle purchase processing. **Updated**: The Shopify order webhook integration delivers seamless automated download email delivery for bundle purchases. **Updated**: The database schema enhancements with dual commission rate management, admin notes functionality, and standardized commission types provide comprehensive administrative capabilities while maintaining backward compatibility. Adhering to the outlined patterns and safeguards ensures predictable performance, maintainability, and security.
 
 ## Appendices
 
 ### Sample Data Structures
 Representative row shapes for key tables (descriptive only):
-- Affiliate: identifier, personal/company contact info, status, timestamps
+- Affiliate: identifier, personal/company contact info, status, dual commission rates, admin notes, timestamps
 - Affiliate Lead: association to affiliate, contact details, opportunity metadata, pipeline and status fields, timestamps
-- Commission: affiliate and optional lead linkage, amounts, status, timestamps, payout date
+- Commission: affiliate and optional lead linkage, amounts, standardized commission types ('upfront'/'backend'), status, timestamps, payout date
 - Payout: affiliate linkage, amount, period, method, status, timestamps
 - Speaker Request: affiliate linkage, event details, status, timestamps
 - **Updated**: User Role: unique combination of user_id and role for access control
@@ -1212,6 +1350,7 @@ Representative row shapes for key tables (descriptive only):
 - [types.ts:97-640](file://src/integrations/supabase/types.ts#L97-L640)
 - [20260324201245_4681ef67-2bf0-4686-a4b6-1ae6c54189f9.sql:5-11](file://supabase/migrations/20260324201245_4681ef67-2bf0-4686-a4b6-1ae6c54189f9.sql#L5-L11)
 - [20260325024643_email_infra.sql:27-271](file://supabase/migrations/20260325024643_email_infra.sql#L27-L271)
+- [20260327_admin_enhancements.sql:4-19](file://supabase/migrations/20260327_admin_enhancements.sql#L4-L19)
 
 ### GHL Calendar API Endpoints
 **Updated**: The GHL calendar integration exposes the following endpoints:
@@ -1305,3 +1444,17 @@ Representative row shapes for key tables (descriptive only):
 **Section sources**
 - [registry.ts:1-17](file://supabase/functions/_shared/transactional-email-templates/registry.ts#L1-L17)
 - [order-download-links.tsx:1-174](file://supabase/functions/_shared/transactional-email-templates/order-download-links.tsx#L1-L174)
+
+### Database Schema Enhancement Details
+**New**: The 20260327_admin_enhancements.sql migration introduces the following database schema changes:
+- **Dual Commission Rates**: Adds upfront_commission_rate and backend_commission_rate columns to affiliates table with NUMERIC(5,2) precision
+- **Admin Notes**: Adds admin_notes column to affiliates table for internal tracking
+- **Commission Type Standardization**: Updates existing commission records, converting 'referral' type to 'upfront'
+- **Default Values**: Provides sensible defaults (10.00% upfront, 5.00% backend) for existing affiliates
+- **Backward Compatibility**: Maintains existing commission_rate field in auth.user_metadata for legacy compatibility
+
+**Section sources**
+- [20260327_admin_enhancements.sql:1-19](file://supabase/migrations/20260327_admin_enhancements.sql#L1-L19)
+- [AdminAffiliates.tsx:78-84](file://src/pages/admin/AdminAffiliates.tsx#L78-L84)
+- [AffiliateSettingsTab.tsx:26-28](file://src/components/admin/affiliate-detail/AffiliateSettingsTab.tsx#L26-L28)
+- [AffiliateCommissionsTab.tsx:47-48](file://src/components/admin/affiliate-detail/AffiliateCommissionsTab.tsx#L47-L48)

@@ -10,6 +10,7 @@
 - [src/hooks/useCartSync.ts](file://src/hooks/useCartSync.ts)
 - [src/lib/shopify.ts](file://src/lib/shopify.ts)
 - [src/hooks/useAuth.tsx](file://src/hooks/useAuth.tsx)
+- [src/hooks/useAdminRole.ts](file://src/hooks/useAdminRole.ts)
 - [src/pages/ProductDetail.tsx](file://src/pages/ProductDetail.tsx)
 - [src/components/ui/sonner.tsx](file://src/components/ui/sonner.tsx)
 - [src/hooks/use-toast.ts](file://src/hooks/use-toast.ts)
@@ -24,8 +25,10 @@
 
 ## Update Summary
 **Changes Made**
-- Enhanced cart drawer with global state management via cartStore, converting it to a controlled component with isCartOpen state management
-- Improved cart drawer auto-open functionality after adding items using both `useCartStore.getState().openCart()` and `openCart()` patterns
+- Enhanced authentication state management with improved useAuth hook featuring synchronous initial state loading from localStorage, proper session restoration, and enhanced error handling
+- Added new useAdminRole hook with retry logic for role verification and fallback mechanisms using user metadata
+- Improved cart drawer with global state management via cartStore, converting it to a controlled component with isCartOpen state management
+- Enhanced cart drawer auto-open functionality after adding items using both `useCartStore.getState().openCart()` and `openCart()` patterns
 - Added new cart state management patterns with separate selector functions for better performance
 - Enhanced authentication logout functionality with immediate localStorage cleanup, synchronous state clearing, and instant redirect
 - Improved user experience during account sign-out by eliminating delays and ensuring immediate state cleanup
@@ -50,12 +53,12 @@ This document explains the state management architecture in the Ryland applicati
 
 It documents cart state management, authentication state handling, and the toast notification system. It also covers state synchronization patterns, data fetching strategies, persistence, performance considerations, debugging, and best practices for scalability.
 
-**Updated** The cart drawer now implements a controlled component pattern with global state management via cartStore, providing enhanced auto-open functionality after adding items. The authentication system now implements a sophisticated dual-session restoration approach combining synchronous localStorage checks with asynchronous Supabase listeners, eliminating blank screen issues during page refreshes. The logout functionality has been enhanced with immediate localStorage cleanup, synchronous state clearing, and instant redirect to provide better user experience during account sign-out. The cart store provides enhanced selector functions for improved performance and fine-grained re-render control.
+**Updated** The cart drawer now implements a controlled component pattern with global state management via cartStore, providing enhanced auto-open functionality after adding items. The authentication system now implements a sophisticated dual-session restoration approach combining synchronous localStorage checks with asynchronous Supabase listeners, eliminating blank screen issues during page refreshes. The logout functionality has been enhanced with immediate localStorage cleanup, synchronous state clearing, and instant redirect to provide better user experience during account sign-out. The cart store provides enhanced selector functions for improved performance and fine-grained re-render control. A new useAdminRole hook has been added with retry logic for role verification and fallback mechanisms using user metadata.
 
 ## Project Structure
 The project is a React + TypeScript application using Vite. State management is implemented primarily in:
 - Zustand stores under src/stores/ with enhanced selector functions and controlled component patterns
-- Custom hooks under src/hooks/
+- Custom hooks under src/hooks/ including the enhanced useAuth hook and new useAdminRole hook
 - UI toast components under src/components/ui/
 - Shopify integration under src/lib/shopify.ts
 - Supabase authentication under src/integrations/supabase/
@@ -74,6 +77,7 @@ END
 subgraph "Enhanced State Stores"
 CART["stores/cartStore.ts<br/>+ Global State Management<br/>+ isCartOpen Control<br/>+ Separate Selectors"]
 AUTH["hooks/useAuth.tsx<br/>+ Dual Session Restoration<br/>+ Enhanced Logout"]
+ADMINROLE["hooks/useAdminRole.ts<br/>+ Retry Logic<br/>+ Fallback Mechanisms"]
 END
 subgraph "External Services"
 SUPABASE["@supabase/supabase-js<br/>+ localStorage Sync"]
@@ -87,6 +91,7 @@ PL --> AUTH
 AG --> AUTH
 CART --> SHOP
 AUTH --> SUPABASE
+ADMINROLE --> SUPABASE
 ```
 
 **Diagram sources**
@@ -96,6 +101,7 @@ AUTH --> SUPABASE
 - [src/components/ui/toaster.tsx:1-24](file://src/components/ui/toaster.tsx#L1-L24)
 - [src/stores/cartStore.ts:29-65](file://src/stores/cartStore.ts#L29-L65)
 - [src/hooks/useAuth.tsx:71-120](file://src/hooks/useAuth.tsx#L71-L120)
+- [src/hooks/useAdminRole.ts:30-62](file://src/hooks/useAdminRole.ts#L30-L62)
 - [src/lib/shopify.ts:54-104](file://src/lib/shopify.ts#L54-L104)
 - [src/components/portal/PortalSidebar.tsx:41-120](file://src/components/portal/PortalSidebar.tsx#L41-L120)
 - [src/pages/portal/PortalLogin.tsx:20-35](file://src/pages/portal/PortalLogin.tsx#L20-L35)
@@ -108,6 +114,7 @@ AUTH --> SUPABASE
 ## Core Components
 - Zustand cart store: Manages cart items, cart ID, checkout URL, loading states, and **enhanced with isCartOpen state management** for controlled cart drawer components. Provides actions to add/update/remove items, synchronize with Shopify, and control cart drawer visibility. **Enhanced** with separate selector functions for improved performance.
 - Authentication hook: Implements dual-session restoration using synchronous localStorage checks followed by asynchronous Supabase listeners, with enhanced error handling and AbortController support for affiliate data fetching. **Enhanced** with immediate logout functionality including localStorage cleanup and instant redirect.
+- **New** Admin role hook: Implements retry logic for role verification using Supabase RPC calls with fallback mechanisms using user metadata when RPC calls fail.
 - Toast system: A lightweight toast manager with a reducer-driven store and UI components for rendering notifications.
 
 Key implementation references:
@@ -115,6 +122,7 @@ Key implementation references:
 - Cart synchronization hook: [src/hooks/useCartSync.ts:1-16](file://src/hooks/useCartSync.ts#L1-L16)
 - Shopify API wrapper: [src/lib/shopify.ts:54-104](file://src/lib/shopify.ts#L54-L104)
 - Auth provider and context: [src/hooks/useAuth.tsx:32-176](file://src/hooks/useAuth.tsx#L32-L176)
+- Admin role hook: [src/hooks/useAdminRole.ts:5-68](file://src/hooks/useAdminRole.ts#L5-L68)
 - Toast manager and UI: [src/hooks/use-toast.ts:1-186](file://src/hooks/use-toast.ts#L1-L186), [src/components/ui/sonner.tsx:1-27](file://src/components/ui/sonner.tsx#L1-L27), [src/components/ui/toaster.tsx:1-24](file://src/components/ui/toaster.tsx#L1-L24)
 
 **Section sources**
@@ -122,6 +130,7 @@ Key implementation references:
 - [src/hooks/useCartSync.ts:1-16](file://src/hooks/useCartSync.ts#L1-L16)
 - [src/lib/shopify.ts:54-104](file://src/lib/shopify.ts#L54-L104)
 - [src/hooks/useAuth.tsx:1-176](file://src/hooks/useAuth.tsx#L1-L176)
+- [src/hooks/useAdminRole.ts:1-69](file://src/hooks/useAdminRole.ts#L1-L69)
 - [src/hooks/use-toast.ts:1-186](file://src/hooks/use-toast.ts#L1-L186)
 - [src/components/ui/sonner.tsx:1-27](file://src/components/ui/sonner.tsx#L1-L27)
 - [src/components/ui/toaster.tsx:1-24](file://src/components/ui/toaster.tsx#L1-L24)
@@ -131,6 +140,7 @@ The state architecture separates concerns:
 - Local Zustand store for cart and UI state with persistence and **enhanced selector functions** for fine-grained re-render control.
 - Server state via Shopify storefront API calls integrated into the cart store.
 - Authentication state via Supabase with **dual-session restoration** (localStorage + Supabase listeners) and background affiliate metadata loading.
+- **New** Admin role state via a dedicated hook with retry logic and fallback mechanisms.
 - Notifications via a custom toast manager with Radix UI primitives and Sonner.
 
 ```mermaid
@@ -245,6 +255,47 @@ Supabase-->>Auth : "Response (ignored)"
 **Section sources**
 - [src/hooks/useAuth.tsx:1-176](file://src/hooks/useAuth.tsx#L1-L176)
 
+### New Admin Role State Management - Retry Logic and Fallback Mechanisms
+The useAdminRole hook implements a robust role verification system:
+- **Retry logic**: Attempts role verification up to 2 times with 500ms delays between attempts
+- **Fallback mechanisms**: Uses user metadata (user_metadata or app_metadata) as last resort when RPC calls fail
+- **Efficient caching**: Tracks checked user IDs to avoid redundant RPC calls
+- **Loading state management**: Properly handles loading states during role verification
+
+**Updated** Key features of the admin role hook:
+- `checkRole(retries = 2)`: Main verification function with retry logic
+- `checkedUserIdRef`: Ref to cache previously verified user IDs
+- **Fallback mechanism**: Extracts role from `user.user_metadata?.role || user.app_metadata?.role` when RPC fails
+- **Loading optimization**: Returns immediately if auth is still loading or if user hasn't changed
+
+```mermaid
+flowchart TD
+Start(["useAdminRole()"]) --> CheckAuth["authLoading?"]
+CheckAuth --> |Yes| Wait["Return - no user yet"]
+CheckAuth --> |No| CheckUser["user exists?"]
+CheckUser --> |No| Reset["Set isAdmin=false, isLoading=false"]
+CheckUser --> |Yes| CheckCache["Checked this user before?"]
+CheckCache --> |Yes| Return["Return cached result"]
+CheckCache --> |No| Retry["checkRole() with retries=2"]
+Retry --> RPC["RPC has_role() call"]
+RPC --> Success{"RPC success?"}
+Success --> |Yes| SetAdmin["Set isAdmin=true/false, isLoading=false"]
+Success --> |No| Delay["Wait 500ms"] --> RetryAttempt{"More attempts?"}
+RetryAttempt --> |Yes| RPC
+RetryAttempt --> |No| Fallback["Check user_metadata/app_metadata"]
+Fallback --> MetaRole["Extract role from metadata"]
+MetaRole --> Finalize["Set isAdmin=metaRole==='admin', isLoading=false"]
+SetAdmin --> Cache["Cache user ID"]
+Finalize --> Cache
+Cache --> End(["Return { isAdmin, isLoading }"])
+```
+
+**Diagram sources**
+- [src/hooks/useAdminRole.ts:30-62](file://src/hooks/useAdminRole.ts#L30-L62)
+
+**Section sources**
+- [src/hooks/useAdminRole.ts:1-69](file://src/hooks/useAdminRole.ts#L1-L69)
+
 ### Toast Notification System
 The toast system consists of:
 - A reducer-driven store in a custom hook that manages an in-memory queue of toasts
@@ -285,6 +336,7 @@ UI-->>Page : "Render toast with title/description"
 - **Enhanced** Dual authentication session restoration: Auth state is immediately restored from localStorage (synchronous) before relying on Supabase listeners (asynchronous).
 - **Enhanced** Selector-based component patterns: Components now use specific selector functions to minimize re-renders and improve performance.
 - **Enhanced** Logout synchronization: Logout operations now provide immediate state synchronization across the application.
+- **New** Admin role state synchronization: Role verification results are cached and reused for the same user to avoid redundant RPC calls.
 
 **Updated** Auto-open functionality patterns:
 - **Pattern 1**: Direct state access - `useCartStore.getState().openCart()` for immediate cart opening
@@ -298,6 +350,7 @@ References:
 - Auto-open pattern 2: [src/pages/Store.tsx:69](file://src/pages/Store.tsx#L69)
 - Dual session restoration: [src/hooks/useAuth.tsx:71-120](file://src/hooks/useAuth.tsx#L71-L120)
 - Enhanced logout: [src/hooks/useAuth.tsx:155-176](file://src/hooks/useAuth.tsx#L155-L176)
+- Admin role retry logic: [src/hooks/useAdminRole.ts:30-62](file://src/hooks/useAdminRole.ts#L30-L62)
 
 **Section sources**
 - [src/hooks/useCartSync.ts:1-16](file://src/hooks/useCartSync.ts#L1-L16)
@@ -306,15 +359,17 @@ References:
 - [src/pages/Store.tsx:69](file://src/pages/Store.tsx#L69)
 - [src/hooks/useAuth.tsx:71-120](file://src/hooks/useAuth.tsx#L71-L120)
 - [src/hooks/useAuth.tsx:155-176](file://src/hooks/useAuth.tsx#L155-L176)
+- [src/hooks/useAdminRole.ts:30-62](file://src/hooks/useAdminRole.ts#L30-L62)
 
 ### Data Fetching Strategies
 - Shopify storefront queries are executed via a wrapper that handles errors and returns structured data.
 - Cart sync uses a storefront query to reconcile local state with server state.
 - Product detail pages trigger async operations to add items to the cart and show toasts upon completion.
 - **Enhanced** Selector functions provide better separation of concerns and improved component performance.
-- **Enhanced** affiliate data fetching with AbortController support for better cleanup and error handling.
-- **Enhanced** logout data fetching with immediate cleanup and background processing.
+- **Enhanced** Affiliate data fetching with AbortController support for better cleanup and error handling.
+- **Enhanced** Logout data fetching with immediate cleanup and background processing.
 - **Enhanced** Controlled component data flow through global state management.
+- **New** Admin role verification with retry logic and fallback mechanisms for robust role checking.
 
 **Updated** Auto-open functionality implementations:
 - **Direct state access pattern**: `useCartStore.getState().openCart()` - immediate cart opening without selector overhead
@@ -328,6 +383,7 @@ References:
 - Auto-open pattern 1: [src/pages/ProductDetail.tsx:223](file://src/pages/ProductDetail.tsx#L223)
 - Auto-open pattern 2: [src/pages/Store.tsx:69](file://src/pages/Store.tsx#L69)
 - Enhanced logout: [src/hooks/useAuth.tsx:155-176](file://src/hooks/useAuth.tsx#L155-L176)
+- Admin role retry logic: [src/hooks/useAdminRole.ts:30-62](file://src/hooks/useAdminRole.ts#L30-L62)
 
 **Section sources**
 - [src/lib/shopify.ts:54-104](file://src/lib/shopify.ts#L54-L104)
@@ -336,12 +392,14 @@ References:
 - [src/pages/ProductDetail.tsx:223](file://src/pages/ProductDetail.tsx#L223)
 - [src/pages/Store.tsx:69](file://src/pages/Store.tsx#L69)
 - [src/hooks/useAuth.tsx:155-176](file://src/hooks/useAuth.tsx#L155-L176)
+- [src/hooks/useAdminRole.ts:30-62](file://src/hooks/useAdminRole.ts#L30-L62)
 
 ### State Persistence
 - Cart persistence: The cart store persists items, cartId, and checkoutUrl to localStorage using Zustand's persist middleware with a partialize function to minimize persisted payload.
 - **Enhanced** Authentication persistence: Session restoration now prioritizes localStorage for immediate availability, reducing blank screen issues during page refreshes.
 - **Enhanced** Logout persistence: Immediate localStorage cleanup ensures complete session termination across browser sessions.
 - **Enhanced** Controlled component persistence: Cart drawer state is maintained globally through the cart store, ensuring consistent behavior across page reloads.
+- **New** Admin role caching: Role verification results are cached per user ID to avoid redundant RPC calls.
 - No explicit persistence is shown for the auth context beyond the dual-session restoration approach.
 
 References:
@@ -351,6 +409,7 @@ References:
 - [src/stores/cartStore.ts:172-178](file://src/stores/cartStore.ts#L172-L178)
 - [src/hooks/useAuth.tsx:71-120](file://src/hooks/useAuth.tsx#L71-L120)
 - [src/hooks/useAuth.tsx:155-176](file://src/hooks/useAuth.tsx#L155-L176)
+- [src/hooks/useAdminRole.ts:25-28](file://src/hooks/useAdminRole.ts#L25-L28)
 
 ### Practical Examples and Custom Hooks
 - Cart sync hook: Demonstrates subscribing to visibility changes and invoking a store action.
@@ -368,6 +427,8 @@ References:
   - Reference: [src/pages/ProductDetail.tsx:223](file://src/pages/ProductDetail.tsx#L223)
   - Reference: [src/pages/Store.tsx:69](file://src/pages/Store.tsx#L69)
   - Reference: [src/hooks/useAuth.tsx:155-176](file://src/hooks/useAuth.tsx#L155-L176)
+- **New** Admin role hook usage: Demonstrates retry logic and fallback mechanisms for role verification.
+  - Reference: [src/hooks/useAdminRole.ts:5-68](file://src/hooks/useAdminRole.ts#L5-L68)
 
 **Section sources**
 - [src/hooks/useCartSync.ts:1-16](file://src/hooks/useCartSync.ts#L1-L16)
@@ -379,12 +440,14 @@ References:
 - [src/pages/ProductDetail.tsx:223](file://src/pages/ProductDetail.tsx#L223)
 - [src/pages/Store.tsx:69](file://src/pages/Store.tsx#L69)
 - [src/hooks/useAuth.tsx:155-176](file://src/hooks/useAuth.tsx#L155-L176)
+- [src/hooks/useAdminRole.ts:5-68](file://src/hooks/useAdminRole.ts#L5-L68)
 
 ## Dependency Analysis
 The state management stack relies on:
 - Zustand for local state and persistence with **enhanced selector functions** and **controlled component patterns**
 - React Query for server state orchestration (not shown in current files; present in dependencies)
 - Supabase for authentication and session management with **dual-session restoration**
+- **New** Supabase RPC calls for admin role verification with retry logic
 - Shopify storefront API for cart and product data
 - Radix UI and Sonner for toast UI
 
@@ -392,7 +455,8 @@ The state management stack relies on:
 graph LR
 ZUSTAND["zustand"] --> CARTSTORE["cartStore.ts<br/>+ Global State Management<br/>+ isCartOpen Control<br/>+ Separate Selectors"]
 REACTQUERY["@tanstack/react-query"] -.-> SERVERSTATE["Server state (external)"]
-SUPABASE["@supabase/supabase-js<br/>+ Dual Session Restoration<br/>+ Enhanced Logout"] --> AUTHHOOK["useAuth.tsx"]
+SUPABASE["@supabase/supabase-js<br/>+ Dual Session Restoration<br/>+ Enhanced Logout<br/>+ RPC Role Verification"] --> AUTHHOOK["useAuth.tsx"]
+SUPABASE --> ADMINHOOK["useAdminRole.ts<br/>+ Retry Logic<br/>+ Fallback Mechanisms"]
 SHOP["lib/shopify.ts"] --> CARTSTORE
 RADIX["@radix-ui/react-toast"] --> TOASTUI["toaster.tsx"]
 SONNER["sonner"] --> SONNERCOMP["sonner.tsx"]
@@ -403,6 +467,7 @@ TOASTUI --> SONNERCOMP
 - [package.json:45-69](file://package.json#L45-L69)
 - [src/stores/cartStore.ts:29-65](file://src/stores/cartStore.ts#L29-L65)
 - [src/hooks/useAuth.tsx:1-176](file://src/hooks/useAuth.tsx#L1-L176)
+- [src/hooks/useAdminRole.ts:1-69](file://src/hooks/useAdminRole.ts#L1-L69)
 - [src/lib/shopify.ts:54-104](file://src/lib/shopify.ts#L54-L104)
 - [src/components/ui/toaster.tsx:1-24](file://src/components/ui/toaster.tsx#L1-L24)
 - [src/components/ui/sonner.tsx:1-27](file://src/components/ui/sonner.tsx#L1-L27)
@@ -416,6 +481,8 @@ TOASTUI --> SONNERCOMP
 - **Enhanced** Immediate logout functionality provides instant user feedback and reduces perceived latency.
 - **Enhanced** Controlled component pattern reduces prop drilling and improves state consistency across components.
 - **Enhanced** Auto-open functionality uses both direct state access and selector-based patterns for optimal performance.
+- **New** Admin role caching prevents redundant RPC calls by tracking checked user IDs.
+- **New** Retry logic in admin role verification balances reliability with performance by limiting retry attempts.
 - Use optimistic updates for cart operations and reconcile with server state via sync.
 - Debounce or batch frequent updates (e.g., quantity changes) to reduce network calls.
 - Keep persisted state minimal (already partially persisted) to reduce storage overhead.
@@ -426,6 +493,7 @@ TOASTUI --> SONNERCOMP
 - **New** Enhanced error handling with AbortController support prevents memory leaks and improves cleanup.
 - **New** Background Supabase signOut ensures complete session termination without blocking the UI.
 - **New** Controlled component state management ensures consistent cart drawer behavior across the application.
+- **New** Fallback mechanisms in admin role verification ensure graceful degradation when RPC calls fail.
 
 ## Troubleshooting Guide
 Common issues and remedies:
@@ -452,6 +520,11 @@ Common issues and remedies:
   - Check that redirect occurs immediately without waiting for Supabase response.
   - Ensure background Supabase signOut doesn't block UI.
   - References: [src/hooks/useAuth.tsx:155-176](file://src/hooks/useAuth.tsx#L155-L176)
+- **New** Admin role verification failing
+  - Check retry logic and ensure RPC calls are properly configured.
+  - Verify fallback mechanism works with user metadata extraction.
+  - Ensure user ID caching prevents redundant calls.
+  - References: [src/hooks/useAdminRole.ts:30-62](file://src/hooks/useAdminRole.ts#L30-L62)
 - Shopify API errors
   - Inspect error handling in the API wrapper and surface user-friendly messages.
   - References: [src/lib/shopify.ts:54-79](file://src/lib/shopify.ts#L54-L79)
@@ -479,6 +552,7 @@ Common issues and remedies:
 - [src/pages/ProductDetail.tsx:210-223](file://src/pages/ProductDetail.tsx#L210-L223)
 - [src/hooks/useAuth.tsx:71-120](file://src/hooks/useAuth.tsx#L71-L120)
 - [src/hooks/useAuth.tsx:155-176](file://src/hooks/useAuth.tsx#L155-L176)
+- [src/hooks/useAdminRole.ts:30-62](file://src/hooks/useAdminRole.ts#L30-L62)
 - [src/lib/shopify.ts:54-79](file://src/lib/shopify.ts#L54-L79)
 - [src/stores/cartStore.ts:42-52](file://src/stores/cartStore.ts#L42-L52)
 - [src/components/CartDrawer.tsx:27](file://src/components/CartDrawer.tsx#L27)
@@ -489,4 +563,8 @@ Ryland's state management combines Zustand for robust local state and persistenc
 
 **Updated** The cart drawer now implements a controlled component pattern with global state management via cartStore, providing enhanced auto-open functionality after adding items through both direct state access and selector-based patterns. The authentication system now provides an enhanced logout experience with immediate localStorage cleanup, synchronous state clearing, and instant redirect to `/portal/login`, eliminating delays and ensuring complete session termination. The logout functionality follows the same pattern as the dual-session restoration approach, prioritizing immediate user feedback and complete state cleanup before performing background cleanup operations.
 
-The new selector functions (useCartItems, useCartLoading, useCartCheckoutUrl, useCartActions) provide fine-grained re-render control and significantly improve component performance. The enhanced authentication system addresses blank screen issues during page refreshes through dual-session restoration, while improved error handling and AbortController support ensure better resource management. The controlled component state management ensures consistent cart drawer behavior across the application, improving user experience and reducing prop drilling complexity. Following the recommended patterns and best practices will help maintain scalability and reliability as the application evolves.
+The new selector functions (useCartItems, useCartLoading, useCartCheckoutUrl, useCartActions) provide fine-grained re-render control and significantly improve component performance. The enhanced authentication system addresses blank screen issues during page refreshes through dual-session restoration, while improved error handling and AbortController support ensure better resource management. The controlled component state management ensures consistent cart drawer behavior across the application, improving user experience and reducing prop drilling complexity.
+
+**New** The addition of the useAdminRole hook with retry logic and fallback mechanisms provides robust admin role verification that balances reliability with performance. The hook implements intelligent caching to avoid redundant RPC calls and gracefully degrades to user metadata when backend services are unavailable, ensuring consistent admin functionality across various network conditions.
+
+Following the recommended patterns and best practices will help maintain scalability and reliability as the application evolves.

@@ -45,8 +45,8 @@ import PortalLayout from "./components/portal/PortalLayout";
 const PortalDashboard = lazy(() => import("./pages/portal/PortalDashboard"));
 const PortalLeads = lazy(() => import("./pages/portal/PortalLeads"));
 const PortalCommissions = lazy(() => import("./pages/portal/PortalCommissions"));
-const PortalCalculator = lazy(() => import("./pages/portal/PortalCalculator"));
 const PortalResources = lazy(() => import("./pages/portal/PortalResources"));
+const ReferralRedirect = lazy(() => import("./pages/ReferralRedirect"));
 const PortalEvents = lazy(() => import("./pages/portal/PortalEvents"));
 const PortalSpeaking = lazy(() => import("./pages/portal/PortalSpeaking"));
 const PortalSettings = lazy(() => import("./pages/portal/PortalSettings"));
@@ -115,12 +115,12 @@ const AppContent = () => {
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/credit-intake" element={<CreditIntake />} />
             <Route path="/unsubscribe" element={<Unsubscribe />} />
+            <Route path="/r/:ref" element={<ReferralRedirect />} />
             <Route path="/portal/login" element={<PortalLogin />} />
             <Route path="/portal" element={<PortalLayout />}>
               <Route index element={<PortalDashboard />} />
               <Route path="leads" element={<PortalLeads />} />
               <Route path="commissions" element={<PortalCommissions />} />
-              <Route path="calculator" element={<PortalCalculator />} />
               <Route path="resources" element={<PortalResources />} />
               <Route path="events" element={<PortalEvents />} />
               <Route path="speaking" element={<PortalSpeaking />} />

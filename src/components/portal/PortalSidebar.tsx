@@ -1,6 +1,6 @@
 import {
-  LayoutDashboard, Users, DollarSign, Calculator,
-  BookOpen, CalendarDays, Mic2, UserCircle, LogOut
+  LayoutDashboard, Users, DollarSign,
+  ShoppingBag, CalendarDays, Mic2, UserCircle, LogOut
 } from "lucide-react";
 import { useLocation } from "react-router-dom";
 import { NavLink } from "@/components/NavLink";
@@ -22,11 +22,10 @@ const affiliateMainNav = [
   { title: "Dashboard", url: "/portal", icon: LayoutDashboard },
   { title: "Lead Tracker", url: "/portal/leads", icon: Users },
   { title: "Commissions", url: "/portal/commissions", icon: DollarSign },
-  { title: "Calculator", url: "/portal/calculator", icon: Calculator },
 ];
 
 const affiliateSupportNav = [
-  { title: "Resources", url: "/portal/resources", icon: BookOpen },
+  { title: "Store", url: "/portal/resources", icon: ShoppingBag },
   { title: "Events", url: "/portal/events", icon: CalendarDays },
   { title: "Speaking", url: "/portal/speaking", icon: Mic2 },
 ];

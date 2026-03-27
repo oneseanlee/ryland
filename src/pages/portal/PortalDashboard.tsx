@@ -18,7 +18,7 @@ export default function PortalDashboard() {
   // Fallback to user ID if affiliate data isn't available
   const referralId = affiliate?.affiliate_id ?? user?.id ?? "";
   const referralLink = referralId
-    ? `https://${SITE_DOMAIN}/assessment?ref=${referralId}`
+    ? `https://${SITE_DOMAIN}/r/${referralId}`
     : "";
 
   const copyLink = () => {
@@ -79,7 +79,7 @@ export default function PortalDashboard() {
   ];
 
   return (
-    <div className="space-y-8 max-w-5xl">
+    <div className="space-y-8">
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold tracking-tight text-slate-900">Dashboard</h1>
