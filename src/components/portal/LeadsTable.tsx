@@ -14,6 +14,7 @@ interface LeadsTableProps {
   leads: Lead[];
   isLoading: boolean;
   onSelectLead: (lead: Lead) => void;
+  onDeleteLead?: (lead: Lead) => void;
   onRefresh?: () => void;
 }
 
@@ -33,7 +34,7 @@ const invoiceStatusBadge: Record<string, string> = {
   "Pending": "bg-slate-50 text-slate-600 border-slate-200",
 };
 
-function LeadsTable({ leads, isLoading, onSelectLead }: LeadsTableProps) {
+function LeadsTable({ leads, isLoading, onSelectLead, onDeleteLead }: LeadsTableProps) {
   if (isLoading) {
     return (
       <div className="p-6 space-y-3">
@@ -109,7 +110,7 @@ function LeadsTable({ leads, isLoading, onSelectLead }: LeadsTableProps) {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end" className="w-44 p-1.5">
-                        <DropdownMenuItem onClick={() => toast.info("Edit coming soon")} className="gap-3 px-3 py-2.5 rounded-md">
+                        <DropdownMenuItem onClick={() => onSelectLead(lead)} className="gap-3 px-3 py-2.5 rounded-md">
                           <Pencil className="h-4 w-4 text-slate-400" />
                           <span>Edit</span>
                         </DropdownMenuItem>
@@ -131,7 +132,7 @@ function LeadsTable({ leads, isLoading, onSelectLead }: LeadsTableProps) {
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           className="gap-3 px-3 py-2.5 rounded-md text-red-600 focus:text-red-600 focus:bg-red-50"
-                          onClick={() => toast.info("Delete coming soon")}
+                          onClick={() => onDeleteLead?.(lead)}
                         >
                           <Trash2 className="h-4 w-4" />
                           <span>Delete</span>

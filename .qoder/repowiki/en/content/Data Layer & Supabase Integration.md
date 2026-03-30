@@ -23,6 +23,7 @@
 - [AdminAffiliateDetail.tsx](file://src/pages/admin/AdminAffiliateDetail.tsx)
 - [AffiliateSettingsTab.tsx](file://src/components/admin/affiliate-detail/AffiliateSettingsTab.tsx)
 - [AffiliateCommissionsTab.tsx](file://src/components/admin/affiliate-detail/AffiliateCommissionsTab.tsx)
+- [NotificationBell.tsx](file://src/components/NotificationBell.tsx)
 - [index.ts](file://supabase/functions/ghl-affiliate-webhook/index.ts)
 - [index.ts](file://supabase/functions/ghl-calendar/index.ts)
 - [ConsultationCalendar.tsx](file://src/components/funnel/ConsultationCalendar.tsx)
@@ -36,6 +37,8 @@
 - [20260325035304_c2ee4398-7ffa-4021-bbda-9671e2f04eb7.sql](file://supabase/migrations/20260325035304_c2ee4398-7ffa-4021-bbda-9671e2f04eb7.sql)
 - [20260325042306_4ee0e761-11f9-4bbb-a6b4-4438b51fe81b.sql](file://supabase/migrations/20260325042306_4ee0e761-11f9-4bbb-a6b4-4438b51fe81b.sql)
 - [20260327_admin_enhancements.sql](file://supabase/migrations/20260327_admin_enhancements.sql)
+- [20260328_notifications.sql](file://supabase/migrations/20260328_notifications.sql)
+- [20260328_restrict_affiliate_update.sql](file://supabase/migrations/20260328_restrict_affiliate_update.sql)
 - [index.html](file://index.html)
 - [config.toml](file://supabase/config.toml)
 - [index.ts](file://supabase/functions/process-email-queue/index.ts)
@@ -49,11 +52,12 @@
 
 ## Update Summary
 **Changes Made**
-- Added dual commission rate columns (upfront_commission_rate and backend_commission_rate) to affiliates table
-- Added admin_notes column to affiliates table for internal administrative tracking
-- Standardized commission_type values by converting 'referral' to 'upfront' in existing records
-- Updated admin interfaces to display and manage dual commission rate structure
-- Enhanced affiliate management with comprehensive rate and notes editing capabilities
+- Added comprehensive notifications table infrastructure with Row Level Security policies
+- Implemented helper function for programmatic notification creation
+- Enhanced affiliate update security with restrictive policy migration
+- Integrated NotificationBell component into admin and portal layouts
+- Added notification types (lead, commission, payout, system, order) with real-time capabilities
+- Implemented notification management with mark-all-read and clear-all functionality
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -63,18 +67,19 @@
 5. [Detailed Component Analysis](#detailed-component-analysis)
 6. [Administrative Framework](#administrative-framework)
 7. [Email Infrastructure](#email-infrastructure)
-8. [External API Integration](#external-api-integration)
-9. [Network Optimization & Performance](#network-optimization--performance)
-10. [Dependency Analysis](#dependency-analysis)
-11. [Performance Considerations](#performance-considerations)
-12. [Troubleshooting Guide](#troubleshooting-guide)
-13. [Conclusion](#conclusion)
-14. [Appendices](#appendices)
+8. [Notifications System](#notifications-system)
+9. [External API Integration](#external-api-integration)
+10. [Network Optimization & Performance](#network-optimization--performance)
+11. [Dependency Analysis](#dependency-analysis)
+12. [Performance Considerations](#performance-considerations)
+13. [Troubleshooting Guide](#troubleshooting-guide)
+14. [Conclusion](#conclusion)
+15. [Appendices](#appendices)
 
 ## Introduction
 This document describes the data model and Supabase integration for the project. It focuses on the database schema design, entity relationships, field definitions for user accounts, affiliate leads, and application data. It also documents authentication setup, real-time features, data validation rules, data access patterns, caching strategies, performance considerations, data lifecycle, security measures, access control mechanisms, synchronization, offline capabilities, and error handling strategies for database operations.
 
-**Updated**: The system now includes comprehensive administrative enhancements with dual commission rate management, admin notes functionality, and standardized commission type handling. The database schema has been enhanced to support both upfront and backend commission structures while maintaining backward compatibility.
+**Updated**: The system now includes comprehensive administrative enhancements with dual commission rate management, admin notes functionality, and standardized commission type handling. A new notifications system has been implemented with Row Level Security policies and real-time capabilities. The affiliate update policy has been strengthened with restrictive security measures to prevent unauthorized modifications to sensitive commission data.
 
 ## Project Structure
 The project is a frontend-first React application that integrates with Supabase for authentication and data persistence. Key integration points include:
@@ -89,6 +94,8 @@ The project is a frontend-first React application that integrates with Supabase 
 - **New**: Suppression management for bounce, complaint, and unsubscribe handling
 - **New**: Shopify order webhook with bundle purchase detection and download email automation
 - **New**: Dual commission rate management system with admin notes
+- **New**: Notifications system with real-time capabilities and Row Level Security
+- **New**: Restrictive affiliate update policies for enhanced security
 - Network optimization through preconnect hints for reduced latency
 - External API integration with GHL for calendar management and appointment booking
 - Administrative dashboard with comprehensive management capabilities
@@ -109,6 +116,7 @@ AdminAffiliates["Admin Affiliates<br/>AdminAffiliates.tsx"]
 AdminDetail["Admin Affiliate Detail<br/>AdminAffiliateDetail.tsx"]
 SettingsTab["Settings Tab<br/>AffiliateSettingsTab.tsx"]
 CommissionsTab["Commissions Tab<br/>AffiliateCommissionsTab.tsx"]
+NotificationBell["Notification Bell<br/>NotificationBell.tsx"]
 HTML["HTML Entry Point<br/>index.html"]
 end
 subgraph "Supabase Integration"
@@ -120,8 +128,11 @@ ShopifyWebhook["Shopify Order Webhook<br/>shopify-order-webhook/index.ts"]
 end
 subgraph "Enhanced Database Schema"
 Mig20260327["Admin Enhancements Migration<br/>20260327_admin_enhancements.sql"]
+Mig20260328Notif["Notifications Migration<br/>20260328_notifications.sql"]
+Mig20260328Aff["Restrict Affiliate Update<br/>20260328_restrict_affiliate_update.sql"]
 Affiliates["Affiliates Table<br/>Dual Commission Rates + Admin Notes"]
 Commissions["Commissions Table<br/>Standardized Types"]
+Notifications["Notifications Table<br/>Real-time + RLS"]
 end
 subgraph "Email Infrastructure"
 EmailQueue["Email Queue System<br/>pgmq"]
@@ -153,14 +164,18 @@ AdminAffiliates --> Client
 AdminDetail --> Client
 SettingsTab --> Client
 CommissionsTab --> Client
+NotificationBell --> Client
 Client --> Types
 Func --> Client
 CalFunc --> Client
 ShopifyWebhook --> Client
 Client --> Affiliates
 Client --> Commissions
+Client --> Notifications
 Mig20260327 --> Affiliates
 Mig20260327 --> Commissions
+Mig20260328Notif --> Notifications
+Mig20260328Aff --> Affiliates
 Client --> GHL
 Client --> Shopify
 Client --> Lovable
@@ -190,10 +205,13 @@ UnsubscribeHandler --> Tokens
 - [AdminAffiliateDetail.tsx:1-182](file://src/pages/admin/AdminAffiliateDetail.tsx#L1-L182)
 - [AffiliateSettingsTab.tsx:1-187](file://src/components/admin/affiliate-detail/AffiliateSettingsTab.tsx#L1-L187)
 - [AffiliateCommissionsTab.tsx:1-174](file://src/components/admin/affiliate-detail/AffiliateCommissionsTab.tsx#L1-L174)
+- [NotificationBell.tsx:1-218](file://src/components/NotificationBell.tsx#L1-L218)
 - [index.ts:41-174](file://supabase/functions/ghl-affiliate-webhook/index.ts#L41-L174)
 - [index.ts:16-240](file://supabase/functions/ghl-calendar/index.ts#L16-L240)
 - [index.ts:74-105](file://supabase/functions/shopify-order-webhook/index.ts#L74-L105)
 - [20260327_admin_enhancements.sql:1-19](file://supabase/migrations/20260327_admin_enhancements.sql#L1-L19)
+- [20260328_notifications.sql:1-61](file://supabase/migrations/20260328_notifications.sql#L1-L61)
+- [20260328_restrict_affiliate_update.sql:1-25](file://supabase/migrations/20260328_restrict_affiliate_update.sql#L1-L25)
 - [index.ts:1-361](file://supabase/functions/process-email-queue/index.ts#L1-L361)
 - [index.ts:1-360](file://supabase/functions/send-transactional-email/index.ts#L1-L360)
 - [index.ts:1-163](file://supabase/functions/handle-email-suppression/index.ts#L1-L163)
@@ -225,6 +243,9 @@ UnsubscribeHandler --> Tokens
 - **New**: Dual commission rate management system with upfront and backend rate tracking.
 - **New**: Admin notes functionality for internal affiliate tracking and management.
 - **New**: Standardized commission type handling with 'referral' converted to 'upfront'.
+- **New**: Notifications system with real-time capabilities and Row Level Security policies.
+- **New**: Helper function for programmatic notification creation.
+- **New**: Restrictive affiliate update policies preventing unauthorized modifications to sensitive data.
 - Network optimization through preconnect hints for reduced database connection latency.
 - External API integration with GHL for calendar management and appointment booking.
 - Administrative dashboard with comprehensive management capabilities.
@@ -245,9 +266,11 @@ UnsubscribeHandler --> Tokens
 - [20260324201245_4681ef67-2bf0-4686-a4b6-1ae6c54189f9.sql:1-82](file://supabase/migrations/20260324201245_4681ef67-2bf0-4686-a4b6-1ae6c54189f9.sql#L1-L82)
 - [20260325024643_email_infra.sql:1-293](file://supabase/migrations/20260325024643_email_infra.sql#L1-L293)
 - [20260327_admin_enhancements.sql:1-19](file://supabase/migrations/20260327_admin_enhancements.sql#L1-L19)
+- [20260328_notifications.sql:1-61](file://supabase/migrations/20260328_notifications.sql#L1-L61)
+- [20260328_restrict_affiliate_update.sql:1-25](file://supabase/migrations/20260328_restrict_affiliate_update.sql#L1-L25)
 
 ## Architecture Overview
-The data layer architecture centers on a typed Supabase client, React Query for caching and reactivity, and Supabase RLS for access control. Authentication events drive state updates, while external webhooks synchronize data into affiliate leads. The architecture now includes comprehensive external API integration with GHL services for calendar management and appointment booking, and **New**: a complete email infrastructure with transactional email processing, queue management, and suppression handling. The email system uses a priority-based queue system with pgmq, rate limiting, and dead letter queues for reliable email delivery. Network optimization through preconnect hints reduces latency for database operations and improves real-time feature responsiveness.
+The data layer architecture centers on a typed Supabase client, React Query for caching and reactivity, and Supabase RLS for access control. Authentication events drive state updates, while external webhooks synchronize data into affiliate leads. The architecture now includes comprehensive external API integration with GHL services for calendar management and appointment booking, and **New**: a complete email infrastructure with transactional email processing, queue management, and suppression handling. The email system uses a priority-based queue system with pgmq, rate limiting, and dead letter queues for reliable email delivery. **New**: A comprehensive notifications system has been implemented with Row Level Security policies, real-time capabilities, and programmatic creation helpers. **New**: Restrictive affiliate update policies have been added to prevent unauthorized modifications to sensitive commission data. Network optimization through preconnect hints reduces latency for database operations and improves real-time feature responsiveness.
 
 **Updated**: The architecture now incorporates comprehensive administrative enhancements with dual commission rate management, admin notes functionality, and standardized commission type handling. The system supports both upfront and backend commission structures while maintaining backward compatibility with existing data.
 
@@ -259,8 +282,11 @@ participant Auth as "Auth Provider<br/>useAuth.tsx"
 participant AdminGuard as "Admin Guard<br/>AdminGuard.tsx"
 participant Client as "Supabase Client<br/>client.ts"
 participant CalComp as "Calendar Components<br/>ConsultationCalendar.tsx"
+participant NotifBell as "NotificationBell.tsx"
 participant DB as "PostgreSQL Tables<br/>types.ts"
 participant Mig20260327 as "Admin Enhancements<br/>20260327_admin_enhancements.sql"
+participant Mig20260328Notif as "Notifications Migration<br/>20260328_notifications.sql"
+participant Mig20260328Aff as "Restrict Affiliate Update<br/>20260328_restrict_affiliate_update.sql"
 participant Func as "Webhook Function<br/>index.ts"
 participant CalFunc as "Calendar Function<br/>ghl-calendar/index.ts"
 participant Shopify as "Shopify Order Webhook<br/>shopify-order-webhook/index.ts"
@@ -284,11 +310,19 @@ UI->>Client : Query affiliate_leads
 Client->>DB : SELECT affiliate_leads WHERE affiliate_id
 DB-->>Client : Lead rows
 Client-->>UI : Typed leads data
+NotifBell->>Client : Subscribe to notifications
+Client->>DB : SELECT notifications WHERE user_id
+DB-->>Client : Notification rows
+Client-->>NotifBell : Real-time notifications
 Func->>Client : Service role insert/update
 Client->>DB : INSERT/UPDATE affiliate_leads
 DB-->>Client : Acknowledgement
 Mig20260327->>DB : ALTER TABLE affiliates ADD dual rates + admin_notes
 Mig20260327->>DB : UPDATE commissions SET commission_type = 'upfront'
+Mig20260328Notif->>DB : CREATE notifications table + RLS + policies
+Mig20260328Notif->>DB : CREATE create_notification function
+Mig20260328Aff->>DB : DROP broad affiliate update policy
+Mig20260328Aff->>DB : CREATE restrictive affiliate update policy
 CalComp->>Client : Invoke ghl-calendar function
 Client->>CalFunc : Function invocation
 CalFunc->>GHL : GET free-slots with timestamp conversion
@@ -313,8 +347,11 @@ Client-->>UI : Order processed with email
 - [AdminGuard.tsx:10-35](file://src/components/admin/AdminGuard.tsx#L10-L35)
 - [client.ts:11-17](file://src/integrations/supabase/client.ts#L11-L17)
 - [ConsultationCalendar.tsx:76-96](file://src/components/funnel/ConsultationCalendar.tsx#L76-L96)
+- [NotificationBell.tsx:36-96](file://src/components/NotificationBell.tsx#L36-L96)
 - [types.ts:16-147](file://src/integrations/supabase/types.ts#L16-L147)
 - [20260327_admin_enhancements.sql:4-19](file://supabase/migrations/20260327_admin_enhancements.sql#L4-L19)
+- [20260328_notifications.sql:4-61](file://supabase/migrations/20260328_notifications.sql#L4-L61)
+- [20260328_restrict_affiliate_update.sql:4-25](file://supabase/migrations/20260328_restrict_affiliate_update.sql#L4-L25)
 - [index.ts:155-166](file://supabase/functions/ghl-affiliate-webhook/index.ts#L155-L166)
 - [index.ts:16-240](file://supabase/functions/ghl-calendar/index.ts#L16-L240)
 - [index.ts:74-105](file://supabase/functions/shopify-order-webhook/index.ts#L74-L105)
@@ -416,7 +453,7 @@ Func-->>Ext : JSON response
 ### Database Schema and Entity Relationships
 The schema defines core tables and enums used by the application. Below is a focused ER diagram for the most relevant entities in the data layer.
 
-**Updated**: Enhanced with user_roles table for comprehensive role-based access control, dual commission rate columns in affiliates table, admin_notes functionality, and standardized commission types.
+**Updated**: Enhanced with user_roles table for comprehensive role-based access control, dual commission rate columns in affiliates table, admin_notes functionality, standardized commission types, and the new notifications table with Row Level Security policies.
 
 ```mermaid
 erDiagram
@@ -518,6 +555,16 @@ string download_token
 timestamp created_at
 timestamp downloaded_at
 }
+NOTIFICATIONS {
+uuid id PK
+uuid user_id FK
+text title
+text message
+text type
+boolean read
+text link
+timestamptz created_at
+}
 EMAIL_SEND_LOG {
 uuid id PK
 text message_id
@@ -549,6 +596,7 @@ AFFILIATES ||--o{ PAYOUTS : "receives"
 AFFILIATES ||--o{ SPEAKER_REQUESTS : "submits"
 ORDERS ||--o{ ORDER_ITEMS : "contains"
 USER_ROLES ||--|| AFFILIATES : "grants"
+NOTIFICATIONS ||--|| USER_ROLES : "belongs_to"
 ```
 
 **Diagram sources**
@@ -556,6 +604,7 @@ USER_ROLES ||--|| AFFILIATES : "grants"
 - [20260324201245_4681ef67-2bf0-4686-a4b6-1ae6c54189f9.sql:5-11](file://supabase/migrations/20260324201245_4681ef67-2bf0-4686-a4b6-1ae6c54189f9.sql#L5-L11)
 - [20260325024643_email_infra.sql:27-271](file://supabase/migrations/20260325024643_email_infra.sql#L27-L271)
 - [20260327_admin_enhancements.sql:4-19](file://supabase/migrations/20260327_admin_enhancements.sql#L4-L19)
+- [20260328_notifications.sql:4-13](file://supabase/migrations/20260328_notifications.sql#L4-L13)
 
 **Section sources**
 - [types.ts:9-657](file://src/integrations/supabase/types.ts#L9-L657)
@@ -568,6 +617,9 @@ USER_ROLES ||--|| AFFILIATES : "grants"
 - **Updated**: Affiliates table now includes dual commission rate fields (upfront_commission_rate, backend_commission_rate) with numeric precision and scale.
 - **Updated**: Admin notes field for internal tracking and management.
 - **Updated**: Commission types standardized with 'upfront' replacing 'referral' for consistency.
+- **Updated**: Notifications table includes type validation with 'lead', 'commission', 'payout', 'system', 'order' values.
+- **Updated**: Notifications table includes read status with default false for new notifications.
+- **Updated**: Notifications table includes optional link field for navigation to related content.
 - Strong typing ensures compile-time safety for inserts and updates.
 - Migrations add columns and default values to support evolving business needs.
 
@@ -578,6 +630,7 @@ USER_ROLES ||--|| AFFILIATES : "grants"
 - [20260325024643_email_infra.sql:32-84](file://supabase/migrations/20260325024643_email_infra.sql#L32-L84)
 - [20260325024643_email_infra.sql:212-216](file://supabase/migrations/20260325024643_email_infra.sql#L212-L216)
 - [20260327_admin_enhancements.sql:4-19](file://supabase/migrations/20260327_admin_enhancements.sql#L4-L19)
+- [20260328_notifications.sql:9](file://supabase/migrations/20260328_notifications.sql#L9)
 
 ### Real-Time Features and Data Lifecycle
 - Auth state changes trigger immediate UI updates and background affiliate profile loading.
@@ -590,6 +643,8 @@ USER_ROLES ||--|| AFFILIATES : "grants"
 - **Updated**: Dual commission rate management enables flexible commission structures with upfront and backend components.
 - **Updated**: Admin notes functionality provides internal tracking and management capabilities.
 - **Updated**: Standardized commission types ensure consistent commission classification across the system.
+- **Updated**: Notifications system provides real-time user notifications with Row Level Security enforcement.
+- **Updated**: Restrictive affiliate update policies prevent unauthorized modifications to sensitive commission data.
 
 **Section sources**
 - [useAuth.tsx:68-106](file://src/hooks/useAuth.tsx#L68-L106)
@@ -601,6 +656,8 @@ USER_ROLES ||--|| AFFILIATES : "grants"
 - [index.ts:1-163](file://supabase/functions/handle-email-suppression/index.ts#L1-L163)
 - [index.ts:74-105](file://supabase/functions/shopify-order-webhook/index.ts#L74-L105)
 - [20260327_admin_enhancements.sql:4-19](file://supabase/migrations/20260327_admin_enhancements.sql#L4-L19)
+- [20260328_notifications.sql:20-42](file://supabase/migrations/20260328_notifications.sql#L20-L42)
+- [20260328_restrict_affiliate_update.sql:7-21](file://supabase/migrations/20260328_restrict_affiliate_update.sql#L7-L21)
 
 ## Administrative Framework
 
@@ -950,6 +1007,137 @@ Webhook-->>Shopify : Success response
 - [registry.ts:1-17](file://supabase/functions/_shared/transactional-email-templates/registry.ts#L1-L17)
 - [20260325024643_email_infra.sql:1-293](file://supabase/migrations/20260325024643_email_infra.sql#L1-L293)
 
+## Notifications System
+
+### Notifications Table Infrastructure
+**New**: A comprehensive notifications system has been implemented to provide real-time user notifications for system events.
+
+#### Notifications Table Structure
+The notifications table stores per-user notifications triggered by system events:
+- Primary key: UUID with default random generation
+- Foreign key: user_id referencing auth.users with CASCADE deletion
+- Title and message: required text fields for notification content
+- Type: enumerated field with default 'system' value
+- Read status: boolean flag with default false for new notifications
+- Link: optional text field for navigation to related content
+- Created timestamp: timestamptz with default current time
+
+#### Notification Types
+The system supports five notification types:
+- 'lead': Notifications related to affiliate lead activities
+- 'commission': Notifications about commission updates and payments
+- 'payout': Notifications about payout processing and status
+- 'system': General system notifications and announcements
+- 'order': Notifications about order-related activities
+
+#### Row Level Security Policies
+The notifications table implements strict Row Level Security policies:
+- Users can only view their own notifications (SELECT with user_id = auth.uid())
+- Users can only update their own notifications (UPDATE with user_id = auth.uid())
+- Users can only delete their own notifications (DELETE with user_id = auth.uid())
+- Service role can insert notifications for system-generated alerts
+- Authenticated users can insert notifications for themselves
+
+#### Real-Time Integration
+Real-time capabilities are enabled through:
+- Supabase publication supabase_realtime includes the notifications table
+- Channel-based subscriptions for individual user notifications
+- Automatic updates for INSERT, UPDATE, and DELETE operations
+- Efficient filtering by user_id for real-time delivery
+
+#### Helper Function for Programmatic Creation
+A security-definer helper function provides programmatic notification creation:
+- create_notification function accepts user_id, title, message, type, and optional link
+- Returns the UUID of the created notification
+- Uses security definer to bypass RLS for system-generated notifications
+- Ensures proper search_path isolation
+
+```mermaid
+sequenceDiagram
+participant System as "System Events"
+participant Helper as "create_notification()"
+participant DB as "notifications table"
+participant User as "User Interface"
+System->>Helper : Trigger notification creation
+Helper->>DB : INSERT notification (user_id, title, message, type, link)
+DB-->>Helper : Return notification id
+Helper-->>System : Notification created successfully
+System->>User : Real-time notification delivery
+User->>DB : Subscribe to user notifications
+DB-->>User : Real-time updates (INSERT/UPDATE/DELETE)
+```
+
+**Diagram sources**
+- [20260328_notifications.sql:44-60](file://supabase/migrations/20260328_notifications.sql#L44-L60)
+- [types.ts:97-129](file://src/integrations/supabase/types.ts#L97-L129)
+
+### NotificationBell Component Integration
+**New**: The NotificationBell component provides a comprehensive notification interface integrated into both admin and portal layouts.
+
+#### Component Architecture
+The NotificationBell component implements:
+- Real-time subscription to user-specific notifications
+- Loading states with skeleton loading indicators
+- Unread count tracking with visual indicators
+- Notification list with type-specific styling
+- Mark-all-read and clear-all functionality
+- Click-to-navigate support with optional links
+
+#### Real-Time Subscription Management
+The component establishes real-time subscriptions:
+- Subscribes to notifications table with user-specific filtering
+- Handles INSERT events for new notifications
+- Processes UPDATE events for read status changes
+- Manages DELETE events for notification removal
+- Cleans up subscriptions on component unmount
+
+#### Notification Types and Styling
+Different notification types receive distinct visual treatment:
+- Lead notifications: Blue theme with user icon
+- Commission notifications: Green theme with dollar icon
+- Payout notifications: Amber theme with dollar icon
+- System notifications: Slate theme with alert icon
+- Order notifications: Purple theme with shopping cart icon
+
+#### User Interaction Features
+The component supports comprehensive user interactions:
+- Mark individual notifications as read
+- Mark all unread notifications as read
+- Clear all notifications from the list
+- Navigate to linked content when available
+- Click outside to close the notification panel
+
+```mermaid
+sequenceDiagram
+participant User as "User Interface"
+participant Bell as "NotificationBell.tsx"
+participant Supabase as "Supabase Client"
+participant DB as "notifications table"
+User->>Bell : Open notification panel
+Bell->>Supabase : Subscribe to notifications channel
+Supabase->>DB : SELECT notifications WHERE user_id
+DB-->>Supabase : Initial notification list
+Supabase-->>Bell : Real-time notification data
+Bell->>User : Display notification list
+User->>Bell : Mark all read
+Bell->>Supabase : UPDATE notifications SET read=true
+Supabase->>DB : Update read status
+DB-->>Supabase : Acknowledge update
+Supabase-->>Bell : Real-time UPDATE event
+Bell->>User : Update UI with read notifications
+```
+
+**Diagram sources**
+- [NotificationBell.tsx:36-96](file://src/components/NotificationBell.tsx#L36-L96)
+- [NotificationBell.tsx:112-132](file://src/components/NotificationBell.tsx#L112-L132)
+- [20260328_notifications.sql:41-42](file://supabase/migrations/20260328_notifications.sql#L41-L42)
+
+**Section sources**
+- [20260328_notifications.sql:1-61](file://supabase/migrations/20260328_notifications.sql#L1-L61)
+- [NotificationBell.tsx:1-218](file://src/components/NotificationBell.tsx#L1-L218)
+- [AdminLayout.tsx:30-31](file://src/components/admin/AdminLayout.tsx#L30-L31)
+- [PortalLayout.tsx:31-32](file://src/components/portal/PortalLayout.tsx#L31-L32)
+
 ## External API Integration
 
 ### GHL Calendar API Integration
@@ -1089,13 +1277,16 @@ The application implements proactive network optimization through HTML preconnec
 - Added `<link rel="preconnect" href="https://gkowxzoadsljkpdzrlue.supabase.co" />` in the HTML head section
 - This allows the browser to establish DNS resolution and TCP handshake in advance
 - Reduces connection establishment time for subsequent Supabase API calls
-- Improves real-time feature responsiveness and overall application performance
+- Improves real-time feature performance (subscriptions, live updates)
+- **Updated**: Enhanced with notifications table real-time subscription performance
+- **Updated**: Optimized for restrictive affiliate update policy query performance
 
 **Benefits:**
 - Reduced first-byte latency for database operations
 - Faster authentication and data fetching responses
 - Improved real-time feature performance (subscriptions, live updates)
 - Better user experience during peak traffic periods
+- **Updated**: Faster notifications real-time delivery and updates
 
 ### Direct Fetch Implementation Performance
 **Updated**: The new direct fetch implementation provides several performance benefits:
@@ -1131,13 +1322,17 @@ The application implements proactive network optimization through HTML preconnec
 - **Standardized Commission Types**: Consistent 'upfront'/'backend' values improve query performance
 - **Default Values**: Automatic defaults for new affiliates eliminate NULL checks
 - **Numeric Precision**: Proper NUMERIC(5,2) types ensure accurate commission calculations
+- **Notifications Indexes**: Multi-column indexes optimize user_id, read status, and timestamp queries
+- **Restrictive Policies**: Efficient WITH CHECK clauses prevent unauthorized updates without performance penalty
 
-**Section sources**
-- [index.html:17](file://index.html#L17)
-- [ConsultationCalendar.tsx:12-38](file://src/components/funnel/ConsultationCalendar.tsx#L12-L38)
-- [index.ts:37-45](file://supabase/functions/ghl-calendar/index.ts#L37-L45)
-- [index.ts:1-361](file://supabase/functions/process-email-queue/index.ts#L1-L361)
-- [20260327_admin_enhancements.sql:4-19](file://supabase/migrations/20260327_admin_enhancements.sql#L4-L19)
+### Notifications System Performance Considerations
+**New**: Notifications system performance optimizations:
+- **Real-time Publication**: Supabase publication includes notifications table for efficient real-time delivery
+- **User-specific Filtering**: Real-time subscriptions filter by user_id for minimal bandwidth usage
+- **Type-based Styling**: Client-side type categorization avoids database joins
+- **Lazy Loading**: Notification list loads with skeleton loaders for better perceived performance
+- **Mark All Read**: Batch operations reduce individual database calls for read status updates
+- **Channel Cleanup**: Proper subscription cleanup prevents memory leaks and unnecessary network usage
 
 ### Network Optimization Best Practices
 - Implement preconnect for critical third-party domains (Supabase, external APIs)
@@ -1153,14 +1348,22 @@ The application implements proactive network optimization through HTML preconnec
 - **Updated**: Implement email processing batching for improved throughput
 - **Updated**: Optimize database schema with proper indexing on dual commission rate columns
 - **Updated**: Use connection pooling for external email API calls to improve throughput
+- **Updated**: Implement efficient real-time subscription management for notifications
+- **Updated**: Optimize restrictive affiliate update policy queries with proper indexing
 
 **Section sources**
-- [index.html:15-18](file://index.html#L15-L18)
+- [index.html:17](file://index.html#L17)
+- [ConsultationCalendar.tsx:12-38](file://src/components/funnel/ConsultationCalendar.tsx#L12-L38)
+- [index.ts:37-45](file://supabase/functions/ghl-calendar/index.ts#L37-L45)
+- [index.ts:1-361](file://supabase/functions/process-email-queue/index.ts#L1-L361)
+- [20260327_admin_enhancements.sql:4-19](file://supabase/migrations/20260327_admin_enhancements.sql#L4-L19)
+- [20260328_notifications.sql:15-18](file://supabase/migrations/20260328_notifications.sql#L15-L18)
+- [20260328_restrict_affiliate_update.sql:12-21](file://supabase/migrations/20260328_restrict_affiliate_update.sql#L12-L21)
 
-## Dependency Analysis
+### Dependency Analysis
 The frontend depends on Supabase for identity and data, React Query for caching, and TypeScript for type safety. Supabase functions depend on the Supabase runtime and service role credentials. External API integrations depend on GHL services and proper environment configuration. Network optimization through preconnect hints provides transparent performance benefits across all Supabase operations.
 
-**Updated**: Enhanced dependency graph includes role-based access control components, administrative framework, comprehensive email infrastructure, and dual commission rate management system.
+**Updated**: Enhanced dependency graph includes role-based access control components, administrative framework, comprehensive email infrastructure, dual commission rate management system, notifications system, and restrictive affiliate update policies.
 
 ```mermaid
 graph LR
@@ -1179,6 +1382,7 @@ EmailProc["process-email-queue/index.ts"]
 EmailSend["send-transactional-email/index.ts"]
 SuppressHandler["handle-email-suppression/index.ts"]
 UnsubscribeHandler["handle-email-unsubscribe/index.ts"]
+NotificationBell["NotificationBell.tsx"]
 ConsultCal["ConsultationCalendar.tsx"]
 PartnerCal["PartnerOnboardingCalendar.tsx"]
 AdminAffiliates["AdminAffiliates.tsx"]
@@ -1193,6 +1397,8 @@ AdminPages["Admin Pages<br/>AdminDashboard.tsx, AdminLeads.tsx, etc."]
 AdminMig["Admin Policies<br/>20260324201245_4681ef67-2bf0-4686-a4b6-1ae6c54189f9.sql"]
 EmailMig["Email Infrastructure<br/>20260325024643_email_infra.sql"]
 AdminEnhMig["Admin Enhancements<br/>20260327_admin_enhancements.sql"]
+NotifMig["Notifications System<br/>20260328_notifications.sql"]
+AffUpdateMig["Restrict Affiliate Update<br/>20260328_restrict_affiliate_update.sql"]
 Package --> Client
 Package --> Auth
 Package --> AdminGuard
@@ -1201,6 +1407,7 @@ Package --> AdminSidebar
 Package --> Leads
 Package --> ConsultCal
 Package --> PartnerCal
+Package --> NotificationBell
 HTML --> Client
 Client --> Types
 Auth --> Client
@@ -1225,6 +1432,8 @@ Client --> AdminPages
 Client --> AdminMig
 Client --> EmailMig
 Client --> AdminEnhMig
+Client --> NotifMig
+Client --> AffUpdateMig
 Client --> GHL
 Client --> Shopify
 Client --> Lovable
@@ -1241,6 +1450,7 @@ Client --> Lovable
 - [useAffiliateLeads.ts:1-4](file://src/hooks/useAffiliateLeads.ts#L1-L4)
 - [ConsultationCalendar.tsx:1-14](file://src/components/funnel/ConsultationCalendar.tsx#L1-L14)
 - [PartnerOnboardingCalendar.tsx:1-14](file://src/components/funnel/PartnerOnboardingCalendar.tsx#L1-L14)
+- [NotificationBell.tsx:1-4](file://src/components/NotificationBell.tsx#L1-L4)
 - [AdminAffiliates.tsx:1-4](file://src/pages/admin/AdminAffiliates.tsx#L1-L4)
 - [AdminAffiliateDetail.tsx:1-4](file://src/pages/admin/AdminAffiliateDetail.tsx#L1-L4)
 - [AffiliateSettingsTab.tsx:1-4](file://src/components/admin/affiliate-detail/AffiliateSettingsTab.tsx#L1-L4)
@@ -1256,6 +1466,8 @@ Client --> Lovable
 - [20260324201245_4681ef67-2bf0-4686-a4b6-1ae6c54189f9.sql:1-82](file://supabase/migrations/20260324201245_4681ef67-2bf0-4686-a4b6-1ae6c54189f9.sql#L1-L82)
 - [20260325024643_email_infra.sql:1-293](file://supabase/migrations/20260325024643_email_infra.sql#L1-L293)
 - [20260327_admin_enhancements.sql:1-19](file://supabase/migrations/20260327_admin_enhancements.sql#L1-L19)
+- [20260328_notifications.sql:1-61](file://supabase/migrations/20260328_notifications.sql#L1-L61)
+- [20260328_restrict_affiliate_update.sql:1-25](file://supabase/migrations/20260328_restrict_affiliate_update.sql#L1-L25)
 
 **Section sources**
 - [package.json:15-69](file://package.json#L15-L69)
@@ -1285,6 +1497,10 @@ Client --> Lovable
 - **Updated**: Use numeric precision and scale (NUMERIC(5,2)) for commission rate calculations to ensure accuracy.
 - **Updated**: Implement default values for new affiliate records to eliminate NULL checks and improve query performance.
 - **Updated**: Standardize commission types ('upfront'/'backend') to improve query performance and reduce complexity.
+- **Updated**: Implement efficient real-time subscription management for notifications with proper channel cleanup.
+- **Updated**: Optimize notifications table queries with multi-column indexes (user_id, read, created_at).
+- **Updated**: Use restrictive WITH CHECK clauses in affiliate update policies to prevent unauthorized modifications efficiently.
+- **Updated**: Implement batch operations for notification read status updates to reduce individual database calls.
 
 ## Troubleshooting Guide
 Common issues and strategies:
@@ -1313,6 +1529,10 @@ Common issues and strategies:
 - **Updated**: Dual commission rate not displaying: Verify database migration completion and frontend type definitions.
 - **Updated**: Admin notes not saving: Check database permissions and frontend form validation.
 - **Updated**: Commission type conversion issues: Verify migration execution and frontend type handling.
+- **Updated**: Notifications not appearing: Check real-time subscription setup and user_id filtering.
+- **Updated**: Notification read status not updating: Verify real-time UPDATE event handling and batch operations.
+- **Updated**: Restrictive affiliate update policy errors: Check WITH CHECK clause syntax and ensure sensitive fields comparison logic is correct.
+- **Updated**: Programmatic notification creation failures: Verify create_notification function permissions and security definer context.
 
 **Section sources**
 - [client.ts:5-17](file://src/integrations/supabase/client.ts#L5-L17)
@@ -1328,9 +1548,11 @@ Common issues and strategies:
 - [index.ts:1-131](file://supabase/functions/handle-email-unsubscribe/index.ts#L1-L131)
 - [index.ts:74-251](file://supabase/functions/shopify-order-webhook/index.ts#L74-L251)
 - [20260327_admin_enhancements.sql:4-19](file://supabase/migrations/20260327_admin_enhancements.sql#L4-L19)
+- [20260328_notifications.sql:20-42](file://supabase/migrations/20260328_notifications.sql#L20-L42)
+- [20260328_restrict_affiliate_update.sql:7-21](file://supabase/migrations/20260328_restrict_affiliate_update.sql#L7-L21)
 
 ## Conclusion
-The data layer leverages a strongly typed Supabase client, robust authentication, and RLS policies to provide secure, scalable data access. React Query enables efficient caching and reactivity, while Supabase functions facilitate reliable synchronization from external systems. **Updated**: The GHL calendar integration provides comprehensive appointment management with proper timestamp conversion for external API compatibility and enhanced environment variable validation. **Updated**: The new direct fetch implementation eliminates SDK-related issues and provides better performance and error control. **Updated**: Network optimization through preconnect hints significantly reduces database connection latency and improves real-time feature responsiveness. **Updated**: External API integration patterns ensure reliable communication with third-party services while maintaining performance and error resilience. **Updated**: Enhanced logging and monitoring capabilities provide comprehensive operational visibility and debugging support. **Updated**: The comprehensive administrative framework with role-based access control provides granular permissions and secure management capabilities. **Updated**: The new admin guard components and dashboard provide intuitive management interfaces with proper access control enforcement. **Updated**: The comprehensive email infrastructure provides reliable transactional email delivery with queue management, suppression handling, and automated bundle purchase processing. **Updated**: The Shopify order webhook integration delivers seamless automated download email delivery for bundle purchases. **Updated**: The database schema enhancements with dual commission rate management, admin notes functionality, and standardized commission types provide comprehensive administrative capabilities while maintaining backward compatibility. Adhering to the outlined patterns and safeguards ensures predictable performance, maintainability, and security.
+The data layer leverages a strongly typed Supabase client, robust authentication, and RLS policies to provide secure, scalable data access. React Query enables efficient caching and reactivity, while Supabase functions facilitate reliable synchronization from external systems. **Updated**: The GHL calendar integration provides comprehensive appointment management with proper timestamp conversion for external API compatibility and enhanced environment variable validation. **Updated**: The new direct fetch implementation eliminates SDK-related issues and provides better performance and error control. **Updated**: Network optimization through preconnect hints significantly reduces database connection latency and improves real-time feature responsiveness. **Updated**: External API integration patterns ensure reliable communication with third-party services while maintaining performance and error resilience. **Updated**: Enhanced logging and monitoring capabilities provide comprehensive operational visibility and debugging support. **Updated**: The comprehensive administrative framework with role-based access control provides granular permissions and secure management capabilities. **Updated**: The new admin guard components and dashboard provide intuitive management interfaces with proper access control enforcement. **Updated**: The comprehensive email infrastructure provides reliable transactional email delivery with queue management, suppression handling, and automated bundle purchase processing. **Updated**: The Shopify order webhook integration delivers seamless automated download email delivery for bundle purchases. **Updated**: The database schema enhancements with dual commission rate management, admin notes functionality, and standardized commission types provide comprehensive administrative capabilities while maintaining backward compatibility. **Updated**: The new notifications system provides real-time user notifications with Row Level Security enforcement and programmatic creation helpers. **Updated**: Restrictive affiliate update policies prevent unauthorized modifications to sensitive commission data while maintaining system security. Adhering to the outlined patterns and safeguards ensures predictable performance, maintainability, and security.
 
 ## Appendices
 
@@ -1345,12 +1567,15 @@ Representative row shapes for key tables (descriptive only):
 - **Updated**: Email Send Log: audit trail for email delivery attempts with status tracking
 - **Updated**: Suppressed Emails: records of email suppression for unsubscribes, bounces, and complaints
 - **Updated**: Email Unsubscribe Tokens: token-based unsubscribe management with usage tracking
+- **Updated**: Notifications: user-specific notifications with type, read status, optional link, timestamps
+- **Updated**: Order and Order Items: e-commerce data with download token management
 
 **Section sources**
 - [types.ts:97-640](file://src/integrations/supabase/types.ts#L97-L640)
 - [20260324201245_4681ef67-2bf0-4686-a4b6-1ae6c54189f9.sql:5-11](file://supabase/migrations/20260324201245_4681ef67-2bf0-4686-a4b6-1ae6c54189f9.sql#L5-L11)
 - [20260325024643_email_infra.sql:27-271](file://supabase/migrations/20260325024643_email_infra.sql#L27-L271)
 - [20260327_admin_enhancements.sql:4-19](file://supabase/migrations/20260327_admin_enhancements.sql#L4-L19)
+- [20260328_notifications.sql:4-13](file://supabase/migrations/20260328_notifications.sql#L4-L13)
 
 ### GHL Calendar API Endpoints
 **Updated**: The GHL calendar integration exposes the following endpoints:
@@ -1458,3 +1683,41 @@ Representative row shapes for key tables (descriptive only):
 - [AdminAffiliates.tsx:78-84](file://src/pages/admin/AdminAffiliates.tsx#L78-L84)
 - [AffiliateSettingsTab.tsx:26-28](file://src/components/admin/affiliate-detail/AffiliateSettingsTab.tsx#L26-L28)
 - [AffiliateCommissionsTab.tsx:47-48](file://src/components/admin/affiliate-detail/AffiliateCommissionsTab.tsx#L47-L48)
+
+### Notifications System Configuration Details
+**New**: The 20260328_notifications.sql migration introduces the following database schema changes:
+- **Notifications Table**: Creates notifications table with UUID primary key, user_id foreign key, title, message, type, read status, optional link, and timestamps
+- **Indexes**: Creates indexes on user_id, (user_id, read), and (user_id, created_at DESC) for optimal query performance
+- **Row Level Security**: Enables RLS on notifications table with comprehensive policies
+- **Policies**: Implements SELECT, UPDATE, DELETE, and INSERT policies with proper user_id filtering
+- **Real-time**: Adds notifications table to supabase_realtime publication
+- **Helper Function**: Creates create_notification function for programmatic notification creation
+
+**Section sources**
+- [20260328_notifications.sql:1-61](file://supabase/migrations/20260328_notifications.sql#L1-L61)
+- [NotificationBell.tsx:36-96](file://src/components/NotificationBell.tsx#L36-L96)
+
+### Restrictive Affiliate Update Policy Details
+**New**: The 20260328_restrict_affiliate_update.sql migration introduces enhanced security:
+- **Policy Removal**: Drops the broad "Affiliates can update own record" policy
+- **Restricted Policy**: Creates "Affiliates can update own contact info" policy with WITH CHECK clause
+- **Field Protection**: Ensures sensitive fields (status, commission rates, admin_notes) cannot be modified
+- **Contact Info Allowance**: Allows modification of non-sensitive contact information fields
+- **Admin Privileges**: Preserves admin update privileges without restrictions
+
+**Section sources**
+- [20260328_restrict_affiliate_update.sql:1-25](file://supabase/migrations/20260328_restrict_affiliate_update.sql#L1-L25)
+- [types.ts:130-189](file://src/integrations/supabase/types.ts#L130-L189)
+
+### NotificationBell Component Usage Details
+**New**: The NotificationBell component integrates into application layouts:
+- **Admin Layout**: Integrated into AdminLayout.tsx with user authentication
+- **Portal Layout**: Integrated into PortalLayout.tsx for affiliate notifications
+- **Real-time Subscriptions**: Establishes user-specific notification channels
+- **Type-based Styling**: Provides visual distinction for different notification types
+- **Interactive Features**: Supports marking as read, clearing notifications, and navigation
+
+**Section sources**
+- [NotificationBell.tsx:1-218](file://src/components/NotificationBell.tsx#L1-L218)
+- [AdminLayout.tsx:30-31](file://src/components/admin/AdminLayout.tsx#L30-L31)
+- [PortalLayout.tsx:31-32](file://src/components/portal/PortalLayout.tsx#L31-L32)

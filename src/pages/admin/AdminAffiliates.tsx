@@ -15,6 +15,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
   Users, Search, CheckCircle2, XCircle, Clock, Percent, ArrowUpDown, ArrowUp, ArrowDown,
   MoreHorizontal, Eye, Mail, Phone, Pencil, Trash2,
 } from "lucide-react";
@@ -43,6 +47,19 @@ export default function AdminAffiliates() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [deleteTarget, setDeleteTarget] = useState<Affiliate | null>(null);
+
+  const handleDeleteAffiliate = async () => {
+    if (!deleteTarget) return;
+    const { error } = await supabase.from("affiliates").delete().eq("id", deleteTarget.id);
+    if (error) {
+      toast.error("Failed to delete affiliate");
+    } else {
+      setAffiliates((prev) => prev.filter((a) => a.id !== deleteTarget.id));
+      toast.success(`${deleteTarget.full_name} deleted`);
+    }
+    setDeleteTarget(null);
+  };
   const [sortField, setSortField] = useState<string>("created_at");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
 
@@ -279,7 +296,7 @@ export default function AdminAffiliates() {
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end" className="w-44 p-1.5">
-                                <DropdownMenuItem onClick={() => toast.info("Edit coming soon")} className="gap-3 px-3 py-2.5 rounded-md">
+                                <DropdownMenuItem onClick={() => navigate(`/portal/admin/affiliates/${affiliate.id}`)} className="gap-3 px-3 py-2.5 rounded-md">
                                   <Pencil className="h-4 w-4 text-slate-400" />
                                   <span>Edit</span>
                                 </DropdownMenuItem>
@@ -299,7 +316,7 @@ export default function AdminAffiliates() {
                                 </DropdownMenuItem>
                                 <DropdownMenuItem
                                   className="gap-3 px-3 py-2.5 rounded-md text-red-600 focus:text-red-600 focus:bg-red-50"
-                                  onClick={() => toast.info("Delete coming soon")}
+                                  onClick={() => setDeleteTarget(affiliate)}
                                 >
                                   <Trash2 className="h-4 w-4" />
                                   <span>Delete</span>
@@ -317,6 +334,23 @@ export default function AdminAffiliates() {
           )}
         </CardContent>
       </Card>
+
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete affiliate?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete <span className="font-semibold">{deleteTarget?.full_name}</span> and all their leads, commissions, and payouts. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteAffiliate} className="bg-red-600 hover:bg-red-700">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

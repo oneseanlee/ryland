@@ -61,16 +61,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const fetchAffiliate = useCallback(async (userId: string) => {
     try {
+      console.log("[Auth] Fetching affiliate for user:", userId);
       const { data, error } = await supabase
         .from("affiliates")
         .select("id, affiliate_id, full_name, email, phone, company_name, website, status")
         .eq("user_id", userId)
         .maybeSingle();
 
-      if (error) throw error;
+      if (error) {
+        console.error("[Auth] Affiliate fetch error:", error.message);
+        throw error;
+      }
+      console.log("[Auth] Affiliate result:", data ? data.affiliate_id : "null (no record found)");
       return data as Affiliate | null;
     } catch (err) {
       const errorMessage = (err as Error)?.message || String(err);
+      console.error("[Auth] Affiliate fetch exception:", errorMessage);
       if (errorMessage.includes('aborted') || errorMessage.includes('AbortError')) {
         return null;
       }

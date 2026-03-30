@@ -16,7 +16,7 @@ interface SubmitLeadDrawerProps {
 }
 
 export default function SubmitLeadDrawer({ open, onClose, onSuccess }: SubmitLeadDrawerProps) {
-  const { affiliate } = useAuth();
+  const { affiliate, user } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({ full_name: "", email: "", phone: "", company_name: "", notes: "" });
@@ -38,7 +38,11 @@ export default function SubmitLeadDrawer({ open, onClose, onSuccess }: SubmitLea
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitted(true);
-    if (!affiliate) return;
+    if (!affiliate) {
+      console.error("Submit Lead: affiliate is null", { user: !!user });
+      toast({ title: "Error", description: "Affiliate profile not loaded. Please refresh and try again.", variant: "destructive" });
+      return;
+    }
 
     const newErrors: Record<string, string> = {};
     if (!form.full_name.trim()) newErrors.full_name = "Full name is required";

@@ -22,15 +22,22 @@
 - [src/integrations/supabase/client.ts](file://src/integrations/supabase/client.ts)
 - [supabase/functions/ghl-calendar/index.ts](file://supabase/functions/ghl-calendar/index.ts)
 - [src/pages/funnel/FunnelConsultation.tsx](file://src/pages/funnel/FunnelConsultation.tsx)
+- [src/components/NotificationBell.tsx](file://src/components/NotificationBell.tsx)
+- [src/components/admin/AdminLayout.tsx](file://src/components/admin/AdminLayout.tsx)
+- [src/components/portal/PortalLayout.tsx](file://src/components/portal/PortalLayout.tsx)
+- [src/components/admin/affiliate-detail/AffiliateProfileTab.tsx](file://src/components/admin/affiliate-detail/AffiliateProfileTab.tsx)
+- [src/components/admin/affiliate-detail/AffiliateSettingsTab.tsx](file://src/components/admin/affiliate-detail/AffiliateSettingsTab.tsx)
+- [src/pages/admin/AdminAffiliateDetail.tsx](file://src/pages/admin/AdminAffiliateDetail.tsx)
+- [supabase/migrations/20260328_notifications.sql](file://supabase/migrations/20260328_notifications.sql)
 </cite>
 
 ## Update Summary
 **Changes Made**
-- Enhanced ConsultationCalendar component documentation with comprehensive logging and debugging capabilities
-- Added detailed analysis of edge function integration improvements
-- Updated troubleshooting guide with calendar integration debugging procedures
-- Expanded error handling documentation for calendar components
-- Added performance considerations for calendar data fetching
+- Added comprehensive documentation for the new NotificationBell component with real-time notifications
+- Enhanced affiliate profile management documentation with detailed editing capabilities and validation
+- Updated notification system documentation covering Supabase integration and real-time updates
+- Added affiliate settings management with commission rate editing and status control
+- Expanded component integration patterns showing NotificationBell usage in Admin and Portal layouts
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -38,11 +45,13 @@
 3. [Core Components](#core-components)
 4. [Architecture Overview](#architecture-overview)
 5. [Detailed Component Analysis](#detailed-component-analysis)
-6. [Dependency Analysis](#dependency-analysis)
-7. [Performance Considerations](#performance-considerations)
-8. [Troubleshooting Guide](#troubleshooting-guide)
-9. [Conclusion](#conclusion)
-10. [Appendices](#appendices)
+6. [Notification System](#notification-system)
+7. [Affiliate Management Components](#affiliate-management-components)
+8. [Dependency Analysis](#dependency-analysis)
+9. [Performance Considerations](#performance-considerations)
+10. [Troubleshooting Guide](#troubleshooting-guide)
+11. [Conclusion](#conclusion)
+12. [Appendices](#appendices)
 
 ## Introduction
 This document describes the UI components and design system used in the Ryland application. The project is a Vite + React + TypeScript application that integrates shadcn/ui component library with Radix UI primitives and Tailwind CSS. It leverages design tokens, a color system, typography scale, and spacing conventions configured via Tailwind to provide accessible, customizable building blocks. The document explains how components are structured, how theming and composition work, and how to use and extend the design system effectively.
@@ -113,7 +122,9 @@ SHAD["shadcn/ui Components<br/>styled variants"]
 end
 subgraph "App"
 APP["React Components<br/>usage of SHAD + RUI"]
-END["Edge Functions<br/>Supabase Functions"]
+NOTIF["Notification System<br/>Real-time updates"]
+AFF["Affiliate Management<br/>Profile editing"]
+END["Supabase Backend<br/>Database + Auth"]
 end
 TW --> CSSV
 TW --> TWT
@@ -123,7 +134,10 @@ TWT --> SHAD
 SP --> SHAD
 SHAD --> APP
 RUI --> SHAD
-APP --> END
+APP --> NOTIF
+APP --> AFF
+NOTIF --> END
+AFF --> END
 ```
 
 **Diagram sources**
@@ -279,6 +293,186 @@ Accessibility compliance:
 - [components.json:13-19](file://components.json#L13-L19)
 - [tailwind.config.ts](file://tailwind.config.ts)
 
+## Notification System
+**New** The Ryland application now includes a comprehensive notification system powered by Supabase Realtime, providing real-time updates and user-centric messaging.
+
+### NotificationBell Component
+The NotificationBell component serves as the central hub for user notifications, featuring a dropdown interface with comprehensive management capabilities.
+
+#### Core Features
+- **Real-time Updates**: Instant notification delivery via Supabase Realtime subscriptions
+- **Multiple Notification Types**: Support for lead, commission, payout, system, and order notifications
+- **Interactive Management**: Mark all read, clear notifications, and individual marking
+- **Type-specific Styling**: Distinct icons, colors, and backgrounds for different notification types
+- **Unread Tracking**: Visual indicators for unread notifications with intelligent counting
+
+#### Technical Implementation
+- **Supabase Integration**: Direct database queries and Realtime subscriptions for live updates
+- **Local State Management**: Client-side state synchronization with server-side persistence
+- **Click-to-Action**: Optional navigation links for actionable notifications
+- **Performance Optimization**: Efficient rendering with loading states and empty state handling
+
+#### Notification Types and Styling
+The system supports five notification types with distinct visual treatments:
+
+| Type | Icon | Color | Background |
+|------|------|-------|------------|
+| lead | Users | Blue-600 | Blue-50 |
+| commission | DollarSign | Green-600 | Green-50 |
+| payout | DollarSign | Amber-600 | Amber-50 |
+| system | AlertCircle | Slate-600 | Slate-50 |
+| order | ShoppingCart | Purple-600 | Purple-50 |
+
+#### Real-time Subscription Management
+The component establishes persistent Realtime connections for each user:
+
+- **INSERT Events**: Automatically prepend new notifications to the list
+- **UPDATE Events**: Sync read/unread status across all connected clients
+- **DELETE Events**: Remove notifications when users clear them
+- **Connection Cleanup**: Proper channel removal on component unmount
+
+**Section sources**
+- [src/components/NotificationBell.tsx:1-218](file://src/components/NotificationBell.tsx#L1-L218)
+- [supabase/migrations/20260328_notifications.sql:1-61](file://supabase/migrations/20260328_notifications.sql#L1-L61)
+
+### Database Schema and Security
+The notification system is backed by a secure database schema with row-level security policies.
+
+#### Database Structure
+- **UUID Primary Keys**: Unique identifiers for notification persistence
+- **User References**: Foreign key relationships to auth.users table
+- **Type Classification**: Enum-like text field for notification categorization
+- **Optional Links**: Support for navigation URLs within notifications
+- **Timestamp Tracking**: Creation timestamps with timezone support
+
+#### Security Policies
+- **Row Level Security**: Enabled for user data isolation
+- **View Permissions**: Users can only access their own notifications
+- **Update/Delete Protection**: Prevent unauthorized modifications
+- **Insert Restrictions**: Controlled creation through defined policies
+- **Realtime Publication**: Supabase Realtime enabled for live updates
+
+#### Helper Functions
+The system includes database helper functions for consistent notification creation:
+
+- **create_notification Function**: Standardized notification creation with type and link support
+- **Flexible Parameters**: Supports all notification properties with sensible defaults
+- **Security Context**: Executes with appropriate permissions for system-generated notifications
+
+**Section sources**
+- [supabase/migrations/20260328_notifications.sql:4-60](file://supabase/migrations/20260328_notifications.sql#L4-L60)
+
+### Integration Patterns
+The NotificationBell integrates seamlessly into the application's layout systems.
+
+#### Admin Layout Integration
+- **Positioning**: Integrated into the admin top navigation bar
+- **User Context**: Receives authenticated user ID for personalized notifications
+- **Consistent Styling**: Matches the admin theme with appropriate spacing and colors
+
+#### Portal Layout Integration
+- **Affiliate Context**: Works within both admin and affiliate portal layouts
+- **Responsive Design**: Adapts to different screen sizes and orientations
+- **Accessibility**: Maintains keyboard navigation and screen reader compatibility
+
+**Section sources**
+- [src/components/admin/AdminLayout.tsx:31](file://src/components/admin/AdminLayout.tsx#L31)
+- [src/components/portal/PortalLayout.tsx:32](file://src/components/portal/PortalLayout.tsx#L32)
+
+## Affiliate Management Components
+**Updated** The affiliate management system has been enhanced with comprehensive profile editing capabilities and administrative controls.
+
+### AffiliateProfileTab Component
+The AffiliateProfileTab provides a dual-mode interface for viewing and editing affiliate profile information with robust validation and user feedback.
+
+#### Editing Mode Features
+- **Form Validation**: Required field validation with immediate user feedback
+- **Real-time Changes**: Visual indicators for unsaved changes
+- **Discard Confirmation**: AlertDialog for preventing accidental data loss
+- **Loading States**: Visual feedback during save and reset operations
+- **Success/Error Messaging**: Toast notifications for operation results
+
+#### Profile Information Categories
+The component organizes affiliate information into two main sections:
+
+**Personal Information**
+- Full Name (required)
+- Email address
+- Phone number with formatting
+- Affiliate ID display
+- Account status badge
+- Join date display
+
+**Business Information**
+- Company name
+- Website URL with external link handling
+- Payment email for payouts
+- GHL contact ID for CRM integration
+- Referral link generation
+
+#### Status Management
+The system supports three affiliate statuses with appropriate visual indicators:
+- **Approved**: Green badge with active status
+- **Pending**: Yellow badge awaiting approval
+- **Suspended**: Red badge with restricted access
+
+#### Password Management
+Integrated password reset functionality with:
+- One-click reset email sending
+- Loading states during reset operations
+- User feedback through toast notifications
+- Security-conscious redirect URLs
+
+**Section sources**
+- [src/components/admin/affiliate-detail/AffiliateProfileTab.tsx:1-304](file://src/components/admin/affiliate-detail/AffiliateProfileTab.tsx#L1-L304)
+
+### AffiliateSettingsTab Component
+The AffiliateSettingsTab focuses on administrative controls for commission rates, status management, and internal notes.
+
+#### Commission Rate Management
+Administrative interface for setting affiliate compensation:
+- **Upfront Commission Rate**: Percentage paid when leads convert to funded clients
+- **Backend Commission Rate**: Recurring percentage on subsequent revenue
+- **Decimal Precision**: Support for half-percent increments (0.5% granularity)
+- **Validation**: Input constraints ensuring realistic commission rates
+
+#### Status Control Interface
+Administrative actions for affiliate account management:
+- **Approval Workflow**: Pending → Approved transitions
+- **Suspension Controls**: Approved → Suspended with destructive styling
+- **Reactivation**: Suspended → Approved restoration
+- **Visual Feedback**: Status badges with appropriate color coding
+
+#### Administrative Notes
+Internal documentation system:
+- **Rich Text Area**: Multi-line text input for detailed notes
+- **Save Operations**: Individual save buttons for each setting type
+- **Loading States**: Visual feedback during save operations
+- **Success Confirmation**: Toast notifications for successful updates
+
+**Section sources**
+- [src/components/admin/affiliate-detail/AffiliateSettingsTab.tsx:1-187](file://src/components/admin/affiliate-detail/AffiliateSettingsTab.tsx#L1-L187)
+
+### Affiliate Detail Page Integration
+The affiliate detail page orchestrates multiple tabs for comprehensive affiliate management.
+
+#### Tab Structure
+The detail page provides five distinct management areas:
+- **Profile**: Personal and business information editing
+- **Commissions**: Commission rate and payment history
+- **Leads**: Lead tracking and conversion analytics
+- **Payouts**: Payment processing and tax documentation
+- **Settings**: Administrative controls and status management
+
+#### Data Flow
+- **Centralized Fetching**: Single source of truth for affiliate data
+- **Real-time Updates**: Tab content updates when parent components refresh
+- **Error Handling**: Graceful degradation if individual tab data fails
+- **Loading States**: Skeleton loaders for improved perceived performance
+
+**Section sources**
+- [src/pages/admin/AdminAffiliateDetail.tsx:144-177](file://src/pages/admin/AdminAffiliateDetail.tsx#L144-L177)
+
 ## Dependency Analysis
 The UI stack relies on a set of core libraries that define the component ecosystem and styling pipeline.
 
@@ -291,8 +485,9 @@ P --> TS["TypeScript"]
 P --> VITE["Vite"]
 P --> REACT["React"]
 P --> UTILS["Utilities<br/>class-variance-authority, clsx,<br/>tailwind-merge, lucide-react,<br/>next-themes, framer-motion, etc."]
-P --> EDGE["Supabase Edge Functions"]
-EDGE --> GHL["GHL Calendar API"]
+P --> SUPA["Supabase<br/>Realtime + Auth"]
+SUPA --> DB["PostgreSQL<br/>Notifications Table"]
+SUPA --> REALTIME["Realtime Subscriptions"]
 ```
 
 **Diagram sources**
@@ -303,13 +498,19 @@ EDGE --> GHL["GHL Calendar API"]
 - [package.json:15-69](file://package.json#L15-L69)
 
 ## Performance Considerations
-**Updated** The application implements comprehensive performance optimization strategies across multiple layers:
+**Updated** The application implements comprehensive performance optimization strategies across multiple layers, including the new notification system.
 
 ### Calendar Component Performance
 - **Edge Function Optimization**: Direct fetch implementation avoids SDK AbortError and improves reliability
 - **Caching Strategies**: Slot data caching prevents redundant API calls during month navigation
 - **Loading States**: Skeleton loaders provide visual feedback during data fetching
 - **Error Recovery**: Retry mechanisms and user-friendly error messages improve user experience
+
+### Notification System Performance
+- **Real-time Efficiency**: Supabase Realtime minimizes polling overhead
+- **State Optimization**: Local state updates prevent unnecessary re-renders
+- **Connection Management**: Proper channel cleanup prevents memory leaks
+- **Limited Fetch Size**: Database queries limit to 50 most recent notifications
 
 ### Component-Level Optimizations
 - **React.memo implementation**: The LeadsTable component uses `React.memo()` wrapper to prevent unnecessary re-renders when props remain unchanged
@@ -342,15 +543,22 @@ Best practices:
 - [src/components/portal/LeadsTable.tsx:5](file://src/components/portal/LeadsTable.tsx#L5)
 - [src/components/portal/LeadsTable.tsx:147](file://src/components/portal/LeadsTable.tsx#L147)
 - [src/hooks/useAffiliateLeads.ts:6-30](file://src/hooks/useAffiliateLeads.ts#L6-L30)
+- [src/components/NotificationBell.tsx:47-96](file://src/components/NotificationBell.tsx#L47-L96)
 
 ## Troubleshooting Guide
-**Updated** Common issues and resolutions with enhanced calendar integration debugging:
+**Updated** Common issues and resolutions with enhanced calendar integration debugging and notification system troubleshooting.
 
 ### Calendar Integration Issues
 - **Edge Function Failures**: Check Supabase Edge Function logs for "[GHL Debug]" prefixed entries
 - **API Authentication Errors**: Verify SUPABASE_URL and SUPABASE_PUBLISHABLE_KEY environment variables
 - **Calendar Service Connectivity**: Monitor GHL API responses and error codes in edge function logs
 - **Slot Availability Problems**: Review calendar service configuration and timezone settings
+
+### Notification System Issues
+- **Real-time Connection Failures**: Verify Supabase Realtime connectivity and authentication
+- **Notification Delivery Problems**: Check database permissions and row-level security policies
+- **Subscription Not Working**: Ensure proper channel naming and filter syntax
+- **Performance Degradation**: Monitor database query performance and connection limits
 
 ### Component Performance Issues
 - **Excessive re-renders**: Verify that components are properly memoized using React.memo wrapper
@@ -379,11 +587,18 @@ Best practices:
 - **Response Processing**: Monitor slot data structure and error propagation from GHL API
 - **Rate Limiting**: Implement retry logic for temporary GHL API errors
 
+### Database and Security Issues
+- **Permission Denied**: Verify user has proper permissions for notifications table access
+- **RLS Policy Conflicts**: Check row-level security policies for notification access restrictions
+- **Realtime Publication Issues**: Ensure notifications table is included in supabase_realtime publication
+- **Connection Limits**: Monitor Supabase connection limits for Realtime subscriptions
+
 ### Performance Debugging
 - Use React DevTools Profiler to identify components causing excessive re-renders
 - Monitor bundle size using webpack-bundle-analyzer for optimization opportunities
 - Implement performance monitoring in production using tools like Sentry or LogRocket
 - Analyze network performance for calendar API calls and edge function responses
+- Track database query performance for notification retrieval and updates
 
 **Section sources**
 - [src/components/funnel/ConsultationCalendar.tsx:13-38](file://src/components/funnel/ConsultationCalendar.tsx#L13-L38)
@@ -391,9 +606,15 @@ Best practices:
 - [components.json:1-20](file://components.json#L1-L20)
 - [tailwind.config.ts](file://tailwind.config.ts)
 - [src/components/portal/LeadsTable.tsx:147](file://src/components/portal/LeadsTable.tsx#L147)
+- [src/components/NotificationBell.tsx:47-96](file://src/components/NotificationBell.tsx#L47-L96)
+- [supabase/migrations/20260328_notifications.sql:20-42](file://supabase/migrations/20260328_notifications.sql#L20-L42)
 
 ## Conclusion
-The Ryland application employs a robust UI design system that combines Radix UI primitives with shadcn/ui components and Tailwind CSS. The system emphasizes accessibility, customization, and consistency through a centralized configuration that defines color tokens, typography, and spacing. Recent enhancements to the ConsultationCalendar component demonstrate a commitment to comprehensive debugging and troubleshooting capabilities, particularly evident in the implementation of detailed logging, improved error handling, and enhanced edge function integration. These improvements significantly enhance the development experience and provide better visibility into calendar integration issues. By leveraging the provided aliases, CSS variables, performance optimization patterns, and comprehensive logging infrastructure, developers can compose accessible, responsive interfaces that align with the design system's guidelines while maintaining optimal performance characteristics and reliable calendar integration.
+The Ryland application employs a robust UI design system that combines Radix UI primitives with shadcn/ui components and Tailwind CSS. The system emphasizes accessibility, customization, and consistency through a centralized configuration that defines color tokens, typography, and spacing. Recent enhancements to the ConsultationCalendar component demonstrate a commitment to comprehensive debugging and troubleshooting capabilities, particularly evident in the implementation of detailed logging, improved error handling, and enhanced edge function integration. These improvements significantly enhance the development experience and provide better visibility into calendar integration issues.
+
+The addition of the comprehensive notification system represents a significant advancement in user communication and engagement. The NotificationBell component provides real-time, personalized notifications with sophisticated type-based styling and seamless integration with the Supabase Realtime infrastructure. The affiliate management system has been enhanced with powerful editing capabilities, validation, and administrative controls that streamline affiliate onboarding and management processes.
+
+By leveraging the provided aliases, CSS variables, performance optimization patterns, comprehensive logging infrastructure, and the new notification system, developers can compose accessible, responsive interfaces that align with the design system's guidelines while maintaining optimal performance characteristics and reliable calendar integration. The notification system's real-time capabilities and the enhanced affiliate management features position the application to deliver a modern, professional user experience that supports both customer-facing and administrative workflows effectively.
 
 ## Appendices
 - Global styles and app-level styling are defined in the CSS files referenced below.

@@ -5,6 +5,10 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import AdminLeadDetailDrawer from "@/components/admin/AdminLeadDetailDrawer";
 import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
   Table,
   TableBody,
   TableCell,
@@ -80,6 +84,19 @@ export default function AdminLeads() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Lead | null>(null);
+
+  const handleDeleteLead = async () => {
+    if (!deleteTarget) return;
+    const { error } = await supabase.from("affiliate_leads").delete().eq("id", deleteTarget.id);
+    if (error) {
+      toast.error("Failed to delete lead");
+    } else {
+      setLeads((prev) => prev.filter((l) => l.id !== deleteTarget.id));
+      toast.success(`${deleteTarget.full_name} deleted`);
+    }
+    setDeleteTarget(null);
+  };
   const [stats, setStats] = useState({
     totalLeads: 0,
     totalValue: 0,
@@ -358,7 +375,7 @@ export default function AdminLeads() {
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end" className="w-44 p-1.5">
-                                <DropdownMenuItem onClick={() => toast.info("Edit coming soon")} className="gap-3 px-3 py-2.5 rounded-md">
+                                <DropdownMenuItem onClick={() => setSelectedLead(lead)} className="gap-3 px-3 py-2.5 rounded-md">
                                   <Pencil className="h-4 w-4 text-slate-400" />
                                   <span>Edit</span>
                                 </DropdownMenuItem>
@@ -386,7 +403,7 @@ export default function AdminLeads() {
                                 </DropdownMenuItem>
                                 <DropdownMenuItem
                                   className="gap-3 px-3 py-2.5 rounded-md text-red-600 focus:text-red-600 focus:bg-red-50"
-                                  onClick={() => toast.info("Delete coming soon")}
+                                  onClick={() => setDeleteTarget(lead)}
                                 >
                                   <Trash2 className="h-4 w-4" />
                                   <span>Delete</span>
@@ -410,6 +427,23 @@ export default function AdminLeads() {
         open={!!selectedLead}
         onClose={() => setSelectedLead(null)}
       />
+
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete lead?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete <span className="font-semibold">{deleteTarget?.full_name}</span> and all associated data. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteLead} className="bg-red-600 hover:bg-red-700">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

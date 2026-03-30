@@ -24,3 +24,4 @@ dist-ssr
 *.sw?
 DEVELOPMENT_NOTES.md
 PROJECT_CHANGELOG.md
+/command-center/

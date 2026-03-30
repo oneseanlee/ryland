@@ -21,6 +21,7 @@
 - [src/components/admin/affiliate-detail/AffiliateLeadsTab.tsx](file://src/components/admin/affiliate-detail/AffiliateLeadsTab.tsx)
 - [src/components/admin/affiliate-detail/AffiliatePayoutsTab.tsx](file://src/components/admin/affiliate-detail/AffiliatePayoutsTab.tsx)
 - [src/components/admin/affiliate-detail/AffiliateSettingsTab.tsx](file://src/components/admin/affiliate-detail/AffiliateSettingsTab.tsx)
+- [src/components/NotificationBell.tsx](file://src/components/NotificationBell.tsx)
 - [src/hooks/use-mobile.tsx](file://src/hooks/use-mobile.tsx)
 - [src/pages/Assessment.tsx](file://src/pages/Assessment.tsx)
 - [src/pages/CreditIntake.tsx](file://src/pages/CreditIntake.tsx)
@@ -43,11 +44,12 @@
 
 ## Update Summary
 **Changes Made**
-- Added new ReferralRedirect route (/r/:ref) for clean referral URL structure
-- Removed old PortalCalculator route (/portal/calculator) from portal navigation
-- Updated main application routing to use clean referral URL structure
-- Enhanced referral tracking system with localStorage-based attribution
-- Updated portal sidebar navigation to remove Calculator link
+- Added integrated notification bell system in AdminLayout for real-time notifications
+- Enhanced AdminAffiliates page with improved sorting, commission rate display, and statistics
+- Expanded AdminAffiliateDetail page with comprehensive tabbed interface (Profile, Commissions, Leads, Payouts, Settings)
+- Implemented AdminLeadDetailDrawer for detailed lead information viewing
+- Added comprehensive affiliate management functionality across all admin pages
+- Enhanced admin navigation with improved user experience and accessibility
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -79,6 +81,7 @@ The repository provides a minimal but functional foundation for a modern React a
 - Enhanced page structure with dedicated Thank You and Unsubscribe pages
 - Comprehensive admin portal with affiliate management capabilities
 - New ReferralRedirect route for clean referral URL structure
+- Integrated notification system for real-time admin communications
 
 ```mermaid
 graph TB
@@ -96,6 +99,7 @@ Comps --> PortalLayout["portal/PortalLayout.tsx"]
 Comps --> PortalSidebar["portal/PortalSidebar.tsx"]
 Comps --> AdminLayout["admin/AdminLayout.tsx"]
 Comps --> AdminLeadDetailDrawer["AdminLeadDetailDrawer.tsx"]
+Comps --> NotificationBell["NotificationBell.tsx"]
 Comps --> AffiliateDetailTabs["affiliate-detail/"]
 Comps --> AffiliateDetailTabs --> ProfileTab["AffiliateProfileTab.tsx"]
 Comps --> AffiliateDetailTabs --> CommissionsTab["AffiliateCommissionsTab.tsx"]
@@ -125,9 +129,10 @@ Pages --> Unsubscribe["Unsubscribe.tsx"]
 - [src/components/NavLink.tsx:1-28](file://src/components/NavLink.tsx#L1-L28)
 - [src/components/portal/PortalLayout.tsx:1-28](file://src/components/portal/PortalLayout.tsx#L1-L28)
 - [src/components/portal/PortalSidebar.tsx:1-133](file://src/components/portal/PortalSidebar.tsx#L1-L133)
-- [src/components/admin/AdminLayout.tsx:1-40](file://src/components/admin/AdminLayout.tsx#L1-L40)
+- [src/components/admin/AdminLayout.tsx:1-50](file://src/components/admin/AdminLayout.tsx#L1-L50)
 - [src/components/admin/AdminLeadDetailDrawer.tsx:1-134](file://src/components/admin/AdminLeadDetailDrawer.tsx#L1-L134)
-- [src/components/admin/affiliate-detail/AffiliateProfileTab.tsx:1-82](file://src/components/admin/affiliate-detail/AffiliateProfileTab.tsx#L1-L82)
+- [src/components/NotificationBell.tsx:1-218](file://src/components/NotificationBell.tsx#L1-L218)
+- [src/components/admin/affiliate-detail/AffiliateProfileTab.tsx:1-304](file://src/components/admin/affiliate-detail/AffiliateProfileTab.tsx#L1-L304)
 - [src/components/admin/affiliate-detail/AffiliateCommissionsTab.tsx:1-174](file://src/components/admin/affiliate-detail/AffiliateCommissionsTab.tsx#L1-L174)
 - [src/components/admin/affiliate-detail/AffiliateLeadsTab.tsx:1-133](file://src/components/admin/affiliate-detail/AffiliateLeadsTab.tsx#L1-L133)
 - [src/components/admin/affiliate-detail/AffiliatePayoutsTab.tsx:1-155](file://src/components/admin/affiliate-detail/AffiliatePayoutsTab.tsx#L1-L155)
@@ -162,12 +167,16 @@ This section outlines the core building blocks for pages and routing in the appl
 
 - Admin Layout
   - A dedicated admin layout provides secure access to administrative functions with role-based access control and comprehensive navigation for admin operations.
+  - **Updated** Now includes integrated NotificationBell component for real-time admin notifications.
 
 - Enhanced Page Components
   - Thank You page with order processing and polling mechanisms
   - Unsubscribe page with token validation and email suppression handling
   - Referral redirect system for clean URL structure
   - Comprehensive admin portal with affiliate management capabilities
+  - **Updated** Enhanced AdminAffiliates page with improved sorting and commission display
+  - **Updated** Comprehensive AdminAffiliateDetail page with tabbed interface
+  - **Updated** AdminLeadDetailDrawer for detailed lead information viewing
 
 Implementation references:
 - [src/App.tsx:90-158](file://src/App.tsx#L90-L158)
@@ -175,7 +184,8 @@ Implementation references:
 - [src/components/ScrollToTop.tsx:1-14](file://src/components/ScrollToTop.tsx#L1-L14)
 - [src/hooks/use-mobile.tsx:1-19](file://src/hooks/use-mobile.tsx#L1-L19)
 - [src/components/portal/PortalLayout.tsx:1-28](file://src/components/portal/PortalLayout.tsx#L1-L28)
-- [src/components/admin/AdminLayout.tsx:1-40](file://src/components/admin/AdminLayout.tsx#L1-L40)
+- [src/components/admin/AdminLayout.tsx:1-50](file://src/components/admin/AdminLayout.tsx#L1-L50)
+- [src/components/NotificationBell.tsx:1-218](file://src/components/NotificationBell.tsx#L1-L218)
 - [src/pages/ReferralRedirect.tsx:1-7](file://src/pages/ReferralRedirect.tsx#L1-L7)
 - [src/pages/ThankYou.tsx:29-80](file://src/pages/ThankYou.tsx#L29-L80)
 - [src/pages/Unsubscribe.tsx:10-56](file://src/pages/Unsubscribe.tsx#L10-L56)
@@ -186,7 +196,8 @@ Implementation references:
 - [src/components/ScrollToTop.tsx:1-14](file://src/components/ScrollToTop.tsx#L1-L14)
 - [src/hooks/use-mobile.tsx:1-19](file://src/hooks/use-mobile.tsx#L1-L19)
 - [src/components/portal/PortalLayout.tsx:1-28](file://src/components/portal/PortalLayout.tsx#L1-L28)
-- [src/components/admin/AdminLayout.tsx:1-40](file://src/components/admin/AdminLayout.tsx#L1-L40)
+- [src/components/admin/AdminLayout.tsx:1-50](file://src/components/admin/AdminLayout.tsx#L1-L50)
+- [src/components/NotificationBell.tsx:1-218](file://src/components/NotificationBell.tsx#L1-L218)
 - [src/pages/ReferralRedirect.tsx:1-7](file://src/pages/ReferralRedirect.tsx#L1-L7)
 - [src/pages/ThankYou.tsx:29-80](file://src/pages/ThankYou.tsx#L29-L80)
 - [src/pages/Unsubscribe.tsx:10-56](file://src/pages/Unsubscribe.tsx#L10-L56)
@@ -194,7 +205,7 @@ Implementation references:
 ## Architecture Overview
 The routing architecture centers around React Router DOM with a provider-based setup. Static pages are mapped to routes, and nested routes encapsulate portal-related functionality. Providers manage global state and UI behavior.
 
-**Updated** The routing architecture now includes a new ReferralRedirect route that provides clean referral URL structure. The old PortalCalculator route has been removed from portal navigation.
+**Updated** The routing architecture now includes a new ReferralRedirect route that provides clean referral URL structure. The old PortalCalculator route has been removed from portal navigation. The admin layout now features an integrated notification bell system for real-time admin communications.
 
 ```mermaid
 graph TB
@@ -285,12 +296,13 @@ P-->>U : Display updated page content
   - The portal layout composes a sidebar, top bar, and outlet. It is protected by an authentication guard and provides a consistent header and navigation for authenticated routes.
 - Admin Layout
   - The admin layout provides secure access to administrative functions with role-based access control and comprehensive navigation for admin operations.
+  - **Updated** Now includes integrated NotificationBell component that displays real-time notifications for admin users.
 - Page Lifecycle Management
   - The ScrollToTop component runs on route changes, resetting scroll position. Providers set up global state and UI behavior, influencing how pages mount and update.
 
 References:
 - [src/components/portal/PortalLayout.tsx:1-28](file://src/components/portal/PortalLayout.tsx#L1-L28)
-- [src/components/admin/AdminLayout.tsx:1-40](file://src/components/admin/AdminLayout.tsx#L1-L40)
+- [src/components/admin/AdminLayout.tsx:1-50](file://src/components/admin/AdminLayout.tsx#L1-L50)
 - [src/components/ScrollToTop.tsx:1-14](file://src/components/ScrollToTop.tsx#L1-L14)
 - [src/App.tsx:147-158](file://src/App.tsx#L147-L158)
 
@@ -309,7 +321,7 @@ Providers --> Ready(["Page Ready"])
 
 **Section sources**
 - [src/components/portal/PortalLayout.tsx:1-28](file://src/components/portal/PortalLayout.tsx#L1-L28)
-- [src/components/admin/AdminLayout.tsx:1-40](file://src/components/admin/AdminLayout.tsx#L1-L40)
+- [src/components/admin/AdminLayout.tsx:1-50](file://src/components/admin/AdminLayout.tsx#L1-L50)
 - [src/components/ScrollToTop.tsx:1-14](file://src/components/ScrollToTop.tsx#L1-L14)
 - [src/App.tsx:147-158](file://src/App.tsx#L147-L158)
 
@@ -399,7 +411,23 @@ The Calculator link has been removed from portal navigation as it was moved to a
 
 ### Enhanced Admin Portal Implementation
 
-**Updated** The admin portal has been significantly enhanced with comprehensive affiliate management capabilities, new commission management features, and improved lead tracking functionality.
+**Updated** The admin portal has been significantly enhanced with comprehensive affiliate management capabilities, new commission management features, improved lead tracking functionality, and integrated notification system.
+
+#### AdminLayout with Notification Bell
+The AdminLayout now includes an integrated NotificationBell component for real-time admin communications:
+
+```mermaid
+graph TB
+AdminLayout["AdminLayout.tsx"]
+NotificationBell["NotificationBell.tsx<br/>Real-time notifications"]
+UserAvatar["User Avatar<br/>Admin profile display"]
+AdminLayout --> NotificationBell
+AdminLayout --> UserAvatar
+```
+
+**Diagram sources**
+- [src/components/admin/AdminLayout.tsx:30-35](file://src/components/admin/AdminLayout.tsx#L30-L35)
+- [src/components/NotificationBell.tsx:30-45](file://src/components/NotificationBell.tsx#L30-L45)
 
 #### AdminAffiliateDetail Page Architecture
 The new AdminAffiliateDetail page provides a comprehensive affiliate management interface with five distinct tabs:
@@ -497,11 +525,54 @@ CommissionsPage --> IndividualActions
 - [src/pages/admin/AdminCommissions.tsx:301-322](file://src/pages/admin/AdminCommissions.tsx#L301-L322)
 - [src/pages/admin/AdminCommissions.tsx:351-368](file://src/pages/admin/AdminCommissions.tsx#L351-L368)
 
+#### AdminLeadDetailDrawer
+The new AdminLeadDetailDrawer provides comprehensive lead information viewing with contact details, pipeline status, commission information, and assignment details:
+
+```mermaid
+graph TB
+LeadDetailDrawer["AdminLeadDetailDrawer.tsx"]
+ContactInfo["Contact Information<br/>Name, Email, Phone, Company"]
+PipelineStatus["Pipeline Status<br/>Status, Stage, Days in Stage, Deal Amount"]
+CommissionInfo["Commission Info<br/>Amount, Status"]
+AssignmentActions["Assignment & Next Actions<br/>Assigned Rep, Next Step, Next Appointment"]
+NotesUpdates["Notes & Updates<br/>Latest Update, Notes, Timestamps"]
+LeadDetailDrawer --> ContactInfo
+LeadDetailDrawer --> PipelineStatus
+LeadDetailDrawer --> CommissionInfo
+LeadDetailDrawer --> AssignmentActions
+LeadDetailDrawer --> NotesUpdates
+```
+
+**Diagram sources**
+- [src/components/admin/AdminLeadDetailDrawer.tsx:43-133](file://src/components/admin/AdminLeadDetailDrawer.tsx#L43-L133)
+
+#### NotificationBell System
+The integrated notification system provides real-time admin notifications with the following features:
+
+```mermaid
+graph TB
+NotificationBell["NotificationBell.tsx"]
+RealtimeSubscriptions["Real-time Subscriptions<br/>PostgreSQL Realtime"]
+NotificationPanel["Notification Panel<br/>50 most recent notifications"]
+MarkActions["Mark Actions<br/>Mark all read, Clear all"]
+TypeIcons["Type Icons & Colors<br/>Lead, Commission, Payout, System, Order"]
+NotificationBell --> RealtimeSubscriptions
+NotificationBell --> NotificationPanel
+NotificationBell --> MarkActions
+NotificationBell --> TypeIcons
+```
+
+**Diagram sources**
+- [src/components/NotificationBell.tsx:36-96](file://src/components/NotificationBell.tsx#L36-L96)
+- [src/components/NotificationBell.tsx:150-214](file://src/components/NotificationBell.tsx#L150-L214)
+
 **Section sources**
 - [src/pages/admin/AdminAffiliateDetail.tsx:35-182](file://src/pages/admin/AdminAffiliateDetail.tsx#L35-L182)
 - [src/pages/admin/AdminAffiliates.tsx:35-279](file://src/pages/admin/AdminAffiliates.tsx#L35-L279)
 - [src/pages/admin/AdminLeads.tsx:77-416](file://src/pages/admin/AdminLeads.tsx#L77-L416)
 - [src/pages/admin/AdminCommissions.tsx:57-466](file://src/pages/admin/AdminCommissions.tsx#L57-L466)
+- [src/components/admin/AdminLeadDetailDrawer.tsx:1-134](file://src/components/admin/AdminLeadDetailDrawer.tsx#L1-L134)
+- [src/components/NotificationBell.tsx:1-218](file://src/components/NotificationBell.tsx#L1-L218)
 
 ### Enhanced Thank You Page Implementation
 **Updated** The Thank You page now features sophisticated order processing with polling mechanisms and integration with the fetch-order edge function for Shopify order synchronization.
@@ -949,6 +1020,14 @@ AppTSX --> Providers["Providers"]
 - AdminLeads: Real-time statistics calculation and enhanced filtering
 - AdminCommissions: Bulk action selection with efficient state management
 - AdminAffiliateDetail: Tab-based lazy loading for improved performance
+- AdminLeadDetailDrawer: Right-side drawer with optimized rendering
+- NotificationBell: Real-time subscriptions with efficient state management
+
+**Updated** The integrated notification system provides:
+- Real-time PostgreSQL Realtime subscriptions for instant notifications
+- Efficient notification panel with 50-item limit
+- Mark all read and clear all functionality
+- Type-specific icons and color coding
 
 Recommendations:
 - Lazy-load heavy page components using React.lazy and Suspense boundaries around route elements.
@@ -970,6 +1049,8 @@ Recommendations:
 - [src/pages/admin/AdminLeads.tsx:162-174](file://src/pages/admin/AdminLeads.tsx#L162-L174)
 - [src/pages/admin/AdminCommissions.tsx:141-152](file://src/pages/admin/AdminCommissions.tsx#L141-L152)
 - [src/pages/admin/AdminAffiliateDetail.tsx:42-65](file://src/pages/admin/AdminAffiliateDetail.tsx#L42-L65)
+- [src/components/admin/AdminLeadDetailDrawer.tsx:43-133](file://src/components/admin/AdminLeadDetailDrawer.tsx#L43-L133)
+- [src/components/NotificationBell.tsx:36-96](file://src/components/NotificationBell.tsx#L36-L96)
 
 ## Troubleshooting Guide
 Common issues and resolutions:
@@ -984,7 +1065,7 @@ Common issues and resolutions:
   - Reference: [src/components/portal/PortalLayout.tsx:1-28](file://src/components/portal/PortalLayout.tsx#L1-L28)
 - Admin layout not rendering for authorized users
   - Verify the admin layout route is properly nested and guarded by AdminGuard.
-  - Reference: [src/components/admin/AdminLayout.tsx:1-40](file://src/components/admin/AdminLayout.tsx#L1-L40)
+  - Reference: [src/components/admin/AdminLayout.tsx:1-50](file://src/components/admin/AdminLayout.tsx#L1-L50)
 - SEO metadata not updating per page
   - Integrate a head management solution to dynamically update meta tags for each route.
   - References: [index.html:23-39](file://index.html#L23-L39)
@@ -1040,12 +1121,24 @@ Common issues and resolutions:
   - **Issue**: Bulk selection or status updates not working
   - **Solution**: Verify selectedCommissions state management, check updateCommissionStatus function, ensure proper error handling
   - Reference: [src/pages/admin/AdminCommissions.tsx:165-189](file://src/pages/admin/AdminCommissions.tsx#L165-L189)
+- **AdminLeadDetailDrawer not displaying**
+  - **Issue**: Lead detail drawer not opening or showing empty content
+  - **Solution**: Verify lead object structure, check drawer props passing, ensure proper conditional rendering
+  - Reference: [src/components/admin/AdminLeadDetailDrawer.tsx:43-133](file://src/components/admin/AdminLeadDetailDrawer.tsx#L43-L133)
+- **NotificationBell not showing notifications**
+  - **Issue**: Notification bell not displaying unread count or notifications
+  - **Solution**: Verify user authentication, check Supabase realtime subscriptions, ensure proper user ID prop passing
+  - Reference: [src/components/NotificationBell.tsx:30-45](file://src/components/NotificationBell.tsx#L30-L45)
+- **AdminLayout notification integration issues**
+  - **Issue**: Notification bell not appearing in admin layout
+  - **Solution**: Verify AdminLayout imports NotificationBell, check user authentication context, ensure proper conditional rendering
+  - Reference: [src/components/admin/AdminLayout.tsx:30-35](file://src/components/admin/AdminLayout.tsx#L30-L35)
 
 **Section sources**
 - [src/components/ScrollToTop.tsx:1-14](file://src/components/ScrollToTop.tsx#L1-L14)
 - [src/components/NavLink.tsx:1-28](file://src/components/NavLink.tsx#L1-L28)
 - [src/components/portal/PortalLayout.tsx:1-28](file://src/components/portal/PortalLayout.tsx#L1-L28)
-- [src/components/admin/AdminLayout.tsx:1-40](file://src/components/admin/AdminLayout.tsx#L1-L40)
+- [src/components/admin/AdminLayout.tsx:1-50](file://src/components/admin/AdminLayout.tsx#L1-L50)
 - [index.html:23-39](file://index.html#L23-L39)
 - [src/pages/ReferralRedirect.tsx:1-7](file://src/pages/ReferralRedirect.tsx#L1-L7)
 - [src/lib/referralTracking.ts:13-23](file://src/lib/referralTracking.ts#L13-L23)
@@ -1060,9 +1153,12 @@ Common issues and resolutions:
 - [src/pages/admin/AdminAffiliates.tsx:97-104](file://src/pages/admin/AdminAffiliates.tsx#L97-L104)
 - [src/pages/admin/AdminLeads.tsx:195](file://src/pages/admin/AdminLeads.tsx#L195)
 - [src/pages/admin/AdminCommissions.tsx:165-189](file://src/pages/admin/AdminCommissions.tsx#L165-L189)
+- [src/components/admin/AdminLeadDetailDrawer.tsx:43-133](file://src/components/admin/AdminLeadDetailDrawer.tsx#L43-L133)
+- [src/components/NotificationBell.tsx:30-45](file://src/components/NotificationBell.tsx#L30-L45)
+- [src/components/admin/AdminLayout.tsx:30-35](file://src/components/admin/AdminLayout.tsx#L30-L35)
 
 ## Conclusion
-The Ryland application employs a clean, centralized routing architecture with shared layouts and navigation utilities. Providers establish a robust foundation for state and UI behavior, while responsive and performance configurations support scalable growth. The new ReferralRedirect route provides clean URL structure for referral links, seamlessly integrating with the Assessment page and GHL CRM for enhanced attribution tracking. The removal of the old PortalCalculator route streamlines portal navigation, focusing on core functionality for partners. The Assessment page demonstrates advanced integration patterns with parallel processing capabilities that improve user experience while maintaining reliable data synchronization. The enhanced Thank You page provides sophisticated order processing with polling mechanisms and integration with the fetch-order edge function. The new Unsubscribe page delivers comprehensive email management with token-based validation and integration with the email suppression system. The addition of comprehensive admin portal functionality provides secure access control, detailed affiliate management interfaces, enhanced lead tracking capabilities, and robust commission management features. The new AdminAffiliateDetail page offers a tabbed interface for comprehensive affiliate oversight, while AdminAffiliates provides improved sorting and commission rate visualization. The enhanced AdminLeads page delivers better data presentation with statistics and filtering, and the new AdminCommissions page centralizes commission management with bulk actions. The updated email infrastructure integration ensures proper transactional email handling and compliance with email suppression requirements. The AdminLeadDetailDrawer provides comprehensive lead detail viewing with contact information, pipeline status, commission details, and assignment information. The streamlined portal navigation removes redundant links while maintaining essential functionality for partner portal users. By following the patterns outlined here—consistent route declarations, shared layouts, SEO-aware meta management, robust integration architectures, comprehensive email management, strong security practices, and enhanced admin capabilities—you can reliably implement new pages, optimize performance, and deliver a seamless user experience across desktop and mobile devices.
+The Ryland application employs a clean, centralized routing architecture with shared layouts and navigation utilities. Providers establish a robust foundation for state and UI behavior, while responsive and performance configurations support scalable growth. The new ReferralRedirect route provides clean URL structure for referral links, seamlessly integrating with the Assessment page and GHL CRM for enhanced attribution tracking. The removal of the old PortalCalculator route streamlines portal navigation, focusing on core functionality for partners. The Assessment page demonstrates advanced integration patterns with parallel processing capabilities that improve user experience while maintaining reliable data synchronization. The enhanced Thank You page provides sophisticated order processing with polling mechanisms and integration with the fetch-order edge function. The new Unsubscribe page delivers comprehensive email management with token-based validation and integration with the email suppression system. The addition of comprehensive admin portal functionality provides secure access control, detailed affiliate management interfaces, enhanced lead tracking capabilities, robust commission management features, and integrated notification system. The new AdminAffiliateDetail page offers a tabbed interface for comprehensive affiliate oversight with five distinct tabs covering profile, commissions, leads, payouts, and settings. The enhanced AdminAffiliates page provides improved sorting, commission rate visualization, and comprehensive statistics. The AdminLeadDetailDrawer offers detailed lead information viewing with contact details, pipeline status, commission information, and assignment details. The integrated NotificationBell system provides real-time admin notifications with type-specific icons and color coding. The streamlined portal navigation removes redundant links while maintaining essential functionality for partner portal users. The enhanced admin interface demonstrates comprehensive affiliate management capabilities with improved user experience and accessibility. By following the patterns outlined here—consistent route declarations, shared layouts, SEO-aware meta management, robust integration architectures, comprehensive email management, strong security practices, enhanced admin capabilities, and integrated notification system—you can reliably implement new pages, optimize performance, and deliver a seamless user experience across desktop and mobile devices.
 
 [No sources needed since this section summarizes without analyzing specific files]
 
@@ -1113,5 +1209,16 @@ The Ryland application employs a clean, centralized routing architecture with sh
   - Verify commission status updates and bulk action handling
   - Test admin sidebar navigation and responsive behavior
   - Verify proper error handling for admin data operations
+  - Test NotificationBell integration and real-time notifications
+  - Verify affiliate detail tabs (Profile, Commissions, Leads, Payouts, Settings)
+  - Test AdminLeadDetailDrawer comprehensive lead information display
+- **Notification system integration checklist**:
+  - Verify NotificationBell component is properly integrated into AdminLayout
+  - Test real-time PostgreSQL Realtime subscriptions
+  - Verify notification types and color coding
+  - Test mark all read and clear all functionality
+  - Verify notification panel display and interaction
+  - Test user authentication context for notification filtering
+  - Verify proper cleanup of realtime subscriptions on component unmount
 
 [No sources needed since this section provides general guidance]

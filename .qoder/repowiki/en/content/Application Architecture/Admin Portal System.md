@@ -14,6 +14,8 @@
 - [src/components/admin/AdminGuard.tsx](file://src/components/admin/AdminGuard.tsx)
 - [src/components/admin/AdminSidebar.tsx](file://src/components/admin/AdminSidebar.tsx)
 - [src/components/admin/AdminLeadDetailDrawer.tsx](file://src/components/admin/AdminLeadDetailDrawer.tsx)
+- [src/components/portal/LeadDetailDrawer.tsx](file://src/components/portal/LeadDetailDrawer.tsx)
+- [src/components/portal/LeadsTable.tsx](file://src/components/portal/LeadsTable.tsx)
 - [src/pages/admin/AdminLogin.tsx](file://src/pages/admin/AdminLogin.tsx)
 - [src/pages/admin/AdminDashboard.tsx](file://src/pages/admin/AdminDashboard.tsx)
 - [src/pages/admin/AdminLeads.tsx](file://src/pages/admin/AdminLeads.tsx)
@@ -35,11 +37,13 @@
 
 ## Update Summary
 **Changes Made**
-- **Updated** AffiliateProfileTab component completely rewritten from static display to interactive editing interface with form inputs, validation, and real-time updates
-- **Updated** AdminAffiliateDetail page enhanced to pass onUpdate callback enabling real-time data synchronization across all affiliate detail tabs
-- **Updated** AffiliateSettingsTab component now includes real-time data synchronization with onUpdate callback
-- **Updated** Enhanced real-time data flow between parent component and child tabs for seamless user experience
-- **Updated** Improved form validation and error handling across all interactive affiliate management components
+- **Updated** Enhanced LeadDetailDrawer with intelligent link generation for email and phone contacts
+- **Updated** Enhanced LeadsTable with clickable contact information and improved row interaction
+- **Updated** AffiliateProfileTab component with dual-mode editing interface (view/edit modes)
+- **Updated** AffiliateSettingsTab with real-time data synchronization and admin controls
+- **Updated** AdminAffiliateDetail page with comprehensive real-time data flow between tabs
+- **Updated** Enhanced database structure with dual commission rate tracking and admin notes
+- **Updated** Improved drawer-based lead detail interface with comprehensive contact information
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -53,11 +57,11 @@
 9. [Conclusion](#conclusion)
 
 ## Introduction
-This document provides comprehensive documentation for the Admin Portal System, a React-based administrative interface for managing an affiliate marketing program. The system integrates with Supabase for authentication, real-time database operations, and user management. It offers dashboard analytics, comprehensive affiliate management with dual commission rate tracking, lead tracking with drawer interface, commission processing, payout management, and reporting capabilities.
+This document provides comprehensive documentation for the Admin Portal System, a React-based administrative interface for managing an affiliate marketing program. The system integrates with Supabase for authentication, real-time database operations, and user management. It offers dashboard analytics, comprehensive affiliate management with dual commission rate tracking, lead tracking with enhanced drawer interfaces, commission processing, payout management, and reporting capabilities.
 
 The Admin Portal is structured as a nested routing system under `/portal/admin`, protected by role-based authentication ensuring only administrators can access sensitive controls. The frontend leverages modern React patterns including Suspense for route-level code splitting, React Query for data caching, and a comprehensive UI toolkit for responsive layouts.
 
-**Updated** The system now features a comprehensive affiliate management system with five specialized tabs, enhanced authentication with retry logic, new AdminLeadDetailDrawer component, and improved database structure supporting dual commission rate tracking. The new affiliate detail page provides a complete 360-degree view of affiliate performance with real-time data visualization and comprehensive management capabilities. The AffiliateProfileTab component has been completely rewritten to provide interactive editing capabilities with form validation and real-time updates.
+**Updated** The system now features enhanced lead management interfaces with intelligent link generation, comprehensive affiliate profile management with dual-mode editing capabilities, real-time data synchronization across all affiliate detail tabs, and an improved database structure supporting dual commission rate tracking with admin notes functionality.
 
 ## Project Structure
 The Admin Portal resides within a larger React application and follows a feature-based organization:
@@ -67,9 +71,10 @@ The Admin Portal resides within a larger React application and follows a feature
 - UI components use a consistent design system with shadcn/ui primitives
 - Modern hooks pattern separates authentication and authorization logic
 - Database layer includes comprehensive role management with security policies
-- **New**: Affiliate detail system with specialized tabs for comprehensive management
-- **New**: Drawer-based lead detail interface for enhanced user experience
+- **New**: Enhanced lead management interfaces with intelligent link generation
+- **New**: Dual-mode affiliate profile editing with view/edit modes
 - **New**: Real-time data synchronization through onUpdate callbacks across all affiliate detail tabs
+- **New**: Enhanced database structure with dual commission rates and admin notes
 
 ```mermaid
 graph TB
@@ -92,6 +97,8 @@ AdminLayout[src/components/admin/AdminLayout.tsx]
 AdminGuard[src/components/admin/AdminGuard.tsx]
 AdminSidebar[src/components/admin/AdminSidebar.tsx]
 AdminLeadDetailDrawer[src/components/admin/AdminLeadDetailDrawer.tsx]
+LeadDetailDrawer[src/components/portal/LeadDetailDrawer.tsx]
+LeadsTable[src/components/portal/LeadsTable.tsx]
 </subgraph
 subgraph "Admin Pages"
 Dashboard[src/pages/admin/AdminDashboard.tsx]
@@ -102,7 +109,7 @@ Commissions[src/pages/admin/AdminCommissions.tsx]
 Payouts[src/pages/admin/AdminPayouts.tsx]
 Reports[src/pages/admin/AdminReports.tsx]
 end
-subgraph "Affiliate Detail Tabs"
+subgraph "Enhanced Affiliate Detail Tabs"
 ProfileTab[src/components/admin/affiliate-detail/AffiliateProfileTab.tsx]
 CommissionsTab[src/components/admin/affiliate-detail/AffiliateCommissionsTab.tsx]
 LeadsTab[src/components/admin/affiliate-detail/AffiliateLeadsTab.tsx]
@@ -113,7 +120,10 @@ subgraph "Real-time Data Flow"
 OnUpdateCallback["onUpdate Callback Prop"]
 FetchAffiliate["fetchAffiliate Function"]
 RealTimeSync["Real-time Data Synchronization"]
-end
+EnhancedLeads["Enhanced Leads Management"]
+IntelligentLinks["Intelligent Link Generation"]
+DualModeEditing["Dual-mode Editing Interface"]
+</subgraph
 subgraph "Integration"
 SupabaseClient[src/integrations/supabase/client.ts]
 DatabaseLayer["Enhanced Database Layer"]
@@ -121,7 +131,7 @@ DualRateColumns["Dual Commission Rate Columns"]
 AdminNotesColumn["Admin Notes Column"]
 StandardizedTypes["Standardized Commission Types"]
 EndRolePolicy["Admin RLS Policies"]
-end
+</subgraph
 Main --> App
 App --> PublicRoutes
 App --> AdminRoutes
@@ -131,6 +141,8 @@ AdminRoutes --> AdminLayout
 AdminLayout --> AdminGuard
 AdminLayout --> AdminSidebar
 AdminLayout --> AdminLeadDetailDrawer
+AdminLayout --> LeadDetailDrawer
+AdminLayout --> LeadsTable
 AdminGuard --> AuthProvider
 AuthProvider --> AdminRoleHook
 AdminLayout --> Dashboard
@@ -150,6 +162,9 @@ SettingsTab --> OnUpdateCallback
 OnUpdateCallback --> FetchAffiliate
 FetchAffiliate --> RealTimeSync
 LeadsTab --> AdminLeadDetailDrawer
+Leads --> EnhancedLeads
+EnhancedLeads --> IntelligentLinks
+ProfileTab --> DualModeEditing
 AdminLayout --> SupabaseClient
 SupabaseClient --> DatabaseLayer
 DatabaseLayer --> DualRateColumns
@@ -169,6 +184,8 @@ DatabaseLayer --> EndRolePolicy
 - [src/components/admin/AdminGuard.tsx:10-35](file://src/components/admin/AdminGuard.tsx#L10-L35)
 - [src/components/admin/AdminSidebar.tsx:30-92](file://src/components/admin/AdminSidebar.tsx#L30-L92)
 - [src/components/admin/AdminLeadDetailDrawer.tsx:43-133](file://src/components/admin/AdminLeadDetailDrawer.tsx#L43-L133)
+- [src/components/portal/LeadDetailDrawer.tsx:41-104](file://src/components/portal/LeadDetailDrawer.tsx#L41-L104)
+- [src/components/portal/LeadsTable.tsx:36-152](file://src/components/portal/LeadsTable.tsx#L36-L152)
 - [src/pages/admin/AdminDashboard.tsx:23-194](file://src/pages/admin/AdminDashboard.tsx#L23-L194)
 - [src/pages/admin/AdminLeads.tsx:54-351](file://src/pages/admin/AdminLeads.tsx#L54-L351)
 - [src/pages/admin/AdminAffiliates.tsx:52-385](file://src/pages/admin/AdminAffiliates.tsx#L52-L385)
@@ -186,49 +203,57 @@ DatabaseLayer --> EndRolePolicy
 ## Core Components
 The Admin Portal consists of several interconnected components that work together to provide a comprehensive administrative interface:
 
-### Enhanced Affiliate Management System
-**Updated** The system now features a comprehensive affiliate management system with five specialized tabs, all featuring real-time data synchronization through onUpdate callbacks:
+### Enhanced Lead Management Interfaces
+**Updated** The system now features comprehensive lead management interfaces with intelligent link generation and enhanced contact information:
 
-#### Profile Tab - Completely Rewritten
-**Updated** The Profile tab has been completely rewritten from a static display to an interactive editing interface with form inputs, validation, and real-time updates:
+#### Enhanced LeadDetailDrawer with Intelligent Link Generation
+**Updated** The LeadDetailDrawer component now provides intelligent link generation for email and phone contacts:
 
-- **Interactive Form Inputs**: Full name, email, phone, company name, website, and payment email fields with real-time validation
-- **Form State Management**: Local state management with controlled components for immediate user feedback
+- **Intelligent Email Links**: Automatic `mailto:` protocol generation for email addresses
+- **Intelligent Phone Links**: Automatic `tel:` protocol generation for phone numbers  
+- **External Website Links**: Automatic protocol detection for website URLs
+- **Targeted External Links**: Proper `_blank` target handling for external websites
+- **Rel Attributes**: Security-conscious `rel="noopener noreferrer"` for external links
+- **Fallback Handling**: Graceful handling of missing contact information
+- **Consistent Styling**: Uniform link styling with hover effects and underline states
+
+#### Enhanced LeadsTable with Clickable Contact Information
+**Updated** The LeadsTable component now features improved row interaction and contact information handling:
+
+- **Clickable Row Interaction**: Entire row click-to-expand functionality
+- **Enhanced Contact Information**: Direct email and phone link generation
+- **Improved Action Menus**: Contextual actions with intelligent link handling
+- **Better User Experience**: Streamlined lead management workflow
+- **Responsive Design**: Mobile-friendly contact information display
+- **Visual Indicators**: Notes indicator badges for leads with additional information
+
+### Enhanced Affiliate Profile Management
+**Updated** The system now features comprehensive affiliate profile management with dual-mode editing capabilities:
+
+#### AffiliateProfileTab - Dual-Mode Editing Interface
+**Updated** The AffiliateProfileTab component now provides a sophisticated dual-mode editing interface:
+
+- **View Mode**: Clean, professional display of affiliate information with external link support
+- **Edit Mode**: Comprehensive form interface with real-time validation
+- **Dual-Mode Switching**: Seamless transition between view and edit states
+- **Unsaved Changes Detection**: Intelligent change tracking with discard confirmation
+- **Form State Management**: Controlled components with immediate user feedback
 - **Real-time Validation**: Client-side validation with error messages and loading states
 - **Password Reset Integration**: Built-in password reset functionality with email notifications
-- **Real-time Updates**: Automatic data refresh through onUpdate callback after successful saves
-- **Loading States**: Visual feedback during save and reset operations
 - **Toast Notifications**: User-friendly success/error feedback for all operations
+- **Discard Changes Dialog**: Confirmation dialog for unsaved modifications
+- **Loading States**: Visual feedback during save and reset operations
 
-#### Commissions Tab
-The Commissions tab features dual commission rate tracking with:
-- Separate display for upfront and backend commission rates
-- Comprehensive commission history with type differentiation
-- Real-time calculation of total earned, pending, upfront, and backend amounts
-- Detailed commission breakdown with lead information and deal amounts
-- Color-coded status indicators for different commission states
+#### AffiliateSettingsTab - Enhanced with Real-time Sync
+**Updated** The AffiliateSettingsTab component now includes comprehensive admin controls with real-time data synchronization:
 
-#### Leads Tab
-The Leads tab implements a drawer-based interface for lead management:
-- Interactive leads table with click-to-expand functionality
-- Drawer interface for detailed lead information
-- Comprehensive lead detail visualization with contact info, pipeline status, and commission data
-- Integration with AdminLeadDetailDrawer for enhanced user experience
-
-#### Payouts Tab
-The Payouts tab provides comprehensive payment management:
-- Payment email and W-9 file status display
-- Total paid and pending amount calculations
-- Payout history with status tracking and period information
-- Payment method and date formatting
-
-#### Settings Tab - Enhanced with Real-time Sync
-**Updated** The Settings tab now includes real-time data synchronization:
-- Commission rate editing with real-time validation
-- Status management with approve/suspend/reactivate actions
-- Admin notes management with internal tracking
-- Real-time updates with loading states and error handling
-- **New**: onUpdate callback integration for seamless data synchronization
+- **Dual Commission Rate Management**: Separate upfront and backend commission rate editing
+- **Status Management**: Approve/suspend/reactivate actions with immediate effect
+- **Admin Notes Management**: Internal tracking with persistent storage
+- **Real-time Updates**: Automatic data refresh through onUpdate callback
+- **Loading States**: Visual feedback during save operations
+- **Error Handling**: Comprehensive error handling with user feedback
+- **Status Badge Display**: Current status with color-coded visual indicators
 
 ### Enhanced Authentication and Authorization
 The system uses Supabase for authentication with role-based access control. The AdminGuard component now utilizes modern hooks pattern with separate useAuth and useAdminRole hooks for improved modularity and maintainability. The new AdminLogin page provides secure two-step authentication with credential verification followed by admin role validation.
@@ -256,31 +281,23 @@ The AdminSidebar features a completely redesigned navigation system with:
 - Integrated sign out functionality with localStorage cleanup
 - Enhanced hover effects and transitions
 
-### Enhanced Lead Detail Interface
-**New** The AdminLeadDetailDrawer component provides comprehensive lead detail visualization:
-- Right-side drawer interface with smooth animations
-- Contact information display with clickable links
-- Pipeline status with color-coded badges and stage tracking
-- Commission information with amount and status display
-- Assignment and next action tracking
-- Notes and update history with formatting
-- ClickUp integration placeholder for future functionality
-
 ### Enhanced Data Management Pages
 - Dashboard: Real-time statistics with improved loading states and better error handling
-- Leads: Comprehensive lead tracking with advanced filtering and search capabilities
-- Affiliates: Affiliate lifecycle management with enhanced status updates and dual commission rate management
+- Leads: Comprehensive lead tracking with advanced filtering, search capabilities, and enhanced contact information
+- Affiliates: Affiliate lifecycle management with enhanced status updates, dual commission rate management, and dual-mode profile editing
 - Commissions: Commission approval and payment processing with improved TypeScript type safety
 - Payouts: Automated payout generation with better status tracking
 - Reports: Performance analytics with enhanced export capabilities
 
-**Updated** The commission management system now includes better TypeScript interfaces, improved status handling, and enhanced bulk operation capabilities.
+**Updated** The commission management system now includes better TypeScript interfaces, improved status handling, enhanced bulk operation capabilities, and dual commission rate tracking.
 
 **Section sources**
 - [src/components/admin/AdminGuard.tsx:10-35](file://src/components/admin/AdminGuard.tsx#L10-L35)
 - [src/components/admin/AdminLayout.tsx:9-40](file://src/components/admin/AdminLayout.tsx#L9-L40)
 - [src/components/admin/AdminSidebar.tsx:30-92](file://src/components/admin/AdminSidebar.tsx#L30-L92)
 - [src/components/admin/AdminLeadDetailDrawer.tsx:43-133](file://src/components/admin/AdminLeadDetailDrawer.tsx#L43-L133)
+- [src/components/portal/LeadDetailDrawer.tsx:14-25](file://src/components/portal/LeadDetailDrawer.tsx#L14-L25)
+- [src/components/portal/LeadsTable.tsx:82-85](file://src/components/portal/LeadsTable.tsx#L82-L85)
 - [src/pages/admin/AdminLogin.tsx:24-52](file://src/pages/admin/AdminLogin.tsx#L24-L52)
 - [src/pages/admin/AdminDashboard.tsx:23-194](file://src/pages/admin/AdminDashboard.tsx#L23-L194)
 - [src/pages/admin/AdminLeads.tsx:54-351](file://src/pages/admin/AdminLeads.tsx#L54-L351)
@@ -301,9 +318,11 @@ AdminLayout
 AdminSidebar
 AdminLogin
 AdminLeadDetailDrawer
+LeadDetailDrawer
+LeadsTable
 PageComponents["Admin Page Components"]
 PortalLogin
-AffiliateDetailTabs["Affiliate Detail Tabs"]
+AffiliateDetailTabs["Enhanced Affiliate Detail Tabs"]
 </subgraph
 subgraph "Authentication Layer"
 AuthProvider
@@ -314,6 +333,9 @@ subgraph "Business Logic Layer"
 AuthGuard
 DataServices
 Validation
+EnhancedLeadManagement["Enhanced Lead Management"]
+DualModeEditing["Dual-mode Editing System"]
+RealTimeSync["Real-time Data Synchronization"]
 </subgraph
 subgraph "Data Access Layer"
 SupabaseClient
@@ -321,6 +343,9 @@ DatabaseTables
 EnhancedDatabaseLayer["Enhanced Database Layer with Dual Rates"]
 HasRoleFunction["has_role Security Function"]
 EndRolePolicy["Admin RLS Policies"]
+DualCommissionRates["Dual Commission Rate Columns"]
+AdminNotes["Admin Notes Column"]
+StandardizedTypes["Standardized Commission Types"]
 </subgraph
 subgraph "External Integrations"
 Auth0
@@ -329,6 +354,8 @@ PaymentSystems
 AdminLayout --> AdminSidebar
 AdminLayout --> AdminLogin
 AdminLayout --> AdminLeadDetailDrawer
+AdminLayout --> LeadDetailDrawer
+AdminLayout --> LeadsTable
 AdminLayout --> PageComponents
 PortalLogin --> AuthProvider
 PageComponents --> AuthGuard
@@ -342,9 +369,11 @@ DataServices --> PaymentSystems
 DatabaseTables --> EnhancedDatabaseLayer
 EnhancedDatabaseLayer --> HasRoleFunction
 EnhancedDatabaseLayer --> EndRolePolicy
-EnhancedDatabaseLayer --> DualCommissionRates["Dual Commission Rate Columns"]
-EnhancedDatabaseLayer --> AdminNotes["Admin Notes Column"]
-EnhancedDatabaseLayer --> StandardizedTypes["Standardized Commission Types"]
+EnhancedDatabaseLayer --> DualCommissionRates
+EnhancedDatabaseLayer --> AdminNotes
+EnhancedDatabaseLayer --> StandardizedTypes
+EnhancedLeadManagement --> IntelligentLinks
+DualModeEditing --> RealTimeSync
 ```
 
 **Diagram sources**
@@ -367,10 +396,162 @@ The architecture emphasizes:
 - Comprehensive database security policies with RLS
 - **New**: Dual commission rate tracking system with separate upfront and backend rates
 - **New**: Comprehensive affiliate detail management with specialized tabs
-- **New**: Drawer-based lead detail interface for enhanced user experience
+- **New**: Enhanced drawer-based lead detail interface with intelligent link generation
+- **New**: Dual-mode editing interface for affiliate profiles with view/edit modes
 - **New**: Real-time data flow between parent component and child tabs for seamless user experience
+- **New**: Enhanced lead management with clickable contact information and improved user interaction
 
 ## Detailed Component Analysis
+
+### Enhanced Lead Management System
+**Updated** The system now features comprehensive lead management interfaces with intelligent link generation and enhanced user interaction:
+
+```mermaid
+sequenceDiagram
+participant User as "Admin User"
+participant LeadsTable as "LeadsTable Component"
+participant LeadDetailDrawer as "LeadDetailDrawer Component"
+participant ContactInfo as "Contact Information"
+User->>LeadsTable : Click lead row
+LeadsTable->>LeadDetailDrawer : Open with lead data
+LeadDetailDrawer->>ContactInfo : Display contact info
+ContactInfo->>ContactInfo : Check for email/phone
+alt Email exists
+ContactInfo->>User : Generate mailto : link
+else Phone exists
+ContactInfo->>User : Generate tel : link
+else Website exists
+ContactInfo->>User : Generate external link
+end
+User->>ContactInfo : Click link
+ContactInfo->>User : Open in new tab/window
+```
+
+**Diagram sources**
+- [src/components/portal/LeadsTable.tsx:82-85](file://src/components/portal/LeadsTable.tsx#L82-L85)
+- [src/components/portal/LeadDetailDrawer.tsx:14-25](file://src/components/portal/LeadDetailDrawer.tsx#L14-L25)
+
+Key features include:
+- **Intelligent Link Generation**: Automatic protocol detection for email (`mailto:`), phone (`tel:`), and website links
+- **External Link Handling**: Proper target and rel attributes for security and UX
+- **Fallback Handling**: Graceful degradation when contact information is missing
+- **Consistent Styling**: Uniform link appearance with hover effects
+- **Enhanced Row Interaction**: Clickable rows with visual feedback
+- **Improved Contact Information**: Direct access to communication channels
+
+**Section sources**
+- [src/components/portal/LeadDetailDrawer.tsx:14-25](file://src/components/portal/LeadDetailDrawer.tsx#L14-L25)
+- [src/components/portal/LeadsTable.tsx:82-85](file://src/components/portal/LeadsTable.tsx#L82-L85)
+
+### Enhanced Affiliate Profile Management System
+**Updated** The system now features comprehensive affiliate profile management with dual-mode editing capabilities:
+
+```mermaid
+stateDiagram-v2
+[*] --> ViewMode
+ViewMode --> EditMode : Click Edit
+EditMode --> Saving : Click Save
+Saving --> ViewMode : Save Success
+Saving --> EditMode : Save Error
+ViewMode --> DiscardChanges : Click Cancel with changes
+DiscardChanges --> ViewMode : Confirm Discard
+ViewMode --> [*] : Click Back
+EditMode --> ViewMode : Click Cancel without changes
+EditMode --> [*] : Click Back
+state ViewMode {
+[*] --> DisplayInfo
+DisplayInfo --> ClickEdit : User clicks edit
+ClickEdit --> EditMode
+}
+state EditMode {
+[*] --> FormInput
+FormInput --> ValidateForm : User submits
+ValidateForm --> Saving : Valid form
+ValidateForm --> EditMode : Invalid form
+}
+state Saving {
+[*] --> UpdateDatabase
+UpdateDatabase --> Success : Update success
+UpdateDatabase --> Error : Update error
+Success --> ViewMode : Show success
+Error --> EditMode : Show error
+}
+```
+
+**Diagram sources**
+- [src/components/admin/affiliate-detail/AffiliateProfileTab.tsx:51-303](file://src/components/admin/affiliate-detail/AffiliateProfileTab.tsx#L51-L303)
+
+Key features include:
+- **Dual-Mode Interface**: Seamless switching between view and edit modes
+- **Unsaved Changes Detection**: Intelligent change tracking with discard confirmation
+- **Real-time Validation**: Client-side validation with immediate feedback
+- **Password Reset Integration**: Built-in password reset functionality
+- **Toast Notifications**: User-friendly success/error feedback
+- **Discard Changes Dialog**: Confirmation dialog for unsaved modifications
+- **Loading States**: Visual feedback during save operations
+
+**Section sources**
+- [src/components/admin/affiliate-detail/AffiliateProfileTab.tsx:51-303](file://src/components/admin/affiliate-detail/AffiliateProfileTab.tsx#L51-L303)
+
+### Enhanced Affiliate Settings Management
+**Updated** The AffiliateSettingsTab component now provides comprehensive admin controls with real-time data synchronization:
+
+```mermaid
+graph TB
+subgraph "Commission Rate Management"
+UpfrontRate["Upfront Commission Rate Input"]
+BackendRate["Backend Commission Rate Input"]
+SaveRates["Save Rates Button"]
+UpdateRates["updateRates Function"]
+</subgraph
+subgraph "Status Management"
+StatusBadge["Current Status Badge"]
+ApproveBtn["Approve Button"]
+SuspendBtn["Suspend Button"]
+ReactivateBtn["Reactivate Button"]
+UpdateStatus["updateStatus Function"]
+</subgraph
+subgraph "Admin Notes Management"
+AdminNotes["Admin Notes Textarea"]
+SaveNotes["Save Notes Button"]
+UpdateNotes["updateNotes Function"]
+</subgraph
+subgraph "Real-time Synchronization"
+OnUpdateCallback["onUpdate Callback"]
+FetchAffiliate["fetchAffiliate Function"]
+RealTimeSync["Real-time Data Synchronization"]
+</subgraph
+UpfrontRate --> SaveRates
+BackendRate --> SaveRates
+SaveRates --> UpdateRates
+UpdateRates --> OnUpdateCallback
+OnUpdateCallback --> FetchAffiliate
+FetchAffiliate --> RealTimeSync
+StatusBadge --> ApproveBtn
+StatusBadge --> SuspendBtn
+StatusBadge --> ReactivateBtn
+ApproveBtn --> UpdateStatus
+SuspendBtn --> UpdateStatus
+ReactivateBtn --> UpdateStatus
+UpdateStatus --> OnUpdateCallback
+AdminNotes --> SaveNotes
+SaveNotes --> UpdateNotes
+UpdateNotes --> OnUpdateCallback
+```
+
+**Diagram sources**
+- [src/components/admin/affiliate-detail/AffiliateSettingsTab.tsx:25-187](file://src/components/admin/affiliate-detail/AffiliateSettingsTab.tsx#L25-L187)
+
+Key features include:
+- **Dual Commission Rate Management**: Separate upfront and backend rate editing with validation
+- **Status Management**: Approve/suspend/reactivate actions with immediate effect
+- **Admin Notes Management**: Internal tracking with persistent storage
+- **Real-time Updates**: Automatic data refresh through onUpdate callback
+- **Loading States**: Visual feedback during save operations
+- **Error Handling**: Comprehensive error handling with user feedback
+
+**Section sources**
+- [src/components/admin/affiliate-detail/AffiliateSettingsTab.tsx:25-187](file://src/components/admin/affiliate-detail/AffiliateSettingsTab.tsx#L25-L187)
 
 ### Secure Admin Authentication Flow
 The new AdminLogin page implements a comprehensive two-step authentication system:
@@ -582,10 +763,10 @@ Key features include:
 
 ```mermaid
 graph TB
-subgraph "Affiliate Detail Tabs"
-ProfileTab["Profile Tab<br/>Interactive Editing<br/>Form Validation<br/>Real-time Updates"]
+subgraph "Enhanced Affiliate Detail Tabs"
+ProfileTab["Profile Tab<br/>Dual-mode Editing<br/>View/Edit Modes<br/>Real-time Updates"]
 CommissionsTab["Commissions Tab<br/>Dual Rate Tracking"]
-LeadsTab["Leads Tab<br/>Drawer Interface"]
+LeadsTab["Leads Tab<br/>Enhanced Drawer Interface"]
 PayoutsTab["Payouts Tab<br/>Payment Management"]
 SettingsTab["Settings Tab<br/>Admin Controls<br/>Real-time Sync"]
 end
@@ -597,7 +778,10 @@ PayoutHistory["Payout History"]
 OnUpdateCallback["onUpdate Callback"]
 FetchAffiliate["fetchAffiliate Function"]
 RealTimeSync["Real-time Data Synchronization"]
-end
+DualModeInterface["Dual-mode Interface"]
+IntelligentLinks["Intelligent Link Generation"]
+EnhancedLeads["Enhanced Leads Management"]
+</subgraph
 AffiliateData --> ProfileTab
 AffiliateData --> CommissionsTab
 AffiliateData --> LeadsTab
@@ -610,6 +794,9 @@ ProfileTab --> OnUpdateCallback
 SettingsTab --> OnUpdateCallback
 OnUpdateCallback --> FetchAffiliate
 FetchAffiliate --> RealTimeSync
+ProfileTab --> DualModeInterface
+LeadsTab --> EnhancedLeads
+EnhancedLeads --> IntelligentLinks
 ```
 
 **Diagram sources**
@@ -618,13 +805,14 @@ FetchAffiliate --> RealTimeSync
 Key features include:
 - Five-tab interface with comprehensive affiliate management
 - **New**: Real-time data synchronization through onUpdate callbacks
-- **New**: Interactive editing capabilities in Profile Tab with form validation
+- **New**: Dual-mode editing capabilities in Profile Tab with view/edit modes
 - **New**: Seamless data updates across all affiliate detail tabs
 - Dual commission rate display with upfront and backend rates
-- Drawer-based lead detail interface for enhanced user experience
+- Enhanced drawer-based lead detail interface for improved user experience
 - Comprehensive payout management with payment email and W-9 status
 - Admin-only settings with status controls and notes management
 - Real-time data updates with loading states and error handling
+- **New**: Intelligent link generation for external website URLs
 
 **Section sources**
 - [src/pages/admin/AdminAffiliateDetail.tsx:35-181](file://src/pages/admin/AdminAffiliateDetail.tsx#L35-L181)
@@ -920,6 +1108,7 @@ The Admin Portal implements several performance optimization strategies with enh
 - **New**: AdminLogin page implements immediate role verification to prevent unnecessary navigation
 - **New**: Enhanced retry logic with exponential backoff for improved session stability
 - **New**: Real-time data synchronization reduces redundant data fetching operations
+- **New**: Dual-mode editing interface reduces unnecessary re-renders during state changes
 
 ### Advanced Rendering Optimizations
 - Route-level code splitting with Suspense boundaries
@@ -929,6 +1118,8 @@ The Admin Portal implements several performance optimization strategies with enh
 - Modern hooks pattern reduces unnecessary re-renders
 - **New**: Drawer-based interface with conditional rendering for better performance
 - **New**: Real-time data updates with efficient state management across all tabs
+- **New**: Intelligent link generation with minimal DOM overhead
+- **New**: Enhanced lead table with optimized row interaction handling
 
 ### Enhanced Network Efficiency
 - Efficient database queries with selective field retrieval
@@ -936,10 +1127,11 @@ The Admin Portal implements several performance optimization strategies with enh
 - Debounced search functionality to reduce API calls
 - Local state management for frequently accessed data
 - **New**: Dual-check role verification system prevents unnecessary RPC calls
-- **New**: Caching mechanism stores user IDs to avoid repeated role checks
+- **New**: Caching system stores user IDs to avoid repeated role checks
 - **New**: AdminLogin page caches role verification results during session
 - **New**: Retry logic reduces failed authentication attempts
 - **New**: onUpdate callbacks eliminate redundant data fetching after updates
+- **New**: Intelligent link generation reduces external API calls
 
 ### Intelligent Role Verification
 - **New**: Local metadata check before RPC call for instant role verification
@@ -955,7 +1147,9 @@ The Admin Portal implements several performance optimization strategies with enh
 - **New**: Real-time data updates with efficient state management
 - **New**: Dual commission rate calculations performed client-side for responsiveness
 - **New**: onUpdate callbacks provide seamless data synchronization without page reloads
-- **New**: Interactive form inputs with immediate validation feedback
+- **New**: Dual-mode editing interface with optimized state management
+- **New**: Intelligent link generation with minimal performance impact
+- **New**: Enhanced lead table with optimized row interaction and contact information
 
 ## Troubleshooting Guide
 Common issues and their solutions with enhanced debugging capabilities:
@@ -977,6 +1171,7 @@ Common issues and their solutions with enhanced debugging capabilities:
 - **New**: Verify has_role function is properly deployed in database
 - **New**: Check dual commission rate data loading in affiliate detail tabs
 - **New**: Verify onUpdate callbacks are properly implemented in all child components
+- **New**: Check dual-mode editing interface state management
 
 ### Performance Issues
 - **Issue**: Slow page loads with large datasets
@@ -987,6 +1182,7 @@ Common issues and their solutions with enhanced debugging capabilities:
 - **New**: Monitor AdminLogin page role verification caching
 - **New**: Check drawer component performance with large lead datasets
 - **New**: Verify real-time data synchronization is not causing performance issues
+- **New**: Check dual-mode editing interface performance with frequent state changes
 
 ### UI Responsiveness
 - **Issue**: Components not responding to user interactions
@@ -996,6 +1192,7 @@ Common issues and their solutions with enhanced debugging capabilities:
 - **New**: Verify role verification caching is working correctly
 - **New**: Check drawer component event handlers for lead detail interface
 - **New**: Verify form validation and error handling in interactive components
+- **New**: Check dual-mode editing interface event handling and state management
 
 ### Role Verification Issues
 - **New**: **Issue**: useAdminRole hook keeps re-checking roles unnecessarily
@@ -1021,14 +1218,28 @@ Common issues and their solutions with enhanced debugging capabilities:
 - **New**: **Issue**: Dual commission rate data not loading in affiliate detail
 - **New**: **Solution**: Verify database migration 20260327_admin_enhancements.sql completed
 - **New**: **Debug**: Check upfront_commission_rate and backend_commission_rate columns exist
+- **New**: **Issue**: Admin notes not displaying in affiliate detail
+- **New**: **Solution**: Verify admin_notes column exists and is accessible
+- **New**: **Debug**: Check database permissions for admin notes column
 
-### Affiliate Management Issues
+### Enhanced Lead Management Issues
+- **New**: **Issue**: LeadDetailDrawer not showing contact information correctly
+- **New**: **Solution**: Verify lead data structure and contact information fields
+- **New**: **Debug**: Check lead object properties and null handling
+- **New**: **Issue**: Intelligent link generation not working
+- **New**: **Solution**: Verify contact information format and protocol detection
+- **New**: **Debug**: Check DetailRow component href generation logic
+- **New**: **Issue**: LeadsTable row interaction not working
+- **New**: **Solution**: Verify row click handlers and event propagation
+- **New**: **Debug**: Check onClick handlers and e.stopPropagation() implementation
+
+### Affiliate Profile Management Issues
 - **New**: **Issue**: Affiliate detail tabs not displaying data correctly
 - **New**: **Solution**: Verify affiliate data exists and user has proper permissions
 - **New**: **Debug**: Check affiliate_id parameter and data fetching logic
-- **New**: **Issue**: Drawer component not showing lead details
-- **New**: **Solution**: Verify selectedLead state and drawer props
-- **New**: **Debug**: Check lead data structure and affiliate relationship
+- **New**: **Issue**: Dual-mode editing interface not switching modes
+- **New**: **Solution**: Verify editing state management and form state handling
+- **New**: **Debug**: Check setEditing state and form state initialization
 - **New**: **Issue**: Commission rate updates not persisting
 - **New**: **Solution**: Verify database column updates and error handling
 - **New**: **Debug**: Check toast notifications for update success/error messages
@@ -1046,16 +1257,14 @@ Common issues and their solutions with enhanced debugging capabilities:
 - [src/pages/admin/AdminLogin.tsx:35-48](file://src/pages/admin/AdminLogin.tsx#L35-L48)
 
 ## Conclusion
-The Admin Portal System provides a robust, scalable solution for managing affiliate marketing programs with significant enhancements. The new comprehensive affiliate management system with five specialized tabs demonstrates sophisticated engineering with intelligent caching mechanisms, dual-check role verification, and improved performance through caching to prevent redundant role checks.
+The Admin Portal System provides a robust, scalable solution for managing affiliate marketing programs with significant enhancements. The new comprehensive lead management interfaces with intelligent link generation, dual-mode affiliate profile editing, and enhanced real-time data synchronization represent major advances in administrative interface functionality and user experience.
 
-**Updated** The most significant enhancement is the complete rewrite of the AffiliateProfileTab component from a static display to an interactive editing interface with form inputs, validation, and real-time updates. The AdminAffiliateDetail page has been enhanced to pass onUpdate callbacks enabling seamless real-time data synchronization across all affiliate detail tabs, creating a cohesive and responsive administrative experience.
+**Updated** The most significant enhancements include the LeadDetailDrawer with intelligent link generation for email, phone, and website contacts, the LeadsTable with clickable contact information and improved row interaction, the AffiliateProfileTab with sophisticated dual-mode editing capabilities, and the comprehensive AffiliateSettingsTab with real-time data synchronization and admin controls.
 
-Key strengths include comprehensive reporting capabilities, automated payout processing, intuitive management interfaces, and enhanced security through modern authentication patterns. The system's modular design with separate authentication and authorization hooks allows for easy extension and customization to meet evolving business requirements.
+The system's architecture supports future growth while maintaining strong security boundaries and optimal user experience. The enhanced database structure with dual commission rate tracking and admin notes, combined with the modern hooks-based authentication system and comprehensive real-time data synchronization, creates a powerful administrative platform for managing complex affiliate marketing operations.
 
-The recent updates demonstrate a commitment to modern React development practices, improved developer experience, and enhanced user experience through thoughtful design improvements. The new AdminLogin page with its two-step authentication flow, the enhanced AdminGuard with improved concurrent loading states, the AdminSidebar with integrated logout functionality, the comprehensive affiliate detail system with specialized tabs, the new AdminLeadDetailDrawer component, and the **New** real-time data synchronization through onUpdate callbacks represent significant advances in administrative interface security and usability.
+The addition of intelligent link generation, dual-mode editing interfaces, enhanced lead management capabilities, and comprehensive affiliate detail management represents a major advancement in administrative functionality. The system now provides complete visibility into affiliate performance with real-time data visualization, comprehensive management tools, and enhanced user experience through thoughtful design improvements.
 
-The new useAdminRole hook with its caching mechanisms, retry logic, and dual-check system, combined with the database-level security policies including the has_role function, comprehensive RLS policies, dual commission rate columns, and standardized commission types, creates a secure, performant, and maintainable administrative interface for managing complex affiliate marketing operations. The system's architecture supports future growth while maintaining strong security boundaries and optimal user experience.
+The real-time data synchronization through onUpdate callbacks ensures that all affiliate detail tabs remain in sync, providing users with immediate feedback when changes are made. The dual-mode editing interface in the Profile Tab enhances user experience by providing seamless switching between view and edit modes with intelligent change tracking. These enhancements collectively create a more responsive, reliable, and user-friendly administrative interface that significantly improves the overall affiliate management experience.
 
-The addition of comprehensive affiliate management capabilities with dual commission rate tracking, drawer-based lead detail interface, and enhanced settings management represents a major advancement in administrative functionality. The system now provides complete visibility into affiliate performance with real-time data visualization and comprehensive management tools, making it an essential component for modern affiliate marketing operations.
-
-**Updated** The real-time data synchronization through onUpdate callbacks ensures that all affiliate detail tabs remain in sync, providing users with immediate feedback when changes are made. The interactive form validation in the Profile Tab enhances user experience by providing instant feedback and preventing invalid submissions. These enhancements collectively create a more responsive, reliable, and user-friendly administrative interface that significantly improves the overall affiliate management experience.
+The system's commitment to modern React development practices, improved developer experience, and enhanced user experience through thoughtful design improvements positions it as a leading solution for comprehensive affiliate marketing administration in today's digital landscape.

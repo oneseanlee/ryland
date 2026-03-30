@@ -251,3 +251,78 @@ All colors MUST be HSL.
 
 .font-geist { font-family: 'Geist', sans-serif !important; }
 .font-manrope { font-family: 'Manrope', sans-serif !important; }
+
+/* ═══ Print Styles for Quick Info Card ═══ */
+@media print {
+  /* Hide navigation, sidebars, and interactive elements */
+  nav,
+  .sidebar,
+  [role="navigation"],
+  .print\:hidden,
+  button:not(.print\:inline-block),
+  .toast {
+    display: none !important;
+  }
+
+  /* Ensure proper page setup */
+  @page {
+    margin: 0.5in;
+    size: auto;
+  }
+
+  body {
+    background: white !important;
+    color: black !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Ensure cards print cleanly */
+  .card,
+  [class*="card"] {
+    background: white !important;
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: none !important;
+    break-inside: avoid;
+  }
+
+  /* Typography for print */
+  h1, h2, h3, h4, h5, h6 {
+    color: #0f172a !important;
+  }
+
+  p, span, div {
+    color: #1e293b !important;
+  }
+
+  /* Ensure text is black on white for readability */
+  .text-slate-900 { color: #0f172a !important; }
+  .text-slate-800 { color: #1e293b !important; }
+  .text-slate-700 { color: #334155 !important; }
+  .text-slate-600 { color: #475569 !important; }
+  .text-slate-500 { color: #64748b !important; }
+
+  /* Show SSN and other masked fields unmasked when printing */
+  [data-print-unmasked] {
+    filter: none !important;
+  }
+
+  /* Layout adjustments */
+  .max-w-4xl {
+    max-width: 100% !important;
+  }
+
+  /* Ensure grid works in print */
+  .grid {
+    display: grid !important;
+  }
+
+  /* Page breaks */
+  .print\:break-inside-avoid {
+    break-inside: avoid;
+  }
+
+  .print\:break-before-page {
+    break-before: page;
+  }
+}
