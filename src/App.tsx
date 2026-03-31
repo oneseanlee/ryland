@@ -62,16 +62,6 @@ const AdminPayouts = lazy(() => import("./pages/admin/AdminPayouts"));
 const AdminReports = lazy(() => import("./pages/admin/AdminReports"));
 const AdminAffiliateDetail = lazy(() => import("./pages/admin/AdminAffiliateDetail"));
 
-// Command Center routes
-import CommandCenterLayout from "./components/command-center/CommandCenterLayout";
-const PipelineDashboard = lazy(() => import("./pages/command-center/PipelineDashboard"));
-const ClientDetailView = lazy(() => import("./pages/command-center/ClientDetailView"));
-const QuickInfoCard = lazy(() => import("./pages/command-center/QuickInfoCard"));
-const MyClients = lazy(() => import("./pages/command-center/MyClients"));
-const MetricsDashboard = lazy(() => import("./pages/command-center/MetricsDashboard"));
-const BankAdmin = lazy(() => import("./pages/command-center/BankAdmin"));
-const InquiryQueue = lazy(() => import("./pages/command-center/InquiryQueue"));
-
 import ScrollToTop from "./components/ScrollToTop";
 
 const queryClient = new QueryClient({
@@ -147,16 +137,7 @@ const AppContent = () => {
               <Route path="payouts" element={<AdminPayouts />} />
               <Route path="reports" element={<AdminReports />} />
             </Route>
-            {/* Command Center routes */}
-            <Route path="/command-center" element={<CommandCenterLayout />}>
-              <Route index element={<PipelineDashboard />} />
-              <Route path="clients/:id" element={<ClientDetailView />} />
-              <Route path="clients/:id/quick-info" element={<QuickInfoCard />} />
-              <Route path="my-clients" element={<MyClients />} />
-              <Route path="metrics" element={<MetricsDashboard />} />
-              <Route path="bank-admin" element={<BankAdmin />} />
-              <Route path="inquiry-queue" element={<InquiryQueue />} />
-            </Route>
+            {/* Command Center moved to standalone project: github.com/oneseanlee/Command-Center */}
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

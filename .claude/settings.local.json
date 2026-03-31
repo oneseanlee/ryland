@@ -17,7 +17,28 @@
       "Bash(wc -l \"F:/Work/Webdevelopment_Projects/SEAN_2025/Lovable Sites/Ryland/.qoder/repowiki/en/content/\"*.md)",
       "Bash(head -80 \"F:/Work/Webdevelopment_Projects/SEAN_2025/Lovable Sites/Ryland/.qoder/repowiki/en/content/Data Layer & Supabase Integration.md\")",
       "Bash(npx tsc --noEmit)",
-      "Bash(npx vite build)"
+      "Bash(npx vite build)",
+      "Bash(node scripts/extract-cc.mjs)",
+      "Bash(ls -la *.*)",
+      "Bash(git config --global --list)",
+      "Bash(ssh -T git@github-work)",
+      "Bash(echo \"exit: $?\")",
+      "WebSearch",
+      "Bash(ls -la ~/Downloads/*Ryland*)",
+      "Bash(ls -la ~/Downloads/*2026-03-31*)",
+      "Read(//f/Work/Webdevelopment_Projects/SEAN_2025/Lovable Sites/funding-command-center/**)",
+      "Bash(node -e \":*)",
+      "Bash(npm install xlsx --no-save)",
+      "Bash(node scripts/analyze-clickup.mjs)",
+      "Bash(node scripts/count-clients.mjs)",
+      "Bash(node scripts/analyze-subtasks.mjs)",
+      "Bash(node scripts/analyze-spaces.mjs)",
+      "Bash(node scripts/import-clickup.mjs)",
+      "Bash(rm -rf src/pages/command-center)",
+      "Bash(rm -rf src/components/command-center)",
+      "Bash(rm -f src/types/command-center.ts)",
+      "Bash(rm -f src/utils/createCommandCenterNotification.ts)",
+      "Bash(rm -rf supabase/functions/intake-webhook)"
     ]
   }
 }

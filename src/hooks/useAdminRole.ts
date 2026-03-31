@@ -54,8 +54,8 @@ export function useAdminRole() {
         }
       }
 
-      // All retries failed — check user_metadata as last resort
-      const metaRole = user.user_metadata?.role || user.app_metadata?.role;
+      // All retries failed — check app_metadata only (user_metadata is user-writable)
+      const metaRole = user.app_metadata?.role;
       setIsAdmin(metaRole === "admin");
       setIsLoading(false);
       checkedUserIdRef.current = user.id;

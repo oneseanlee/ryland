@@ -5,13 +5,15 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import PageMeta from "@/components/PageMeta";
 import { Button } from "@/components/ui/button";
-import { Download, CheckCircle2, BookOpen, Loader2 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Download, CheckCircle2, BookOpen, Loader2, Mail } from "lucide-react";
 import { motion } from "framer-motion";
 
 interface OrderItem {
   id: string;
   product_title: string;
-  download_token: string;
+  download_token?: string; // only present after email verification
   downloaded_at: string | null;
 }
 
@@ -29,29 +31,39 @@ const POLL_INTERVAL_MS = 3000;
 const ThankYou = () => {
   const [searchParams] = useSearchParams();
   const orderId = searchParams.get("order");
+
+  // Email verification state
+  const [email, setEmail] = useState(searchParams.get("email") ?? "");
+  const [emailInput, setEmailInput] = useState("");
+  const [emailError, setEmailError] = useState<string | null>(null);
+  const [verifying, setVerifying] = useState(false);
+
   const [order, setOrder] = useState<Order | null>(null);
+  const [emailVerified, setEmailVerified] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const pollCount = useRef(0);
   const pollTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Step 1: On mount, look up the order (without tokens) to confirm it exists
   useEffect(() => {
     if (!orderId) {
       setLoading(false);
       return;
     }
 
-    const fetchOrder = async () => {
+    const fetchOrder = async (verifiedEmail?: string) => {
       try {
         const { data, error: fetchErr } = await supabase.functions.invoke(
           "fetch-order",
-          { body: { shopify_order_id: orderId } }
+          { body: { shopify_order_id: orderId, customer_email: verifiedEmail ?? email } }
         );
 
         if (fetchErr) throw fetchErr;
 
         if (data?.found && data.order) {
           setOrder(data.order as Order);
+          setEmailVerified(!!data.email_verified);
           setLoading(false);
           return;
         }
@@ -59,7 +71,7 @@ const ThankYou = () => {
         // Order not found yet — webhook may still be processing
         pollCount.current += 1;
         if (pollCount.current < MAX_POLL_ATTEMPTS) {
-          pollTimer.current = setTimeout(fetchOrder, POLL_INTERVAL_MS);
+          pollTimer.current = setTimeout(() => fetchOrder(verifiedEmail), POLL_INTERVAL_MS);
         } else {
           setError(
             "Your order is still being processed. Check your email shortly for download links."
@@ -77,7 +89,42 @@ const ThankYou = () => {
     return () => {
       if (pollTimer.current) clearTimeout(pollTimer.current);
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [orderId]);
+
+  // Step 2: User submits their email to verify ownership and unlock download tokens
+  const handleVerifyEmail = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!emailInput.trim()) {
+      setEmailError("Please enter your email address.");
+      return;
+    }
+    setEmailError(null);
+    setVerifying(true);
+
+    try {
+      const { data, error: fetchErr } = await supabase.functions.invoke(
+        "fetch-order",
+        { body: { shopify_order_id: orderId, customer_email: emailInput.trim() } }
+      );
+
+      if (fetchErr) throw fetchErr;
+
+      if (data?.email_verified && data.order) {
+        setEmail(emailInput.trim());
+        setOrder(data.order as Order);
+        setEmailVerified(true);
+      } else {
+        setEmailError(
+          "That email doesn't match the one used during checkout. Please try again."
+        );
+      }
+    } catch {
+      setEmailError("Something went wrong. Please try again.");
+    } finally {
+      setVerifying(false);
+    }
+  };
 
   const downloadUrl = (token: string) =>
     `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/download-ebook?token=${token}`;
@@ -104,17 +151,18 @@ const ThankYou = () => {
             <p className="text-muted-foreground text-lg">
               {loading
                 ? "Loading your downloads…"
-                : "Your e-books are ready to download. We've also sent download links to your email."}
+                : emailVerified
+                ? "Your e-books are ready to download. We've also sent download links to your email."
+                : "Verify your email to access your downloads."}
             </p>
           </motion.div>
 
           {loading ? (
             <div className="flex flex-col items-center justify-center py-12 gap-3">
               <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-              <p className="text-sm text-muted-foreground">
-                Preparing your downloads…
-              </p>
+              <p className="text-sm text-muted-foreground">Preparing your downloads…</p>
             </div>
+
           ) : error ? (
             <div className="bg-muted rounded-xl p-8 text-center">
               <BookOpen className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
@@ -123,7 +171,52 @@ const ThankYou = () => {
                 <Button variant="outline">Go to My Downloads</Button>
               </Link>
             </div>
-          ) : order ? (
+
+          ) : order && !emailVerified ? (
+            /* ── Email verification gate ── */
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="bg-card border border-border rounded-xl p-8"
+            >
+              <div className="flex flex-col items-center text-center mb-6">
+                <Mail className="h-10 w-10 text-primary mb-3" />
+                <h2 className="text-lg font-semibold text-foreground mb-1">
+                  Confirm your email to download
+                </h2>
+                <p className="text-sm text-muted-foreground">
+                  Enter the email address you used at checkout to access your files.
+                </p>
+              </div>
+              <form onSubmit={handleVerifyEmail} className="space-y-4">
+                <div className="space-y-1.5">
+                  <Label htmlFor="verify-email">Email address</Label>
+                  <Input
+                    id="verify-email"
+                    type="email"
+                    placeholder="you@example.com"
+                    value={emailInput}
+                    onChange={(e) => setEmailInput(e.target.value)}
+                    autoComplete="email"
+                    disabled={verifying}
+                  />
+                  {emailError && (
+                    <p className="text-sm text-destructive">{emailError}</p>
+                  )}
+                </div>
+                <Button type="submit" className="w-full" disabled={verifying}>
+                  {verifying ? (
+                    <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Verifying…</>
+                  ) : (
+                    "Access My Downloads"
+                  )}
+                </Button>
+              </form>
+            </motion.div>
+
+          ) : order && emailVerified ? (
+            /* ── Download list (tokens now available) ── */
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -153,20 +246,27 @@ const ThankYou = () => {
                         {item.product_title}
                       </span>
                     </div>
-                    <a
-                      href={downloadUrl(item.download_token)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <Button size="sm" className="gap-2 flex-shrink-0">
-                        <Download className="h-4 w-4" />
-                        Download
+                    {item.download_token ? (
+                      <a
+                        href={downloadUrl(item.download_token)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <Button size="sm" className="gap-2 flex-shrink-0">
+                          <Download className="h-4 w-4" />
+                          Download
+                        </Button>
+                      </a>
+                    ) : (
+                      <Button size="sm" variant="outline" disabled className="flex-shrink-0">
+                        Unavailable
                       </Button>
-                    </a>
+                    )}
                   </motion.div>
                 ))}
               </div>
             </motion.div>
+
           ) : (
             <div className="bg-muted rounded-xl p-8 text-center">
               <p className="text-muted-foreground mb-4">
