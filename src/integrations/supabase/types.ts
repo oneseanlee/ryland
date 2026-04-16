@@ -94,44 +94,11 @@ export type Database = {
           },
         ]
       }
-      notifications: {
-        Row: {
-          id: string
-          user_id: string
-          title: string
-          message: string
-          type: string
-          read: boolean
-          link: string | null
-          created_at: string
-        }
-        Insert: {
-          id?: string
-          user_id: string
-          title: string
-          message: string
-          type?: string
-          read?: boolean
-          link?: string | null
-          created_at?: string
-        }
-        Update: {
-          id?: string
-          user_id?: string
-          title?: string
-          message?: string
-          type?: string
-          read?: boolean
-          link?: string | null
-          created_at?: string
-        }
-        Relationships: []
-      }
       affiliates: {
         Row: {
           admin_notes: string | null
           affiliate_id: string
-          backend_commission_rate: number
+          backend_commission_rate: number | null
           company_name: string | null
           created_at: string
           email: string
@@ -142,7 +109,7 @@ export type Database = {
           phone: string | null
           status: Database["public"]["Enums"]["affiliate_status"]
           updated_at: string
-          upfront_commission_rate: number
+          upfront_commission_rate: number | null
           user_id: string
           w9_file_url: string | null
           website: string | null
@@ -150,7 +117,7 @@ export type Database = {
         Insert: {
           admin_notes?: string | null
           affiliate_id: string
-          backend_commission_rate?: number
+          backend_commission_rate?: number | null
           company_name?: string | null
           created_at?: string
           email: string
@@ -161,7 +128,7 @@ export type Database = {
           phone?: string | null
           status?: Database["public"]["Enums"]["affiliate_status"]
           updated_at?: string
-          upfront_commission_rate?: number
+          upfront_commission_rate?: number | null
           user_id: string
           w9_file_url?: string | null
           website?: string | null
@@ -169,7 +136,7 @@ export type Database = {
         Update: {
           admin_notes?: string | null
           affiliate_id?: string
-          backend_commission_rate?: number
+          backend_commission_rate?: number | null
           company_name?: string | null
           created_at?: string
           email?: string
@@ -180,7 +147,7 @@ export type Database = {
           phone?: string | null
           status?: Database["public"]["Enums"]["affiliate_status"]
           updated_at?: string
-          upfront_commission_rate?: number
+          upfront_commission_rate?: number | null
           user_id?: string
           w9_file_url?: string | null
           website?: string | null
@@ -231,6 +198,289 @@ export type Database = {
           qualification?: string
         }
         Relationships: []
+      }
+      banks: {
+        Row: {
+          application_url: string | null
+          bureau_pulled: string | null
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          notes: string | null
+          product_name: string | null
+          product_type: string | null
+          requires_relationship: boolean | null
+          sequence_priority: number | null
+          typical_limit_max: number | null
+          typical_limit_min: number | null
+        }
+        Insert: {
+          application_url?: string | null
+          bureau_pulled?: string | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          notes?: string | null
+          product_name?: string | null
+          product_type?: string | null
+          requires_relationship?: boolean | null
+          sequence_priority?: number | null
+          typical_limit_max?: number | null
+          typical_limit_min?: number | null
+        }
+        Update: {
+          application_url?: string | null
+          bureau_pulled?: string | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          notes?: string | null
+          product_name?: string | null
+          product_type?: string | null
+          requires_relationship?: boolean | null
+          sequence_priority?: number | null
+          typical_limit_max?: number | null
+          typical_limit_min?: number | null
+        }
+        Relationships: []
+      }
+      bureau_status: {
+        Row: {
+          bureau: string
+          client_id: string
+          id: string
+          inquiry_count: number | null
+          is_paused: boolean | null
+          paused_at: string | null
+          unpaused_at: string | null
+        }
+        Insert: {
+          bureau: string
+          client_id: string
+          id?: string
+          inquiry_count?: number | null
+          is_paused?: boolean | null
+          paused_at?: string | null
+          unpaused_at?: string | null
+        }
+        Update: {
+          bureau?: string
+          client_id?: string
+          id?: string
+          inquiry_count?: number | null
+          is_paused?: boolean | null
+          paused_at?: string | null
+          unpaused_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bureau_status_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "funding_clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      client_activity_log: {
+        Row: {
+          action_type: string
+          client_id: string
+          created_at: string | null
+          details: Json | null
+          id: string
+          user_id: string | null
+        }
+        Insert: {
+          action_type: string
+          client_id: string
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          user_id?: string | null
+        }
+        Update: {
+          action_type?: string
+          client_id?: string
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_activity_log_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "funding_clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      client_assignments: {
+        Row: {
+          assigned_at: string | null
+          client_id: string
+          id: string
+          is_primary: boolean | null
+          user_id: string
+        }
+        Insert: {
+          assigned_at?: string | null
+          client_id: string
+          id?: string
+          is_primary?: boolean | null
+          user_id: string
+        }
+        Update: {
+          assigned_at?: string | null
+          client_id?: string
+          id?: string
+          is_primary?: boolean | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_assignments_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "funding_clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      client_documents: {
+        Row: {
+          client_id: string
+          filename: string
+          id: string
+          storage_path: string
+          type: string | null
+          uploaded_at: string | null
+          uploaded_by: string | null
+          version: number | null
+        }
+        Insert: {
+          client_id: string
+          filename: string
+          id?: string
+          storage_path: string
+          type?: string | null
+          uploaded_at?: string | null
+          uploaded_by?: string | null
+          version?: number | null
+        }
+        Update: {
+          client_id?: string
+          filename?: string
+          id?: string
+          storage_path?: string
+          type?: string | null
+          uploaded_at?: string | null
+          uploaded_by?: string | null
+          version?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_documents_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "funding_clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      client_notes: {
+        Row: {
+          client_id: string
+          content: string
+          created_at: string | null
+          created_by: string | null
+          id: string
+        }
+        Insert: {
+          client_id: string
+          content: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+        }
+        Update: {
+          client_id?: string
+          content?: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_notes_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "funding_clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      client_tasks: {
+        Row: {
+          application_id: string | null
+          assigned_to: string | null
+          client_id: string | null
+          completed_at: string | null
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          due_date: string | null
+          id: string
+          status: string
+          title: string
+        }
+        Insert: {
+          application_id?: string | null
+          assigned_to?: string | null
+          client_id?: string | null
+          completed_at?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          status?: string
+          title: string
+        }
+        Update: {
+          application_id?: string | null
+          assigned_to?: string | null
+          client_id?: string | null
+          completed_at?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          status?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_tasks_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "funding_applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_tasks_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "funding_clients"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       commissions: {
         Row: {
@@ -424,6 +674,162 @@ export type Database = {
         }
         Relationships: []
       }
+      funding_applications: {
+        Row: {
+          application_url: string | null
+          applied_date: string | null
+          approval_amount: number | null
+          bank_id: string | null
+          bureau_pulled: string | null
+          client_id: string
+          created_at: string | null
+          created_by: string | null
+          id: string
+          notes: string | null
+          product_type: string | null
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          application_url?: string | null
+          applied_date?: string | null
+          approval_amount?: number | null
+          bank_id?: string | null
+          bureau_pulled?: string | null
+          client_id: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          notes?: string | null
+          product_type?: string | null
+          status?: string
+          updated_at?: string | null
+        }
+        Update: {
+          application_url?: string | null
+          applied_date?: string | null
+          approval_amount?: number | null
+          bank_id?: string | null
+          bureau_pulled?: string | null
+          client_id?: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          notes?: string | null
+          product_type?: string | null
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "funding_applications_bank_id_fkey"
+            columns: ["bank_id"]
+            isOneToOne: false
+            referencedRelation: "banks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "funding_applications_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "funding_clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      funding_clients: {
+        Row: {
+          business_revenue: number | null
+          company_address: Json | null
+          company_email: string | null
+          company_name: string | null
+          company_phone: string | null
+          created_at: string | null
+          current_stage: string
+          dob: string | null
+          duns: string | null
+          ein: string | null
+          email: string | null
+          existing_checking_accounts: Json | null
+          existing_credit_cards: Json | null
+          full_name: string
+          funding_goal: string | null
+          home_address: Json | null
+          id: string
+          is_archived: boolean | null
+          mfsn_credentials: Json | null
+          monthly_deposits: number | null
+          mothers_maiden_name: string | null
+          nav_credentials: Json | null
+          personal_income: number | null
+          phone: string | null
+          ssn_encrypted: string | null
+          stage_entered_at: string | null
+          updated_at: string | null
+          website: string | null
+        }
+        Insert: {
+          business_revenue?: number | null
+          company_address?: Json | null
+          company_email?: string | null
+          company_name?: string | null
+          company_phone?: string | null
+          created_at?: string | null
+          current_stage?: string
+          dob?: string | null
+          duns?: string | null
+          ein?: string | null
+          email?: string | null
+          existing_checking_accounts?: Json | null
+          existing_credit_cards?: Json | null
+          full_name: string
+          funding_goal?: string | null
+          home_address?: Json | null
+          id?: string
+          is_archived?: boolean | null
+          mfsn_credentials?: Json | null
+          monthly_deposits?: number | null
+          mothers_maiden_name?: string | null
+          nav_credentials?: Json | null
+          personal_income?: number | null
+          phone?: string | null
+          ssn_encrypted?: string | null
+          stage_entered_at?: string | null
+          updated_at?: string | null
+          website?: string | null
+        }
+        Update: {
+          business_revenue?: number | null
+          company_address?: Json | null
+          company_email?: string | null
+          company_name?: string | null
+          company_phone?: string | null
+          created_at?: string | null
+          current_stage?: string
+          dob?: string | null
+          duns?: string | null
+          ein?: string | null
+          email?: string | null
+          existing_checking_accounts?: Json | null
+          existing_credit_cards?: Json | null
+          full_name?: string
+          funding_goal?: string | null
+          home_address?: Json | null
+          id?: string
+          is_archived?: boolean | null
+          mfsn_credentials?: Json | null
+          monthly_deposits?: number | null
+          mothers_maiden_name?: string | null
+          nav_credentials?: Json | null
+          personal_income?: number | null
+          phone?: string | null
+          ssn_encrypted?: string | null
+          stage_entered_at?: string | null
+          updated_at?: string | null
+          website?: string | null
+        }
+        Relationships: []
+      }
       funnel_leads: {
         Row: {
           created_at: string
@@ -448,6 +854,80 @@ export type Database = {
           name?: string
           phone?: string | null
           source?: string
+        }
+        Relationships: []
+      }
+      inquiry_removals: {
+        Row: {
+          assigned_to: string | null
+          bureau: string
+          client_id: string
+          completed_at: string | null
+          id: string
+          notes: string | null
+          requested_at: string | null
+          status: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          bureau: string
+          client_id: string
+          completed_at?: string | null
+          id?: string
+          notes?: string | null
+          requested_at?: string | null
+          status?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          bureau?: string
+          client_id?: string
+          completed_at?: string | null
+          id?: string
+          notes?: string | null
+          requested_at?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inquiry_removals_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "funding_clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notifications: {
+        Row: {
+          created_at: string
+          id: string
+          link: string | null
+          message: string
+          read: boolean
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          link?: string | null
+          message: string
+          read?: boolean
+          title: string
+          type?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          link?: string | null
+          message?: string
+          read?: boolean
+          title?: string
+          type?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -808,477 +1288,21 @@ export type Database = {
         }
         Relationships: []
       }
-      funding_clients: {
-        Row: {
-          id: string
-          full_name: string
-          email: string | null
-          phone: string | null
-          dob: string | null
-          ssn_encrypted: string | null
-          mothers_maiden_name: string | null
-          home_address: Json | null
-          company_name: string | null
-          company_email: string | null
-          company_phone: string | null
-          company_address: Json | null
-          ein: string | null
-          duns: string | null
-          website: string | null
-          personal_income: number | null
-          business_revenue: number | null
-          monthly_deposits: number | null
-          funding_goal: string | null
-          current_stage: string
-          stage_entered_at: string | null
-          mfsn_credentials: Json | null
-          nav_credentials: Json | null
-          existing_checking_accounts: Json | null
-          existing_credit_cards: Json | null
-          is_archived: boolean
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          full_name: string
-          email?: string | null
-          phone?: string | null
-          dob?: string | null
-          ssn_encrypted?: string | null
-          mothers_maiden_name?: string | null
-          home_address?: Json | null
-          company_name?: string | null
-          company_email?: string | null
-          company_phone?: string | null
-          company_address?: Json | null
-          ein?: string | null
-          duns?: string | null
-          website?: string | null
-          personal_income?: number | null
-          business_revenue?: number | null
-          monthly_deposits?: number | null
-          funding_goal?: string | null
-          current_stage?: string
-          stage_entered_at?: string | null
-          mfsn_credentials?: Json | null
-          nav_credentials?: Json | null
-          existing_checking_accounts?: Json | null
-          existing_credit_cards?: Json | null
-          is_archived?: boolean
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          full_name?: string
-          email?: string | null
-          phone?: string | null
-          dob?: string | null
-          ssn_encrypted?: string | null
-          mothers_maiden_name?: string | null
-          home_address?: Json | null
-          company_name?: string | null
-          company_email?: string | null
-          company_phone?: string | null
-          company_address?: Json | null
-          ein?: string | null
-          duns?: string | null
-          website?: string | null
-          personal_income?: number | null
-          business_revenue?: number | null
-          monthly_deposits?: number | null
-          funding_goal?: string | null
-          current_stage?: string
-          stage_entered_at?: string | null
-          mfsn_credentials?: Json | null
-          nav_credentials?: Json | null
-          existing_checking_accounts?: Json | null
-          existing_credit_cards?: Json | null
-          is_archived?: boolean
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      client_assignments: {
-        Row: {
-          id: string
-          client_id: string
-          user_id: string
-          assigned_at: string
-          is_primary: boolean
-        }
-        Insert: {
-          id?: string
-          client_id: string
-          user_id: string
-          assigned_at?: string
-          is_primary?: boolean
-        }
-        Update: {
-          id?: string
-          client_id?: string
-          user_id?: string
-          assigned_at?: string
-          is_primary?: boolean
-        }
-        Relationships: [
-          {
-            foreignKeyName: "client_assignments_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "funding_clients"
-            referencedColumns: ["id"]
-          }
-        ]
-      }
-      client_activity_log: {
-        Row: {
-          id: string
-          client_id: string
-          user_id: string | null
-          action_type: string
-          details: Json | null
-          created_at: string
-        }
-        Insert: {
-          id?: string
-          client_id: string
-          user_id?: string | null
-          action_type: string
-          details?: Json | null
-          created_at?: string
-        }
-        Update: {
-          id?: string
-          client_id?: string
-          user_id?: string | null
-          action_type?: string
-          details?: Json | null
-          created_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "client_activity_log_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "funding_clients"
-            referencedColumns: ["id"]
-          }
-        ]
-      }
-      client_notes: {
-        Row: {
-          id: string
-          client_id: string
-          content: string
-          created_by: string | null
-          created_at: string
-        }
-        Insert: {
-          id?: string
-          client_id: string
-          content: string
-          created_by?: string | null
-          created_at?: string
-        }
-        Update: {
-          id?: string
-          client_id?: string
-          content?: string
-          created_by?: string | null
-          created_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "client_notes_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "funding_clients"
-            referencedColumns: ["id"]
-          }
-        ]
-      }
-      funding_applications: {
-        Row: {
-          id: string
-          client_id: string
-          bank_id: string | null
-          product_type: string | null
-          application_url: string | null
-          applied_date: string | null
-          status: string
-          approval_amount: number | null
-          bureau_pulled: string | null
-          notes: string | null
-          created_by: string | null
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          client_id: string
-          bank_id?: string | null
-          product_type?: string | null
-          application_url?: string | null
-          applied_date?: string | null
-          status?: string
-          approval_amount?: number | null
-          bureau_pulled?: string | null
-          notes?: string | null
-          created_by?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          client_id?: string
-          bank_id?: string | null
-          product_type?: string | null
-          application_url?: string | null
-          applied_date?: string | null
-          status?: string
-          approval_amount?: number | null
-          bureau_pulled?: string | null
-          notes?: string | null
-          created_by?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "funding_applications_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "funding_clients"
-            referencedColumns: ["id"]
-          }
-        ]
-      }
-      banks: {
-        Row: {
-          id: string
-          name: string
-          product_name: string | null
-          product_type: string | null
-          bureau_pulled: string | null
-          requires_relationship: boolean
-          typical_limit_min: number | null
-          typical_limit_max: number | null
-          application_url: string | null
-          notes: string | null
-          is_active: boolean
-          sequence_priority: number
-          created_at: string
-        }
-        Insert: {
-          id?: string
-          name: string
-          product_name?: string | null
-          product_type?: string | null
-          bureau_pulled?: string | null
-          requires_relationship?: boolean
-          typical_limit_min?: number | null
-          typical_limit_max?: number | null
-          application_url?: string | null
-          notes?: string | null
-          is_active?: boolean
-          sequence_priority?: number
-          created_at?: string
-        }
-        Update: {
-          id?: string
-          name?: string
-          product_name?: string | null
-          product_type?: string | null
-          bureau_pulled?: string | null
-          requires_relationship?: boolean
-          typical_limit_min?: number | null
-          typical_limit_max?: number | null
-          application_url?: string | null
-          notes?: string | null
-          is_active?: boolean
-          sequence_priority?: number
-          created_at?: string
-        }
-        Relationships: []
-      }
-      client_tasks: {
-        Row: {
-          id: string
-          client_id: string | null
-          application_id: string | null
-          title: string
-          description: string | null
-          due_date: string | null
-          assigned_to: string | null
-          status: string
-          created_by: string | null
-          created_at: string
-          completed_at: string | null
-        }
-        Insert: {
-          id?: string
-          client_id?: string | null
-          application_id?: string | null
-          title: string
-          description?: string | null
-          due_date?: string | null
-          assigned_to?: string | null
-          status?: string
-          created_by?: string | null
-          created_at?: string
-          completed_at?: string | null
-        }
-        Update: {
-          id?: string
-          client_id?: string | null
-          application_id?: string | null
-          title?: string
-          description?: string | null
-          due_date?: string | null
-          assigned_to?: string | null
-          status?: string
-          created_by?: string | null
-          created_at?: string
-          completed_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "client_tasks_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "funding_clients"
-            referencedColumns: ["id"]
-          }
-        ]
-      }
-      bureau_status: {
-        Row: {
-          id: string
-          client_id: string
-          bureau: string
-          inquiry_count: number
-          is_paused: boolean
-          paused_at: string | null
-          unpaused_at: string | null
-        }
-        Insert: {
-          id?: string
-          client_id: string
-          bureau: string
-          inquiry_count?: number
-          is_paused?: boolean
-          paused_at?: string | null
-          unpaused_at?: string | null
-        }
-        Update: {
-          id?: string
-          client_id?: string
-          bureau?: string
-          inquiry_count?: number
-          is_paused?: boolean
-          paused_at?: string | null
-          unpaused_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "bureau_status_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "funding_clients"
-            referencedColumns: ["id"]
-          }
-        ]
-      }
-      client_documents: {
-        Row: {
-          id: string
-          client_id: string
-          type: string | null
-          filename: string
-          storage_path: string
-          uploaded_by: string | null
-          uploaded_at: string
-          version: number
-        }
-        Insert: {
-          id?: string
-          client_id: string
-          type?: string | null
-          filename: string
-          storage_path: string
-          uploaded_by?: string | null
-          uploaded_at?: string
-          version?: number
-        }
-        Update: {
-          id?: string
-          client_id?: string
-          type?: string | null
-          filename?: string
-          storage_path?: string
-          uploaded_by?: string | null
-          uploaded_at?: string
-          version?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "client_documents_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "funding_clients"
-            referencedColumns: ["id"]
-          }
-        ]
-      }
-      inquiry_removals: {
-        Row: {
-          id: string
-          client_id: string
-          bureau: string
-          status: string
-          requested_at: string
-          completed_at: string | null
-          assigned_to: string | null
-          notes: string | null
-        }
-        Insert: {
-          id?: string
-          client_id: string
-          bureau: string
-          status?: string
-          requested_at?: string
-          completed_at?: string | null
-          assigned_to?: string | null
-          notes?: string | null
-        }
-        Update: {
-          id?: string
-          client_id?: string
-          bureau?: string
-          status?: string
-          requested_at?: string
-          completed_at?: string | null
-          assigned_to?: string | null
-          notes?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "inquiry_removals_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "funding_clients"
-            referencedColumns: ["id"]
-          }
-        ]
-      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      create_notification: {
+        Args: {
+          _link?: string
+          _message: string
+          _title: string
+          _type?: string
+          _user_id: string
+        }
+        Returns: string
+      }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
@@ -1288,6 +1312,7 @@ export type Database = {
         Returns: number
       }
       get_my_affiliate_id: { Args: never; Returns: string }
+      has_client_access: { Args: { client_id: string }; Returns: boolean }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -1295,6 +1320,9 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_admin: { Args: never; Returns: boolean }
+      is_manager: { Args: never; Returns: boolean }
+      is_specialist: { Args: never; Returns: boolean }
       move_to_dlq: {
         Args: {
           dlq_name: string
