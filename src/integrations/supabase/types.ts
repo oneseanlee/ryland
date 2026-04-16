@@ -1343,7 +1343,7 @@ export type Database = {
     }
     Enums: {
       affiliate_status: "pending" | "approved" | "suspended"
-      app_role: "admin" | "user"
+      app_role: "admin" | "user" | "manager" | "specialist"
       commission_status: "pending" | "approved" | "paid"
       payout_status: "pending" | "processing" | "paid" | "failed"
       speaker_request_status: "pending" | "reviewed" | "approved" | "declined"
@@ -1475,7 +1475,7 @@ export const Constants = {
   public: {
     Enums: {
       affiliate_status: ["pending", "approved", "suspended"],
-      app_role: ["admin", "user"],
+      app_role: ["admin", "user", "manager", "specialist"],
       commission_status: ["pending", "approved", "paid"],
       payout_status: ["pending", "processing", "paid", "failed"],
       speaker_request_status: ["pending", "reviewed", "approved", "declined"],
