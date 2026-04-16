@@ -73,7 +73,7 @@ export default function AffiliateSettingsTab({ affiliate, onUpdate }: AffiliateS
     try {
       const { error } = await supabase
         .from("affiliates")
-        .update({ status: newStatus })
+        .update({ status: newStatus as "approved" | "pending" | "suspended" })
         .eq("id", affiliate.id);
 
       if (error) throw error;
