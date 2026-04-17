@@ -29,17 +29,21 @@ serve(async (req) => {
     return json({ error: "Invalid request body" }, 400);
   }
 
-  const isPartner = body.calendarType === "partner";
-  const calendarId = isPartner
-    ? Deno.env.get("GHL_PARTNER_CALENDAR_ID")
-    : Deno.env.get("GHL_CALENDAR_ID");
+  const calendarType = body.calendarType as string | undefined;
+  const isPartner = calendarType === "partner";
+  const isAffiliate = calendarType === "affiliate";
+  const calendarId = isAffiliate
+    ? (Deno.env.get("GHL_AFFILIATE_CALENDAR_ID") || Deno.env.get("GHL_PARTNER_CALENDAR_ID"))
+    : isPartner
+      ? Deno.env.get("GHL_PARTNER_CALENDAR_ID")
+      : Deno.env.get("GHL_CALENDAR_ID");
 
   if (!apiKey || !locationId || !calendarId) {
     console.error("Missing GHL env vars:", {
       hasApiKey: !!apiKey,
       hasLocationId: !!locationId,
       hasCalendarId: !!calendarId,
-      calendarType: body.calendarType ?? "consultation (default)",
+      calendarType: calendarType ?? "consultation (default)",
     });
     return json({ error: "Server configuration error" }, 500);
   }
@@ -82,7 +86,7 @@ serve(async (req) => {
 
       console.log("GHL free-slots request:", {
         calendarId,
-        calendarType: isPartner ? "partner" : "consultation",
+        calendarType: calendarType || "consultation",
         startDate,
         endDate,
         timezone,
@@ -171,8 +175,12 @@ serve(async (req) => {
         lastName,
         email,
         locationId,
-        source: isPartner ? "Partner Onboarding" : "Consultation Booking",
-        tags: isPartner ? ["partner-onboarding", "referral-partner"] : ["consultation-booking", "funnel-lead"],
+        source: isAffiliate ? "Affiliate Referral Booking" : isPartner ? "Partner Onboarding" : "Consultation Booking",
+        tags: isAffiliate
+          ? ["affiliate-referral", "affiliate-appointment-scheduled"]
+          : isPartner
+            ? ["partner-onboarding", "referral-partner"]
+            : ["consultation-booking", "funnel-lead"],
       };
       if (phone) contactPayload.phone = phone;
 
