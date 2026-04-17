@@ -41,7 +41,15 @@ interface SlotMap {
   [date: string]: { slots: string[] };
 }
 
-export default function ConsultationCalendar() {
+interface ConsultationCalendarProps {
+  calendarType?: "consultation" | "partner" | "affiliate";
+  prefillFromKey?: string;
+}
+
+export default function ConsultationCalendar({
+  calendarType = "consultation",
+  prefillFromKey = "funnel_lead",
+}: ConsultationCalendarProps = {}) {
   const navigate = useNavigate();
   const location = useLocation();
   const isFunnel = location.pathname.startsWith("/funnel");
@@ -55,13 +63,13 @@ export default function ConsultationCalendar() {
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
 
   const [name, setName] = useState(() => {
-    try { return JSON.parse(sessionStorage.getItem("funnel_lead") || "{}").name || ""; } catch { return ""; }
+    try { return JSON.parse(sessionStorage.getItem(prefillFromKey) || "{}").name || ""; } catch { return ""; }
   });
   const [email, setEmail] = useState(() => {
-    try { return JSON.parse(sessionStorage.getItem("funnel_lead") || "{}").email || ""; } catch { return ""; }
+    try { return JSON.parse(sessionStorage.getItem(prefillFromKey) || "{}").email || ""; } catch { return ""; }
   });
   const [phone, setPhone] = useState(() => {
-    try { return JSON.parse(sessionStorage.getItem("funnel_lead") || "{}").phone || ""; } catch { return ""; }
+    try { return JSON.parse(sessionStorage.getItem(prefillFromKey) || "{}").phone || ""; } catch { return ""; }
   });
   const [notes, setNotes] = useState("");
   const [booking, setBooking] = useState(false);
@@ -79,6 +87,7 @@ export default function ConsultationCalendar() {
         startDate: start.getTime(),
         endDate: end.getTime(),
         timezone,
+        calendarType,
       });
       const slotData: SlotMap = data || {};
       setSlots(slotData);
@@ -88,7 +97,7 @@ export default function ConsultationCalendar() {
     } finally {
       setLoading(false);
     }
-  }, [timezone]);
+  }, [timezone, calendarType]);
 
   useEffect(() => {
     fetchSlots(month);
@@ -142,6 +151,7 @@ export default function ConsultationCalendar() {
         startTime,
         endTime,
         timezone,
+        calendarType,
       });
       if (data?.error) throw new Error(data.error);
       if (!isFunnel && selectedDate && selectedSlot) {
