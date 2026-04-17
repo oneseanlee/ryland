@@ -107,6 +107,7 @@ export type Database = {
           id: string
           payment_email: string | null
           phone: string | null
+          referral_slug: string | null
           status: Database["public"]["Enums"]["affiliate_status"]
           updated_at: string
           upfront_commission_rate: number | null
@@ -126,6 +127,7 @@ export type Database = {
           id?: string
           payment_email?: string | null
           phone?: string | null
+          referral_slug?: string | null
           status?: Database["public"]["Enums"]["affiliate_status"]
           updated_at?: string
           upfront_commission_rate?: number | null
@@ -145,6 +147,7 @@ export type Database = {
           id?: string
           payment_email?: string | null
           phone?: string | null
+          referral_slug?: string | null
           status?: Database["public"]["Enums"]["affiliate_status"]
           updated_at?: string
           upfront_commission_rate?: number | null
@@ -1323,6 +1326,14 @@ export type Database = {
       is_admin: { Args: never; Returns: boolean }
       is_manager: { Args: never; Returns: boolean }
       is_specialist: { Args: never; Returns: boolean }
+      lookup_affiliate_by_ref: {
+        Args: { _ref: string }
+        Returns: {
+          affiliate_id: string
+          full_name: string
+          referral_slug: string
+        }[]
+      }
       move_to_dlq: {
         Args: {
           dlq_name: string
