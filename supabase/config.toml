@@ -25,3 +25,5 @@ project_id = "gkowxzoadsljkpdzrlue"
     verify_jwt = false
   [functions.send-transactional-email]
     verify_jwt = false
+  [functions.submit-affiliate-referral]
+    verify_jwt = false
