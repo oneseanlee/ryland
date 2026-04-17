@@ -49,6 +49,7 @@ const PortalResources = lazy(() => import("./pages/portal/PortalResources"));
 const ReferralRedirect = lazy(() => import("./pages/ReferralRedirect"));
 const AffiliateReferral = lazy(() => import("./pages/AffiliateReferral"));
 const AffiliateBooking = lazy(() => import("./pages/AffiliateBooking"));
+const VanitySlugRedirect = lazy(() => import("./pages/VanitySlugRedirect"));
 const PortalEvents = lazy(() => import("./pages/portal/PortalEvents"));
 const PortalSpeaking = lazy(() => import("./pages/portal/PortalSpeaking"));
 const PortalSettings = lazy(() => import("./pages/portal/PortalSettings"));
@@ -142,6 +143,8 @@ const AppContent = () => {
               <Route path="reports" element={<AdminReports />} />
             </Route>
             {/* Command Center moved to standalone project: github.com/oneseanlee/Command-Center */}
+            {/* Vanity affiliate URLs (e.g. /brittany) — must come right before the catch-all */}
+            <Route path="/:slug" element={<VanitySlugRedirect />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
