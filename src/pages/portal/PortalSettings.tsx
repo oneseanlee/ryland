@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { UserCircle, CreditCard, Upload, Loader2, CheckCircle2, FileText, Lock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import ReferralLinkCard from "@/components/portal/ReferralLinkCard";
 
 export default function PortalSettings() {
   const { affiliate, user, updatePassword } = useAuth();
@@ -157,6 +158,9 @@ export default function PortalSettings() {
         <h1 className="text-2xl font-bold tracking-tight text-slate-900">Profile & Payouts</h1>
         <p className="text-sm text-slate-500 mt-1">Manage your account, payment info, and tax documents.</p>
       </div>
+
+      {/* Referral Link + QR */}
+      <ReferralLinkCard />
 
       {/* Profile Info */}
       <Card className="border-slate-200 bg-white shadow-sm">

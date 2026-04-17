@@ -65,16 +65,21 @@ serve(async (req) => {
       return json({ error: "Invalid affiliate ref" }, 400);
     }
 
-    // Look up affiliate by public affiliate_id (e.g. "JSmith1")
+    // Look up affiliate by either public affiliate_id (e.g. "JSmith1") OR vanity slug (e.g. "brittany"),
+    // case-insensitive. We pull both columns so we can match either one.
     let affiliate: { id: string; full_name: string; affiliate_id: string } | null = null;
     if (affiliateRef) {
+      const refLower = affiliateRef.toLowerCase();
       const { data, error } = await supabase
         .from("affiliates")
-        .select("id, full_name, affiliate_id")
-        .eq("affiliate_id", affiliateRef)
+        .select("id, full_name, affiliate_id, referral_slug")
+        .or(`affiliate_id.ilike.${refLower},referral_slug.eq.${refLower}`)
+        .limit(1)
         .maybeSingle();
       if (error) console.error("Affiliate lookup error:", error);
-      affiliate = data ?? null;
+      if (data) {
+        affiliate = { id: data.id, full_name: data.full_name, affiliate_id: data.affiliate_id };
+      }
     }
 
     // Insert into affiliate_leads if we found a real affiliate
