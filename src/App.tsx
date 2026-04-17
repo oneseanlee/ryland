@@ -47,6 +47,8 @@ const PortalLeads = lazy(() => import("./pages/portal/PortalLeads"));
 const PortalCommissions = lazy(() => import("./pages/portal/PortalCommissions"));
 const PortalResources = lazy(() => import("./pages/portal/PortalResources"));
 const ReferralRedirect = lazy(() => import("./pages/ReferralRedirect"));
+const AffiliateReferral = lazy(() => import("./pages/AffiliateReferral"));
+const AffiliateBooking = lazy(() => import("./pages/AffiliateBooking"));
 const PortalEvents = lazy(() => import("./pages/portal/PortalEvents"));
 const PortalSpeaking = lazy(() => import("./pages/portal/PortalSpeaking"));
 const PortalSettings = lazy(() => import("./pages/portal/PortalSettings"));
@@ -116,6 +118,8 @@ const AppContent = () => {
             <Route path="/credit-intake" element={<CreditIntake />} />
             <Route path="/unsubscribe" element={<Unsubscribe />} />
             <Route path="/r/:ref" element={<ReferralRedirect />} />
+            <Route path="/affiliate-referral" element={<AffiliateReferral />} />
+            <Route path="/affiliate-booking" element={<AffiliateBooking />} />
             <Route path="/portal/login" element={<PortalLogin />} />
             <Route path="/portal" element={<PortalLayout />}>
               <Route index element={<PortalDashboard />} />
