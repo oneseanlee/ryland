@@ -66,6 +66,7 @@ const AdminReports = lazy(() => import("./pages/admin/AdminReports"));
 const AdminAffiliateDetail = lazy(() => import("./pages/admin/AdminAffiliateDetail"));
 
 import ScrollToTop from "./components/ScrollToTop";
+import ImpersonationBanner from "./components/ImpersonationBanner";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -85,6 +86,7 @@ const AppContent = () => {
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <ImpersonationBanner />
         <ScrollToTop />
         <Suspense fallback={<div className="min-h-screen" />}>
           <Routes>

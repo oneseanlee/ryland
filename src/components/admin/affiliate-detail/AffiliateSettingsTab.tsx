@@ -6,14 +6,23 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle2, XCircle, RefreshCw, Loader2, Save } from "lucide-react";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { CheckCircle2, XCircle, RefreshCw, Loader2, Save, Link2, UserCheck, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
+import { validateSlug } from "@/lib/reservedSlugs";
+import { startImpersonationSession } from "@/components/ImpersonationBanner";
 
 interface AffiliateSettingsTabProps {
   affiliate: {
     id: string;
     user_id: string;
     full_name: string;
+    email: string;
+    affiliate_id: string;
+    referral_slug?: string | null;
     status: string;
     upfront_commission_rate: number;
     backend_commission_rate: number;
@@ -26,9 +35,14 @@ export default function AffiliateSettingsTab({ affiliate, onUpdate }: AffiliateS
   const [upfrontRate, setUpfrontRate] = useState(affiliate.upfront_commission_rate);
   const [backendRate, setBackendRate] = useState(affiliate.backend_commission_rate);
   const [adminNotes, setAdminNotes] = useState(affiliate.admin_notes || "");
+  const [slug, setSlug] = useState(affiliate.referral_slug || "");
+  const [savingSlug, setSavingSlug] = useState(false);
   const [savingRates, setSavingRates] = useState(false);
   const [savingNotes, setSavingNotes] = useState(false);
   const [updatingStatus, setUpdatingStatus] = useState(false);
+  const [impersonateOpen, setImpersonateOpen] = useState(false);
+  const [reason, setReason] = useState("");
+  const [impersonating, setImpersonating] = useState(false);
 
   const updateRates = async () => {
     setSavingRates(true);
@@ -86,8 +100,145 @@ export default function AffiliateSettingsTab({ affiliate, onUpdate }: AffiliateS
     }
   };
 
+  const saveSlug = async () => {
+    const trimmed = slug.trim().toLowerCase();
+    if (trimmed) {
+      const v = validateSlug(trimmed);
+      if (!v.valid) {
+        toast.error(v.error || "Invalid slug");
+        return;
+      }
+    }
+    setSavingSlug(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("admin-update-affiliate-slug", {
+        body: { affiliate_id: affiliate.id, slug: trimmed || null },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      toast.success(trimmed ? `Referral handle set to "${trimmed}"` : "Referral handle cleared");
+      setSlug(data?.slug || "");
+      onUpdate();
+    } catch (err) {
+      toast.error((err as Error).message || "Failed to update referral handle");
+    } finally {
+      setSavingSlug(false);
+    }
+  };
+
+  const startImpersonation = async () => {
+    setImpersonating(true);
+    try {
+      // Capture current admin session BEFORE we sign in as the target
+      const { data: sessionData } = await supabase.auth.getSession();
+      const adminAccess = sessionData.session?.access_token;
+      const adminRefresh = sessionData.session?.refresh_token;
+      if (!adminAccess || !adminRefresh) {
+        throw new Error("No active admin session");
+      }
+
+      const { data, error } = await supabase.functions.invoke("admin-impersonate", {
+        body: {
+          target_user_id: affiliate.user_id,
+          reason: reason.trim() || null,
+          redirect_to: `${window.location.origin}/portal`,
+        },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      if (!data?.action_link) throw new Error("No sign-in link returned");
+
+      // Save admin session so we can return later
+      startImpersonationSession(adminAccess, adminRefresh, data.target_email);
+
+      // Follow the magic link — Supabase will sign in as the target user
+      window.location.href = data.action_link;
+    } catch (err) {
+      toast.error((err as Error).message || "Failed to start impersonation");
+      setImpersonating(false);
+    }
+  };
+
+  const referralLink = affiliate.referral_slug
+    ? `rylandpartners.com/${affiliate.referral_slug}`
+    : `rylandpartners.com/r/${affiliate.affiliate_id}`;
+
   return (
     <div className="space-y-6">
+      {/* Referral Link */}
+      <Card>
+        <CardContent className="pt-6">
+          <div className="flex items-start justify-between gap-4 mb-4">
+            <div>
+              <h3 className="text-sm font-semibold text-slate-700 uppercase tracking-wider">Referral Handle</h3>
+              <p className="text-xs text-slate-500 mt-1">
+                Custom vanity URL. Defaults to affiliate ID if blank.
+              </p>
+            </div>
+            <Link2 className="h-5 w-5 text-slate-400" aria-hidden="true" />
+          </div>
+
+          <div className="flex items-center gap-2 mb-3 px-3 py-2 bg-slate-50 rounded-md border border-slate-200">
+            <span className="text-xs text-slate-500">Current link:</span>
+            <a
+              href={`https://${referralLink}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm font-mono text-blue-600 hover:underline flex items-center gap-1"
+            >
+              {referralLink}
+              <ExternalLink className="h-3 w-3" />
+            </a>
+          </div>
+
+          <Label htmlFor="slug-input" className="text-sm text-slate-600">Custom handle</Label>
+          <div className="flex items-center gap-2 mt-1">
+            <span className="text-sm text-slate-500 shrink-0">rylandpartners.com/</span>
+            <Input
+              id="slug-input"
+              value={slug}
+              onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))}
+              placeholder="brittany"
+              maxLength={30}
+              className="font-mono"
+            />
+            <Button onClick={saveSlug} disabled={savingSlug || slug === (affiliate.referral_slug || "")}>
+              {savingSlug ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
+              Save
+            </Button>
+          </div>
+          <p className="text-xs text-slate-400 mt-1.5">
+            3–30 chars, lowercase letters, numbers, hyphens. Must start with a letter.
+          </p>
+        </CardContent>
+      </Card>
+
+      {/* Impersonation */}
+      <Card className="border-amber-200">
+        <CardContent className="pt-6">
+          <div className="flex items-start justify-between gap-4 mb-4">
+            <div>
+              <h3 className="text-sm font-semibold text-slate-700 uppercase tracking-wider flex items-center gap-2">
+                <UserCheck className="h-4 w-4 text-amber-600" aria-hidden="true" />
+                Sign In As User
+              </h3>
+              <p className="text-xs text-slate-500 mt-1">
+                Log into the portal as <span className="font-medium">{affiliate.full_name}</span> to verify their experience.
+                A red banner will let you return to admin. Every session is recorded.
+              </p>
+            </div>
+          </div>
+          <Button
+            onClick={() => setImpersonateOpen(true)}
+            variant="outline"
+            className="border-amber-300 text-amber-700 hover:bg-amber-50"
+          >
+            <UserCheck className="h-4 w-4 mr-2" />
+            Log in as {affiliate.full_name}
+          </Button>
+        </CardContent>
+      </Card>
+
       {/* Commission Rates */}
       <Card>
         <CardContent className="pt-6">
@@ -181,6 +332,37 @@ export default function AffiliateSettingsTab({ affiliate, onUpdate }: AffiliateS
           </Button>
         </CardContent>
       </Card>
+
+      {/* Impersonation confirm dialog */}
+      <AlertDialog open={impersonateOpen} onOpenChange={setImpersonateOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Log in as {affiliate.full_name}?</AlertDialogTitle>
+            <AlertDialogDescription>
+              You will be signed in as <span className="font-medium">{affiliate.email}</span> in a new session.
+              A red banner across the top of the site will let you return to your admin account.
+              This action is recorded in the audit log.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="space-y-2">
+            <Label htmlFor="reason" className="text-xs text-slate-500">Reason (optional)</Label>
+            <Input
+              id="reason"
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+              placeholder="e.g. Verifying portal layout"
+              maxLength={200}
+            />
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={impersonating}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={startImpersonation} disabled={impersonating} className="bg-amber-600 hover:bg-amber-700">
+              {impersonating ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <UserCheck className="h-4 w-4 mr-2" />}
+              Continue
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

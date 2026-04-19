@@ -28,6 +28,7 @@ interface Affiliate {
   upfront_commission_rate: number;
   backend_commission_rate: number;
   admin_notes: string | null;
+  referral_slug: string | null;
   created_at: string;
   updated_at: string;
 }
