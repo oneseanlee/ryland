@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_impersonation_log: {
+        Row: {
+          admin_user_id: string
+          ended_at: string | null
+          id: string
+          ip_address: string | null
+          reason: string | null
+          started_at: string
+          target_email: string | null
+          target_user_id: string
+          user_agent: string | null
+        }
+        Insert: {
+          admin_user_id: string
+          ended_at?: string | null
+          id?: string
+          ip_address?: string | null
+          reason?: string | null
+          started_at?: string
+          target_email?: string | null
+          target_user_id: string
+          user_agent?: string | null
+        }
+        Update: {
+          admin_user_id?: string
+          ended_at?: string | null
+          id?: string
+          ip_address?: string | null
+          reason?: string | null
+          started_at?: string
+          target_email?: string | null
+          target_user_id?: string
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       affiliate_leads: {
         Row: {
           affiliate_id: string
