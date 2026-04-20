@@ -3,17 +3,31 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { DollarSign, Users, CalendarClock, Copy, Check, ExternalLink, ArrowRight } from "lucide-react";
-import { useState } from "react";
+import { DollarSign, Users, CalendarClock, Copy, Check, ExternalLink, ArrowRight, Download, Settings as SettingsIcon } from "lucide-react";
+import { useRef, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Link } from "react-router-dom";
 import { format } from "date-fns";
+import { QRCodeCanvas } from "qrcode.react";
 
 const SITE_DOMAIN = "rylandpartners.com";
 
 export default function PortalDashboard() {
   const { affiliate, user } = useAuth();
   const [copied, setCopied] = useState(false);
+  const qrWrapRef = useRef<HTMLDivElement>(null);
+
+  const downloadQR = () => {
+    const canvas = qrWrapRef.current?.querySelector("canvas") as HTMLCanvasElement | null;
+    if (!canvas) return;
+    const url = canvas.toDataURL("image/png");
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `referral-qr-${referralId || "link"}.png`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  };
 
   // Fallback to user ID if affiliate data isn't available
   const referralId = affiliate?.affiliate_id ?? user?.id ?? "";
@@ -131,8 +145,57 @@ export default function PortalDashboard() {
               {copied ? "Copied!" : "Copy Link"}
             </Button>
           </div>
+
+          {/* Customize handle helper */}
+          <Link
+            to="/portal/settings"
+            className="mt-3 flex items-center justify-between rounded-lg border border-dashed border-slate-200 bg-slate-50/60 px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-100 hover:border-slate-300 transition-colors group"
+          >
+            <span className="flex items-center gap-2">
+              <SettingsIcon className="h-4 w-4 text-slate-400" />
+              If you want to change it, click here to make it easier to share.
+            </span>
+            <ArrowRight className="h-4 w-4 text-slate-400 group-hover:text-slate-600 transition-colors" />
+          </Link>
         </CardContent>
       </Card>
+
+      {/* QR Code */}
+      {referralLink && (
+        <Card className="border-slate-200 bg-white shadow-sm">
+          <CardContent className="p-5">
+            <div className="flex flex-col sm:flex-row gap-6 items-start sm:items-center">
+              <div
+                ref={qrWrapRef}
+                className="rounded-xl border border-slate-200 bg-white p-3 shrink-0"
+              >
+                <QRCodeCanvas
+                  value={referralLink}
+                  size={160}
+                  level="H"
+                  includeMargin={false}
+                  bgColor="#ffffff"
+                  fgColor="#0f172a"
+                />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="text-sm font-semibold text-slate-900">Your Referral QR Code</h3>
+                <p className="text-xs text-slate-500 mt-1">
+                  Print it on flyers, business cards, or show it on your phone — anyone who scans it lands on your referral link.
+                </p>
+                <Button
+                  onClick={downloadQR}
+                  variant="outline"
+                  className="mt-3 gap-2 border-slate-200 text-slate-700 hover:bg-slate-100"
+                >
+                  <Download className="h-4 w-4" />
+                  Download PNG
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Quick links */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
