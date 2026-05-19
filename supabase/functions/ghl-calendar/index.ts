@@ -78,9 +78,12 @@ serve(async (req) => {
       url.searchParams.set("endDate", String(endDate as number));
       url.searchParams.set("timezone", String(timezone));
 
-      // userId is optional but required for round-robin / collective calendar types
+      // userId is optional but required for round-robin / collective calendar types.
+      // Only attach it for partner/affiliate calendars — the consultation calendar
+      // ("Free Business Credit Consultation") uses its own team assignments, and
+      // filtering by a userId that isn't on that calendar returns zero slots.
       const userId = Deno.env.get("GHL_USER_ID");
-      if (userId) {
+      if (userId && (isPartner || isAffiliate)) {
         url.searchParams.set("userId", userId);
       }
 
