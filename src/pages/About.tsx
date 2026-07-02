@@ -60,7 +60,7 @@ const About = () => {
           <div className="relative lg:flex-1 flex justify-center mt-4 lg:mt-0 w-full">
             <div className="relative flex flex-col items-center gap-4 sm:gap-6 w-full max-w-sm sm:max-w-md lg:max-w-xl">
               <div className="absolute inset-0 bg-blue-500/20 blur-[80px] rounded-full" />
-              <img src={geneRylandAbout} alt="Gene Ryland — Founder of Ryland Partners" width={1178} height={1667} loading="lazy" className="relative z-10 w-full max-w-[16rem] sm:max-w-[20rem] md:max-w-[24rem] lg:max-w-[28rem] object-cover drop-shadow-2xl" />
+              <img src={geneRylandAbout.url} alt="Gene Ryland — Founder of Ryland Partners" width={1178} height={1667} loading="lazy" className="relative z-10 w-full max-w-[16rem] sm:max-w-[20rem] md:max-w-[24rem] lg:max-w-[28rem] object-cover drop-shadow-2xl" />
               <div className="relative z-10 flex flex-col items-center mt-1 sm:mt-2">
                 <p className="text-base sm:text-lg font-semibold text-white/90" style={{ fontVariant: 'small-caps', letterSpacing: '0.15em' }}>Gene Ryland</p>
                 <p className="text-[10px] sm:text-xs uppercase tracking-[0.2em] text-blue-300 font-medium mt-0.5">CEO &amp; Founder <span className="text-white/50 mx-1">|</span> Business Funding Expert</p>
