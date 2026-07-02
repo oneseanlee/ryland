@@ -97,9 +97,19 @@ export default function PortalDashboard() {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900">Dashboard</h1>
-        <p className="text-sm text-slate-500 mt-1">Your partner performance at a glance.</p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900">Dashboard</h1>
+          <p className="text-sm text-slate-500 mt-1">Your partner performance at a glance.</p>
+        </div>
+        <Button
+          onClick={() => setAddClientOpen(true)}
+          className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white gap-2 shadow-sm"
+          size="lg"
+        >
+          <UserPlus className="h-4 w-4" />
+          Add New Client
+        </Button>
       </div>
 
       {/* 3 KPI Cards */}
