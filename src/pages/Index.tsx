@@ -140,7 +140,7 @@ const Index = () => {
               <div className="absolute inset-0 bg-blue-500/20 blur-[80px] rounded-full" />
               <div className="relative z-10 w-full">
                 <img
-                  src={geneHeroOffice}
+                  src={geneHeroBeard.url}
                   alt="Gene Ryland — Business Credit Strategist"
                   fetchPriority="high"
                   width={1280}
