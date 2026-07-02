@@ -2,7 +2,7 @@ import { Shield, DollarSign, Users } from "lucide-react";
 import PageMeta from "@/components/PageMeta";
 import heroPortrait from "@/assets/hero-portrait.png";
 import asSeenOn from "@/assets/as-seen-on.png";
-import geneRylandAbout from "@/assets/gene-ryland-about.png";
+import geneRylandAbout from "@/assets/gene-ryland-about-v2.png.asset.json";
 import InfiniteGrid from "@/components/ui/infinite-grid";
 import Counter from "@/components/funding-visuals/Counter";
 import HlsVideoBackground from "@/components/HlsVideoBackground";
