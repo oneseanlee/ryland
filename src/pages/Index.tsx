@@ -35,7 +35,7 @@ import successEmpire from "@/assets/success-empire.webp";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import PageMeta from "@/components/PageMeta";
-import geneHeroOffice from "@/assets/gene-hero-office.jpg";
+
 import geneHeroHeadshot from "@/assets/gene-hero-headshot.jpg";
 import geneHeroBlazer from "@/assets/gene-hero-blazer.jpg";
 
@@ -140,7 +140,7 @@ const Index = () => {
               <div className="absolute inset-0 bg-blue-500/20 blur-[80px] rounded-full" />
               <div className="relative z-10 w-full">
                 <img
-                  src={geneHeroOffice}
+                  src="/gene-hero-beard.webp"
                   alt="Gene Ryland — Business Credit Strategist"
                   fetchPriority="high"
                   width={1280}
