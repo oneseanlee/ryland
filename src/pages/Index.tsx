@@ -1,10 +1,10 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { VolumeX, Volume2, Rocket, LayoutDashboard, ShieldCheck, Handshake } from "lucide-react";
 import logoWhite from "@/assets/logo-white.png";
 import heroPortrait from "@/assets/hero-portrait.png";
 import asSeenOn from "@/assets/as-seen-on.png";
-import geneRylandAbout from "@/assets/gene-ryland-about.png";
+import geneRylandAboutV2 from "@/assets/gene-ryland-about-v2.png.asset.json";
 import logoUsBank from "@/assets/logo-usbank.png";
 import logoBoa from "@/assets/logo-boa.png";
 import logoNavyFed from "@/assets/logo-navyfed.png";
@@ -29,15 +29,9 @@ import proofAmex from "@/assets/proof-amex.webp";
 import proofIbc from "@/assets/proof-ibc.webp";
 import iconConsultation from "@/assets/icon-consultation.png";
 import { motion } from "framer-motion";
-import successFunding from "@/assets/success-funding.jpg";
-import successCredit from "@/assets/success-credit.webp";
-import successEmpire from "@/assets/success-empire.webp";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import PageMeta from "@/components/PageMeta";
-
-import geneHeroHeadshot from "@/assets/gene-hero-headshot.jpg";
-import geneHeroBlazer from "@/assets/gene-hero-blazer.jpg";
 
 const DISCLAIMER_TEXT = "Terms apply. We provide financial education; specific funding amounts are not guaranteed.";
 
@@ -185,45 +179,6 @@ const Index = () => {
         </div>
       </section>
 
-      {/* About section */}
-      <section className="overflow-hidden mt-4 sm:mt-8 mb-8 sm:mb-12 pt-16 sm:pt-24 pb-16 sm:pb-24 relative" id="about">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[500px] bg-blue-500/10 blur-[120px] rounded-full pointer-events-none -z-10 mix-blend-screen"></div>
-          <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="text-center max-w-2xl mx-auto mb-16">
-            <p className="text-xs sm:text-sm text-slate-500 mb-4">Meet The Founder</p>
-            <h2 className="text-4xl md:text-5xl font-medium tracking-tighter text-slate-900 mb-6" style={{ maskImage: 'linear-gradient(to bottom, black 40%, rgba(0,0,0,0.5))', WebkitMaskImage: 'linear-gradient(to bottom, black 40%, rgba(0,0,0,0.5))' }}>Gene Ryland</h2>
-            <p className="text-lg text-slate-500">CEO &amp; Founder, Ryland Partners</p>
-          </div>
-          <div className="border border-[#004E8C] rounded-3xl p-6 sm:p-8 md:p-12 shadow-2xl overflow-visible relative">
-            <HlsVideoBackground overlay="bg-[#003A70]/90" className="rounded-3xl" staticOnly />
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-20 items-center relative z-10">
-              <div className="relative flex justify-center -mt-20 sm:-mt-32 md:-mt-56 lg:-mt-64">
-                <img src={geneRylandAbout} alt="Gene Ryland — Founder of Ryland Partners" loading="lazy" width={1178} height={1667} className="relative z-10 w-full max-w-[16rem] sm:max-w-[20rem] md:max-w-[26rem] lg:max-w-[30rem] object-cover drop-shadow-2xl" />
-              </div>
-              <div className="space-y-6">
-                <p className="text-white/80 leading-relaxed text-base">Gene Ryland is a serial entrepreneur and business funding strategist who has dedicated his career to helping founders unlock the capital they need to scale. With deep expertise in credit optimization, alternative lending, and strategic financial positioning, Gene has built Ryland Partners into a trusted name in the funding space.</p>
-                <p className="text-white/80 leading-relaxed text-base">After experiencing firsthand how traditional banks overlook ambitious entrepreneurs, Gene created a system that bridges the gap — connecting business owners with high-limit lenders, credit-building strategies, and the education needed to secure six- and seven-figure funding packages.</p>
-                <p className="text-white/80 leading-relaxed text-base">Today, Gene leads a growing community of funded founders through the Ryland Partners ecosystem — offering done-for-you services, a private academy, and direct lender access that most entrepreneurs never knew existed.</p>
-                <div className="grid grid-cols-3 gap-6 pt-6 border-t border-white/20">
-                  <div><p className="text-2xl md:text-3xl font-semibold text-white tracking-tight">$150M+</p><p className="text-xs text-white/70 mt-1">Funding Secured</p></div>
-                  <div><p className="text-2xl md:text-3xl font-semibold text-white tracking-tight">10K+</p><p className="text-xs text-white/70 mt-1">Entrepreneurs Helped</p></div>
-                  <div><p className="text-2xl md:text-3xl font-semibold text-white tracking-tight">8+</p><p className="text-xs text-white/70 mt-1">Years of Experience</p></div>
-                </div>
-                <div className="pt-4">
-                  <Link to="/contact" className="inline-flex transition-all duration-300 hover:shadow-[0_8px_25px_rgba(0,123,255,0.8)] hover:scale-[1.02] hover:bg-gradient-to-tr hover:from-blue-300 hover:via-blue-500 hover:to-blue-700 active:shadow-inner active:shadow-blue-900/50 active:scale-[0.98] active:duration-75 text-sm font-semibold text-white bg-gradient-to-tr from-blue-400 via-blue-600 to-blue-800 rounded-full py-3.5 px-8 shadow-[0_4px_15px_rgba(0,123,255,0.4)] items-center justify-center">
-                    Work With Gene
-                  </Link>
-                  <p className="text-[10px] text-white/60 mt-2">{DISCLAIMER_TEXT}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Funding Journey */}
-      <FundingJourney />
-
       {/* Who This Is For */}
       <section className="sm:pt-24 md:pt-20 pt-24 pb-20 relative" id="showcase">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
@@ -288,6 +243,9 @@ const Index = () => {
           </div>
         </div>
       </section>
+
+      {/* Funding Journey */}
+      <FundingJourney />
 
       {/* Testimonials */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 mt-20 pt-8 pb-10 sm:py-12">
@@ -366,6 +324,42 @@ const Index = () => {
                   </article>
                 </div>
               ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* About section */}
+      <section className="overflow-hidden mt-4 sm:mt-8 mb-8 sm:mb-12 pt-16 sm:pt-24 pb-16 sm:pb-24 relative" id="about">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[500px] bg-blue-500/10 blur-[120px] rounded-full pointer-events-none -z-10 mix-blend-screen"></div>
+          <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="text-center max-w-2xl mx-auto mb-16">
+            <p className="text-xs sm:text-sm text-slate-500 mb-4">Meet The Founder</p>
+            <h2 className="text-4xl md:text-5xl font-medium tracking-tighter text-slate-900 mb-6" style={{ maskImage: 'linear-gradient(to bottom, black 40%, rgba(0,0,0,0.5))', WebkitMaskImage: 'linear-gradient(to bottom, black 40%, rgba(0,0,0,0.5))' }}>Gene Ryland</h2>
+            <p className="text-lg text-slate-500">CEO &amp; Founder, Ryland Partners</p>
+          </div>
+          <div className="border border-[#004E8C] rounded-3xl p-6 sm:p-8 md:p-12 shadow-2xl overflow-visible relative">
+            <HlsVideoBackground overlay="bg-[#003A70]/90" className="rounded-3xl" staticOnly />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-20 items-center relative z-10">
+              <div className="relative flex justify-center -mt-20 sm:-mt-32 md:-mt-56 lg:-mt-64">
+                <img src={geneRylandAboutV2.url} alt="Gene Ryland — Founder of Ryland Partners" loading="lazy" width={1178} height={1667} className="relative z-10 w-full max-w-[16rem] sm:max-w-[20rem] md:max-w-[26rem] lg:max-w-[30rem] object-cover drop-shadow-2xl" />
+              </div>
+              <div className="space-y-6">
+                <p className="text-white/80 leading-relaxed text-base">Gene Ryland is a serial entrepreneur and business funding strategist who has dedicated his career to helping founders unlock the capital they need to scale. With deep expertise in credit optimization, alternative lending, and strategic financial positioning, Gene has built Ryland Partners into a trusted name in the funding space.</p>
+                <p className="text-white/80 leading-relaxed text-base">After experiencing firsthand how traditional banks overlook ambitious entrepreneurs, Gene created a system that bridges the gap — connecting business owners with high-limit lenders, credit-building strategies, and the education needed to secure six- and seven-figure funding packages.</p>
+                <p className="text-white/80 leading-relaxed text-base">Today, Gene leads a growing community of funded founders through the Ryland Partners ecosystem — offering done-for-you services, a private academy, and direct lender access that most entrepreneurs never knew existed.</p>
+                <div className="grid grid-cols-3 gap-6 pt-6 border-t border-white/20">
+                  <div><p className="text-2xl md:text-3xl font-semibold text-white tracking-tight">$150M+</p><p className="text-xs text-white/70 mt-1">Funding Secured</p></div>
+                  <div><p className="text-2xl md:text-3xl font-semibold text-white tracking-tight">10K+</p><p className="text-xs text-white/70 mt-1">Entrepreneurs Helped</p></div>
+                  <div><p className="text-2xl md:text-3xl font-semibold text-white tracking-tight">8+</p><p className="text-xs text-white/70 mt-1">Years of Experience</p></div>
+                </div>
+                <div className="pt-4">
+                  <Link to="/contact" className="inline-flex transition-all duration-300 hover:shadow-[0_8px_25px_rgba(0,123,255,0.8)] hover:scale-[1.02] hover:bg-gradient-to-tr hover:from-blue-300 hover:via-blue-500 hover:to-blue-700 active:shadow-inner active:shadow-blue-900/50 active:scale-[0.98] active:duration-75 text-sm font-semibold text-white bg-gradient-to-tr from-blue-400 via-blue-600 to-blue-800 rounded-full py-3.5 px-8 shadow-[0_4px_15px_rgba(0,123,255,0.4)] items-center justify-center">
+                    Work With Gene
+                  </Link>
+                  <p className="text-[10px] text-white/60 mt-2">{DISCLAIMER_TEXT}</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
