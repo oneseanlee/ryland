@@ -35,7 +35,7 @@ import successEmpire from "@/assets/success-empire.webp";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import PageMeta from "@/components/PageMeta";
-import geneHeroOffice from "@/assets/gene-hero-office.jpg";
+import geneHeroBeard from "@/assets/gene-hero-beard.png.asset.json";
 import geneHeroHeadshot from "@/assets/gene-hero-headshot.jpg";
 import geneHeroBlazer from "@/assets/gene-hero-blazer.jpg";
 
