@@ -16,6 +16,7 @@ const SITE_DOMAIN = "rylandpartners.com";
 export default function PortalDashboard() {
   const { affiliate, user } = useAuth();
   const [copied, setCopied] = useState(false);
+  const [addClientOpen, setAddClientOpen] = useState(false);
   const qrWrapRef = useRef<HTMLDivElement>(null);
 
   const downloadQR = () => {
