@@ -83,25 +83,11 @@ const About = () => {
         </div>
       </section>
 
-      {/* THE FOUNDER'S JOURNEY */}
-      <section className="max-w-4xl mx-auto px-6 mt-20 sm:mt-32 mb-20 sm:mb-32">
-        <p className="text-xs sm:text-sm text-slate-500 mb-4 text-center">The Story</p>
-        <h2 className="text-3xl md:text-5xl font-medium tracking-tighter text-slate-900 mb-8 text-center" style={{ maskImage: 'linear-gradient(to bottom, black 40%, rgba(0,0,0,0.5))', WebkitMaskImage: 'linear-gradient(to bottom, black 40%, rgba(0,0,0,0.5))' }}>
-          The Founder's Journey
-        </h2>
-        <div className="space-y-6 text-base sm:text-lg text-slate-600 leading-relaxed">
-          <p>Gene Ryland is a serial entrepreneur and business funding strategist who has dedicated his career to helping founders unlock the capital they need to scale. With deep expertise in credit optimization, alternative lending, and strategic financial positioning, Gene has built Ryland Partners into a trusted name in the funding space.</p>
-          <p>After experiencing firsthand how traditional banks overlook ambitious entrepreneurs, Gene created a system that bridges the gap — connecting business owners with high-limit lenders, credit-building strategies, and the education needed to secure six- and seven-figure funding packages.</p>
-          <p>Featured in <span className="font-semibold text-slate-900">FOX</span>, <span className="font-semibold text-slate-900">USA Today</span>, <span className="font-semibold text-slate-900">Digital Journal</span>, and <span className="font-semibold text-slate-900">MarketWatch</span>, Gene's methods have helped over 10,000 entrepreneurs secure more than $150 million in business funding — with no tax returns or revenue required.</p>
-          <p>Today, Gene leads a growing community of funded founders through the Ryland Partners ecosystem — offering done-for-you services, a private academy, and direct lender access that most entrepreneurs never knew existed.</p>
-        </div>
-      </section>
-
       {/* THE RYLAND PILLARS */}
-      <section className="max-w-7xl mx-auto px-6 mb-20 sm:mb-32">
-        <p className="text-xs sm:text-sm text-slate-500 mb-4 text-center">Our Approach</p>
+      <section className="max-w-7xl mx-auto px-6 mt-20 sm:mt-32 mb-20 sm:mb-32">
+        <p className="text-xs sm:text-sm text-slate-500 mb-4 text-center">What We Do</p>
         <h2 className="text-3xl md:text-5xl font-medium tracking-tighter text-slate-900 mb-12 text-center" style={{ maskImage: 'linear-gradient(to bottom, black 40%, rgba(0,0,0,0.5))', WebkitMaskImage: 'linear-gradient(to bottom, black 40%, rgba(0,0,0,0.5))' }}>
-          The Ryland Pillars
+          How We Help Entrepreneurs Win
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {[
@@ -120,6 +106,20 @@ const About = () => {
               </div>
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* THE FOUNDER'S JOURNEY */}
+      <section className="max-w-4xl mx-auto px-6 mb-20 sm:mb-32">
+        <p className="text-xs sm:text-sm text-slate-500 mb-4 text-center">Meet the Founder</p>
+        <h2 className="text-3xl md:text-5xl font-medium tracking-tighter text-slate-900 mb-8 text-center" style={{ maskImage: 'linear-gradient(to bottom, black 40%, rgba(0,0,0,0.5))', WebkitMaskImage: 'linear-gradient(to bottom, black 40%, rgba(0,0,0,0.5))' }}>
+          The Founder's Journey
+        </h2>
+        <div className="space-y-6 text-base sm:text-lg text-slate-600 leading-relaxed">
+          <p>Gene Ryland is a serial entrepreneur and business funding strategist who has dedicated his career to helping founders unlock the capital they need to scale. With deep expertise in credit optimization, alternative lending, and strategic financial positioning, Gene has built Ryland Partners into a trusted name in the funding space.</p>
+          <p>After experiencing firsthand how traditional banks overlook ambitious entrepreneurs, Gene created a system that bridges the gap — connecting business owners with high-limit lenders, credit-building strategies, and the education needed to secure six- and seven-figure funding packages.</p>
+          <p>Featured in <span className="font-semibold text-slate-900">FOX</span>, <span className="font-semibold text-slate-900">USA Today</span>, <span className="font-semibold text-slate-900">Digital Journal</span>, and <span className="font-semibold text-slate-900">MarketWatch</span>, Gene's methods have helped over 10,000 entrepreneurs secure more than $150 million in business funding — with no tax returns or revenue required.</p>
+          <p>Today, Gene leads a growing community of funded founders through the Ryland Partners ecosystem — offering done-for-you services, a private academy, and direct lender access that most entrepreneurs never knew existed.</p>
         </div>
       </section>
 
