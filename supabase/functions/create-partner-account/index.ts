@@ -26,21 +26,44 @@ serve(async (req) => {
       auth: { autoRefreshToken: false, persistSession: false },
     });
 
-    const { name, email, phone, business_name, referral_source, message } = await req.json();
+    const body = await req.json();
+    const {
+      first_name,
+      last_name,
+      name, // legacy fallback
+      email,
+      password,
+      phone,
+      business_name,
+      referral_source,
+      message,
+    } = body ?? {};
+
+    // Derive first/last from legacy `name` if provided
+    let firstNameIn = typeof first_name === "string" ? first_name.trim() : "";
+    let lastNameIn = typeof last_name === "string" ? last_name.trim() : "";
+    if ((!firstNameIn || !lastNameIn) && typeof name === "string") {
+      const parts = name.trim().split(/\s+/);
+      firstNameIn = firstNameIn || parts[0] || "";
+      lastNameIn = lastNameIn || parts.slice(1).join(" ") || "";
+    }
 
     // Validation
-    if (!name || !email) {
-      return json({ error: "Name and email are required" }, 400);
+    if (!firstNameIn || !lastNameIn) {
+      return json({ error: "First and last name are required" }, 400);
     }
-    if (typeof name !== "string" || name.length > 100) {
-      return json({ error: "Invalid name" }, 400);
+    if (firstNameIn.length > 50 || lastNameIn.length > 50) {
+      return json({ error: "Name is too long" }, 400);
     }
-    if (typeof email !== "string" || email.length > 255) {
+    if (!email || typeof email !== "string" || email.length > 255) {
       return json({ error: "Invalid email" }, 400);
+    }
+    if (!password || typeof password !== "string" || password.length < 8 || password.length > 72) {
+      return json({ error: "Password must be between 8 and 72 characters" }, 400);
     }
 
     const trimmedEmail = email.trim().toLowerCase();
-    const trimmedName = name.trim();
+    const trimmedName = `${firstNameIn} ${lastNameIn}`.trim();
 
     // Check if email already exists in affiliates
     const { data: existingAffiliate } = await supabase
@@ -54,15 +77,11 @@ serve(async (req) => {
     }
 
     // Generate affiliate ID: FirstInitialLastName1, increment if duplicate
-    const nameParts = trimmedName.split(/\s+/);
-    const firstName = nameParts[0] || "";
-    const lastName = nameParts.slice(1).join("") || firstName;
-    const baseId = (firstName.charAt(0) + lastName).replace(/[^a-zA-Z]/g, "");
+    const baseId = (firstNameIn.charAt(0) + lastNameIn.replace(/\s+/g, "")).replace(/[^a-zA-Z]/g, "");
 
     let affiliateId = `${baseId}1`;
     let counter = 1;
 
-    // Check for duplicates
     const { data: existingIds } = await supabase
       .from("affiliates")
       .select("affiliate_id")
@@ -82,11 +101,16 @@ serve(async (req) => {
       affiliateId = `${baseId}${counter}`;
     }
 
-    // Create auth user with no password, email confirmed
+    // Create auth user with user-chosen password, email confirmed
     const { data: authData, error: authError } = await supabase.auth.admin.createUser({
       email: trimmedEmail,
+      password,
       email_confirm: true,
-      user_metadata: { full_name: trimmedName },
+      user_metadata: {
+        full_name: trimmedName,
+        first_name: firstNameIn,
+        last_name: lastNameIn,
+      },
     });
 
     if (authError) {
@@ -112,28 +136,22 @@ serve(async (req) => {
 
     if (affiliateError) {
       console.error("Affiliate insert error:", affiliateError);
-      // Clean up auth user on failure
       await supabase.auth.admin.deleteUser(userId);
       return json({ error: "Failed to create partner record. Please try again." }, 500);
     }
 
-    // ── Non-critical tasks: run in parallel, don't block response ──
+    // ── Non-critical background tasks ──
     const backgroundTasks = async () => {
       let ghlContactId: string | null = null;
 
-      // GHL sync
       try {
         const ghlApiKey = Deno.env.get("GHL_API_KEY");
         const ghlLocationId = Deno.env.get("GHL_LOCATION_ID");
 
         if (ghlApiKey && ghlLocationId) {
-          const ghlNameParts = trimmedName.split(/\s+/);
-          const ghlFirstName = ghlNameParts[0] || "";
-          const ghlLastName = ghlNameParts.slice(1).join(" ") || "";
-
           const ghlPayload: Record<string, unknown> = {
-            firstName: ghlFirstName,
-            lastName: ghlLastName,
+            firstName: firstNameIn,
+            lastName: lastNameIn,
             email: trimmedEmail,
             locationId: ghlLocationId,
             source: "Partner Signup Form",
@@ -165,29 +183,17 @@ serve(async (req) => {
         console.error("GHL sync error (non-critical):", ghlErr);
       }
 
-      // Partner submissions & recovery email in parallel
-      await Promise.allSettled([
-        supabase.from("partner_submissions").insert({
-          name: trimmedName,
-          email: trimmedEmail,
-          phone: phone || null,
-          business_name: business_name || null,
-          referral_source: referral_source || null,
-          message: message || null,
-          ghl_contact_id: ghlContactId,
-        }),
-        supabase.auth.admin.generateLink({
-          type: "recovery",
-          email: trimmedEmail,
-          options: {
-            redirectTo: "https://rylandpartners.com/reset-password",
-          },
-        }),
-      ]);
+      await supabase.from("partner_submissions").insert({
+        name: trimmedName,
+        email: trimmedEmail,
+        phone: phone || null,
+        business_name: business_name || null,
+        referral_source: referral_source || null,
+        message: message || null,
+        ghl_contact_id: ghlContactId,
+      });
     };
 
-    // Fire background tasks without awaiting — edge function stays alive
-    // via waitUntil-style pattern (Deno keeps running until all promises settle)
     backgroundTasks().catch((err) => console.error("Background task error:", err));
 
     return json({ success: true, affiliateId });
