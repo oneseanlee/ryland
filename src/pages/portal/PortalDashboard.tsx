@@ -3,12 +3,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { DollarSign, Users, CalendarClock, Copy, Check, ExternalLink, ArrowRight, Download, Settings as SettingsIcon } from "lucide-react";
+import { DollarSign, Users, CalendarClock, Copy, Check, ExternalLink, ArrowRight, Download, Settings as SettingsIcon, UserPlus } from "lucide-react";
 import { useRef, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Link } from "react-router-dom";
 import { format } from "date-fns";
 import { QRCodeCanvas } from "qrcode.react";
+import AddClientDrawer from "@/components/portal/AddClientDrawer";
 
 const SITE_DOMAIN = "rylandpartners.com";
 
