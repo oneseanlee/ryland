@@ -3,18 +3,20 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { DollarSign, Users, CalendarClock, Copy, Check, ExternalLink, ArrowRight, Download, Settings as SettingsIcon } from "lucide-react";
+import { DollarSign, Users, CalendarClock, Copy, Check, ExternalLink, ArrowRight, Download, Settings as SettingsIcon, UserPlus } from "lucide-react";
 import { useRef, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Link } from "react-router-dom";
 import { format } from "date-fns";
 import { QRCodeCanvas } from "qrcode.react";
+import AddClientDrawer from "@/components/portal/AddClientDrawer";
 
 const SITE_DOMAIN = "rylandpartners.com";
 
 export default function PortalDashboard() {
   const { affiliate, user } = useAuth();
   const [copied, setCopied] = useState(false);
+  const [addClientOpen, setAddClientOpen] = useState(false);
   const qrWrapRef = useRef<HTMLDivElement>(null);
 
   const downloadQR = () => {
@@ -95,9 +97,19 @@ export default function PortalDashboard() {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900">Dashboard</h1>
-        <p className="text-sm text-slate-500 mt-1">Your partner performance at a glance.</p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900">Dashboard</h1>
+          <p className="text-sm text-slate-500 mt-1">Your partner performance at a glance.</p>
+        </div>
+        <Button
+          onClick={() => setAddClientOpen(true)}
+          className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white gap-2 shadow-sm"
+          size="lg"
+        >
+          <UserPlus className="h-4 w-4" />
+          Add New Client
+        </Button>
       </div>
 
       {/* 3 KPI Cards */}
@@ -232,6 +244,8 @@ export default function PortalDashboard() {
           </Card>
         </Link>
       </div>
+
+      <AddClientDrawer open={addClientOpen} onClose={() => setAddClientOpen(false)} />
     </div>
   );
 }
