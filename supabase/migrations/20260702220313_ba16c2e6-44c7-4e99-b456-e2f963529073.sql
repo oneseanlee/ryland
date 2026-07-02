@@ -1,0 +1,1 @@
+DELETE FROM auth.users WHERE email IN ('geno72@hotmail.com','coolcups@outlook.com','testportal2@mailinator.com','debug-test-12345@example.com','geenoo007@gmail.com','audit-test-user@rylandpartners.com','testpartner@rylandpartners.com') AND id NOT IN (SELECT user_id FROM public.affiliates WHERE user_id IS NOT NULL) AND id NOT IN (SELECT user_id FROM public.user_roles);
