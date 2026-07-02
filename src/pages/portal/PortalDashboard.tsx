@@ -244,6 +244,8 @@ export default function PortalDashboard() {
           </Card>
         </Link>
       </div>
+
+      <AddClientDrawer open={addClientOpen} onClose={() => setAddClientOpen(false)} />
     </div>
   );
 }
