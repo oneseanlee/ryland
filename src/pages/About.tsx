@@ -48,10 +48,10 @@ const About = () => {
         <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-12 relative z-10">
           <div className="text-center lg:text-left lg:flex-1 max-w-3xl">
             <h1 className="text-[28px] leading-[0.95] sm:text-[42px] md:text-[52px] lg:text-[64px] font-medium tracking-tighter font-geist text-center lg:text-left mt-4 sm:mt-8 bg-clip-text text-transparent bg-gradient-to-b from-white via-white to-zinc-500">
-              The Architect of Capital: Bridging the Gap Between Banks and Visionaries
+              Capital, Credit &amp; Community for Entrepreneurs Ready to Scale
             </h1>
             <p className="text-base sm:text-lg md:text-xl text-zinc-400 mt-4 sm:mt-6 max-w-xl text-center lg:text-left leading-relaxed mx-auto lg:mx-0">
-              Helping entrepreneurs unlock capital to build, scale, and grow their businesses.
+              We help founders unlock business funding, optimize their credit, and plug into a network of funded operators — so you can build, scale, and grow with confidence.
             </p>
             <div className="flex flex-col mt-6 sm:mt-8 gap-4 items-center lg:items-start">
               <img src={asSeenOn} alt="As seen on FOX, USA Today, Digital Journal, MarketWatch" width={1584} height={263} loading="lazy" className="w-full max-w-xs sm:max-w-sm lg:max-w-md brightness-0 invert opacity-60" />
