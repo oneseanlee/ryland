@@ -136,6 +136,10 @@ export default function PartnerSignupForm({ open, onOpenChange }: PartnerSignupF
           </div>
         ) : (
           <Form {...form}>
+            <div className="mt-3 rounded-lg border border-blue-500/30 bg-blue-500/10 px-4 py-3 text-xs text-blue-100 leading-relaxed">
+              <span className="font-semibold text-blue-200">Heads up:</span> Partners also earn on our{" "}
+              <span className="font-semibold">Credit Repair &amp; Credit Optimization</span> services — not just funding. You can refer clients to any of our offerings.
+            </div>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 mt-2">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <FormField control={form.control} name="first_name" render={({ field }) => (
