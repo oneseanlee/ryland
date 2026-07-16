@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, LogIn, Shield } from "lucide-react";
+import { Menu, X, Handshake } from "lucide-react";
 import logoDark from "@/assets/logo-dark.png";
 
 const SERVICE_ITEMS = [
@@ -85,18 +85,11 @@ const Navbar = ({ active, showServicesDropdown = true }: NavbarProps) => {
             <Link to="/community" className={navLinkClass("/community")}>Community</Link>
             <Link to="/store" className={navLinkClass("/store")}>Store</Link>
             <Link
-              to="/portal/login"
+              to="/partners"
               className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-900 transition-colors"
             >
-              <LogIn className="w-4 h-4" />
-              <span>Partner Portal</span>
-            </Link>
-            <Link
-              to="/portal/admin/login"
-              className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-900 transition-colors"
-            >
-              <Shield className="w-4 h-4" />
-              <span>Admin</span>
+              <Handshake className="w-4 h-4" />
+              <span>Partners</span>
             </Link>
             <Link to="/contact" className="shiny-cta !py-2 !px-5 !text-sm whitespace-nowrap focus:outline-none">
               <span>Contact</span>
@@ -163,22 +156,6 @@ const Navbar = ({ active, showServicesDropdown = true }: NavbarProps) => {
           ))}
         </ul>
         <div className="mt-6 flex flex-col gap-3">
-          <Link
-            to="/portal/login"
-            onClick={() => setMobileOpen(false)}
-            className="inline-flex items-center gap-2 rounded-xl bg-slate-50 px-4 py-2.5 text-sm ring-1 ring-slate-200 hover:bg-slate-100 text-slate-700 transition-colors"
-          >
-            <LogIn className="w-4 h-4" />
-            Partner Portal
-          </Link>
-          <Link
-            to="/portal/admin/login"
-            onClick={() => setMobileOpen(false)}
-            className="inline-flex items-center gap-2 rounded-xl bg-slate-50 px-4 py-2.5 text-sm ring-1 ring-slate-200 hover:bg-slate-100 text-slate-700 transition-colors"
-          >
-            <Shield className="w-4 h-4" />
-            Admin Portal
-          </Link>
           <Link
             to="/contact"
             onClick={() => setMobileOpen(false)}
