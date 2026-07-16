@@ -444,10 +444,23 @@ const Partners = () => {
           ))}
         </div>
 
-        {/* Info banner */}
+        {/* Full-service banner */}
         <motion.div
           {...stagger(0.3)}
-          className="mt-12 rounded-xl bg-blue-50 border border-blue-200 p-5 text-center"
+          className="mt-12 rounded-xl bg-gradient-to-r from-[#003A70]/5 to-blue-50 border border-blue-200 p-6 text-center"
+        >
+          <p className="text-blue-700 font-medium text-[15px] leading-relaxed">
+            <span className="text-blue-900 font-semibold">Full-service option:</span>{" "}
+            In addition to capital, the business owners you refer can also access our{" "}
+            <span className="text-blue-900 font-semibold">Credit Repair &amp; Credit Optimization</span>{" "}
+            services — so you can offer them a complete path to stronger credit and better funding.
+          </p>
+        </motion.div>
+
+        {/* Info banner */}
+        <motion.div
+          {...stagger(0.4)}
+          className="mt-6 rounded-xl bg-blue-50 border border-blue-200 p-5 text-center"
         >
           <p className="text-blue-700 font-medium text-[15px]">
             And remember, as long as they qualify (even if they don't take the funding),{" "}
