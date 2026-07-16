@@ -179,12 +179,15 @@ const Partners = () => {
           </motion.p>
 
           {/* CTA */}
-          <motion.div {...stagger(0.35)} className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-5">
+          <motion.div {...stagger(0.35)} className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
             <button onClick={() => setFormOpen(true)} className="shiny-cta !py-4 !px-10 !text-lg">
-              <span>Become A Partner Now</span>
+              <span>Apply To Become A Partner</span>
             </button>
-            <a href="/portal/login" className="text-white/60 hover:text-white text-sm font-medium tracking-wide transition-colors underline underline-offset-4 decoration-white/20 hover:decoration-white/50">
-              Partner Login →
+            <a
+              href="/portal/login"
+              className="inline-flex items-center justify-center rounded-full border border-white/25 bg-white/5 backdrop-blur-sm px-8 py-4 text-base font-medium text-white hover:bg-white/10 hover:border-white/40 transition-all"
+            >
+              Partner Portal Login →
             </a>
           </motion.div>
 
