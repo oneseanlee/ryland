@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, LogIn, Shield } from "lucide-react";
+import { Menu, X, Handshake } from "lucide-react";
 import logoDark from "@/assets/logo-dark.png";
 
 const SERVICE_ITEMS = [
