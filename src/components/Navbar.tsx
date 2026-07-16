@@ -85,18 +85,11 @@ const Navbar = ({ active, showServicesDropdown = true }: NavbarProps) => {
             <Link to="/community" className={navLinkClass("/community")}>Community</Link>
             <Link to="/store" className={navLinkClass("/store")}>Store</Link>
             <Link
-              to="/portal/login"
+              to="/partners"
               className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-900 transition-colors"
             >
-              <LogIn className="w-4 h-4" />
-              <span>Partner Portal</span>
-            </Link>
-            <Link
-              to="/portal/admin/login"
-              className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-900 transition-colors"
-            >
-              <Shield className="w-4 h-4" />
-              <span>Admin</span>
+              <Handshake className="w-4 h-4" />
+              <span>Partners</span>
             </Link>
             <Link to="/contact" className="shiny-cta !py-2 !px-5 !text-sm whitespace-nowrap focus:outline-none">
               <span>Contact</span>
