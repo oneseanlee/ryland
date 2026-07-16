@@ -157,22 +157,6 @@ const Navbar = ({ active, showServicesDropdown = true }: NavbarProps) => {
         </ul>
         <div className="mt-6 flex flex-col gap-3">
           <Link
-            to="/portal/login"
-            onClick={() => setMobileOpen(false)}
-            className="inline-flex items-center gap-2 rounded-xl bg-slate-50 px-4 py-2.5 text-sm ring-1 ring-slate-200 hover:bg-slate-100 text-slate-700 transition-colors"
-          >
-            <LogIn className="w-4 h-4" />
-            Partner Portal
-          </Link>
-          <Link
-            to="/portal/admin/login"
-            onClick={() => setMobileOpen(false)}
-            className="inline-flex items-center gap-2 rounded-xl bg-slate-50 px-4 py-2.5 text-sm ring-1 ring-slate-200 hover:bg-slate-100 text-slate-700 transition-colors"
-          >
-            <Shield className="w-4 h-4" />
-            Admin Portal
-          </Link>
-          <Link
             to="/contact"
             onClick={() => setMobileOpen(false)}
             className="inline-flex items-center gap-2 rounded-xl bg-slate-100 px-4 py-2 text-sm ring-1 ring-slate-200 hover:bg-slate-200 text-slate-900 transition-colors"
