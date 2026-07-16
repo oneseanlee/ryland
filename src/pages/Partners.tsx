@@ -175,7 +175,7 @@ const Partners = () => {
           </motion.p>
 
           <motion.p {...stagger(0.25)} className="mt-5 text-lg text-zinc-400 max-w-xl mx-auto leading-relaxed">
-            Welcome to the Ryland Partners Program. Ready to start earning?
+            Welcome to the Ryland Partners Program. You help business owners access capital — and we also offer full-service credit repair and optimization options so you can serve them end-to-end. Ready to start earning?
           </motion.p>
 
           {/* CTA */}
