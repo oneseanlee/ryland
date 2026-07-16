@@ -70,7 +70,7 @@ export default function AddClientDrawer({ open, onClose, onSuccess }: AddClientD
       return;
     }
 
-    // 2. Sync to GHL with partner tag
+    // 2. Sync to GHL with partner tag + create opportunity in Funding pipeline
     try {
       await supabase.functions.invoke("ghl-create-contact", {
         body: {
@@ -79,10 +79,32 @@ export default function AddClientDrawer({ open, onClose, onSuccess }: AddClientD
           phone: form.phone.trim(),
           source: `Partner Referral: ${partnerName}`,
           tags: ["partner-referral", partnerTag, `partner-id:${affiliate.affiliate_id}`],
+          createOpportunity: true,
+          opportunityName: `${fullName} — Referred by ${partnerName}`,
         },
       });
     } catch (err) {
       console.error("GHL sync failed (non-critical):", err);
+    }
+
+    // 3. Notify info@rylandpartners.com
+    try {
+      await supabase.functions.invoke("send-transactional-email", {
+        body: {
+          templateName: "partner-new-lead-notification",
+          idempotencyKey: `partner-lead-${affiliate.id}-${Date.now()}`,
+          templateData: {
+            leadName: fullName,
+            leadEmail: form.email.trim(),
+            leadPhone: form.phone.trim(),
+            partnerName,
+            partnerAffiliateId: affiliate.affiliate_id,
+            partnerEmail: affiliate.email,
+          },
+        },
+      });
+    } catch (err) {
+      console.error("Notification email failed (non-critical):", err);
     }
 
     setLoading(false);

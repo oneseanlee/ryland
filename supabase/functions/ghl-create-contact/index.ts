@@ -27,7 +27,7 @@ serve(async (req) => {
       return json({ error: "Server configuration error" }, 500);
     }
 
-    const { name, email, phone, businessName, tags, source, customFields } = await req.json();
+    const { name, email, phone, businessName, tags, source, customFields, createOpportunity, opportunityName, monetaryValue } = await req.json();
 
     // Required field validation
     if (!name || !email) {
@@ -122,9 +122,70 @@ serve(async (req) => {
       console.log("GHL contact created:", contactId);
     }
 
+    // Optionally create opportunity in the Funding pipeline at the New Lead stage
+    let opportunityId: string | null = null;
+    if (createOpportunity && contactId) {
+      try {
+        const pipelineId = Deno.env.get("GHL_FUNDING_PIPELINE_ID");
+        if (!pipelineId) {
+          console.warn("GHL_FUNDING_PIPELINE_ID not configured — skipping opportunity creation");
+        } else {
+          // Look up pipeline stages to find the "New Lead" stage (fallback to first stage)
+          const pipeRes = await fetch(
+            `https://services.leadconnectorhq.com/opportunities/pipelines?locationId=${locationId}`,
+            { headers: { Authorization: `Bearer ${apiKey}`, Version: "2021-07-28" } }
+          );
+          const pipeData = await pipeRes.json();
+          const pipelines = pipeData?.pipelines || [];
+          const pipeline = pipelines.find((p: any) => p.id === pipelineId);
+          let stageId: string | null = null;
+          if (pipeline?.stages?.length) {
+            const newLeadStage = pipeline.stages.find((s: any) =>
+              /new\s*lead/i.test(s.name || "")
+            );
+            stageId = (newLeadStage || pipeline.stages[0]).id;
+          }
+
+          if (stageId) {
+            const oppPayload: Record<string, unknown> = {
+              pipelineId,
+              locationId,
+              name: opportunityName || `${name} — Partner Referral`,
+              pipelineStageId: stageId,
+              status: "open",
+              contactId,
+            };
+            if (typeof monetaryValue === "number") oppPayload.monetaryValue = monetaryValue;
+
+            const oppRes = await fetch("https://services.leadconnectorhq.com/opportunities/", {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${apiKey}`,
+                "Content-Type": "application/json",
+                Version: "2021-07-28",
+              },
+              body: JSON.stringify(oppPayload),
+            });
+            const oppData = await oppRes.json();
+            if (oppRes.ok) {
+              opportunityId = oppData?.opportunity?.id || oppData?.id || null;
+              console.log("GHL opportunity created:", opportunityId);
+            } else {
+              console.error("GHL opportunity error:", oppRes.status, JSON.stringify(oppData));
+            }
+          } else {
+            console.warn("No pipeline stages found for pipelineId:", pipelineId);
+          }
+        }
+      } catch (oppErr) {
+        console.error("GHL opportunity creation error (non-critical):", oppErr);
+      }
+    }
+
     return json({
       success: true,
       contactId,
+      opportunityId,
     });
   } catch (err) {
     console.error("Unexpected error:", err);

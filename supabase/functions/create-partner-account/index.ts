@@ -192,6 +192,27 @@ serve(async (req) => {
         message: message || null,
         ghl_contact_id: ghlContactId,
       });
+
+      // Send internal notification email to info@rylandpartners.com
+      try {
+        await supabase.functions.invoke("send-transactional-email", {
+          body: {
+            templateName: "partner-signup-notification",
+            idempotencyKey: `partner-signup-${affiliateId}`,
+            templateData: {
+              partnerName: trimmedName,
+              affiliateId,
+              email: trimmedEmail,
+              phone: phone || "",
+              businessName: business_name || "",
+              referralSource: referral_source || "",
+              message: message || "",
+            },
+          },
+        });
+      } catch (notifyErr) {
+        console.error("Partner signup notification email error (non-critical):", notifyErr);
+      }
     };
 
     backgroundTasks().catch((err) => console.error("Background task error:", err));

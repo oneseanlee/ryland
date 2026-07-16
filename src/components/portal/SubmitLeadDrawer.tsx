@@ -71,6 +71,49 @@ export default function SubmitLeadDrawer({ open, onClose, onSuccess }: SubmitLea
     if (error) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
     } else {
+      const partnerName = affiliate.full_name;
+      const partnerTag = `partner:${partnerName}`;
+
+      // Sync to GHL with partner tag + create opportunity in Funding pipeline
+      try {
+        await supabase.functions.invoke("ghl-create-contact", {
+          body: {
+            name: form.full_name.trim(),
+            email: form.email.trim(),
+            phone: form.phone.trim() || undefined,
+            businessName: form.company_name.trim() || undefined,
+            source: `Partner Referral: ${partnerName}`,
+            tags: ["partner-referral", partnerTag, `partner-id:${affiliate.affiliate_id}`],
+            createOpportunity: true,
+            opportunityName: `${form.full_name.trim()} — Referred by ${partnerName}`,
+          },
+        });
+      } catch (err) {
+        console.error("GHL sync failed (non-critical):", err);
+      }
+
+      // Notify info@rylandpartners.com
+      try {
+        await supabase.functions.invoke("send-transactional-email", {
+          body: {
+            templateName: "partner-new-lead-notification",
+            idempotencyKey: `partner-lead-${affiliate.id}-${Date.now()}`,
+            templateData: {
+              leadName: form.full_name.trim(),
+              leadEmail: form.email.trim(),
+              leadPhone: form.phone.trim() || "",
+              companyName: form.company_name.trim() || "",
+              notes: form.notes.trim() || "",
+              partnerName,
+              partnerAffiliateId: affiliate.affiliate_id,
+              partnerEmail: affiliate.email,
+            },
+          },
+        });
+      } catch (err) {
+        console.error("Notification email failed (non-critical):", err);
+      }
+
       toast({ title: "Lead submitted", description: `${form.full_name} has been added to your pipeline.` });
       setForm({ full_name: "", email: "", phone: "", company_name: "", notes: "" });
       setErrors({});
