@@ -71,8 +71,9 @@ export default function AddClientDrawer({ open, onClose, onSuccess }: AddClientD
     }
 
     // 2. Sync to GHL with partner tag + create opportunity in Funding pipeline
+    let ghlSynced = true;
     try {
-      await supabase.functions.invoke("ghl-create-contact", {
+      const { data: ghlData, error: ghlError } = await supabase.functions.invoke("ghl-create-contact", {
         body: {
           name: fullName,
           email: form.email.trim(),
@@ -83,8 +84,13 @@ export default function AddClientDrawer({ open, onClose, onSuccess }: AddClientD
           opportunityName: `${fullName} — Referred by ${partnerName}`,
         },
       });
+      if (ghlError || !ghlData?.success) {
+        ghlSynced = false;
+        console.error("GHL sync failed:", ghlError || ghlData);
+      }
     } catch (err) {
-      console.error("GHL sync failed (non-critical):", err);
+      ghlSynced = false;
+      console.error("GHL sync threw:", err);
     }
 
     // 3. Notify info@rylandpartners.com
@@ -100,6 +106,7 @@ export default function AddClientDrawer({ open, onClose, onSuccess }: AddClientD
             partnerName,
             partnerAffiliateId: affiliate.affiliate_id,
             partnerEmail: affiliate.email,
+            ghlSynced,
           },
         },
       });
