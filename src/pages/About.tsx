@@ -1,5 +1,6 @@
 import { Shield, DollarSign, Users } from "lucide-react";
 import PageMeta from "@/components/PageMeta";
+import JsonLd, { breadcrumbSchema } from "@/components/JsonLd";
 import heroPortrait from "@/assets/hero-portrait.png";
 import asSeenOn from "@/assets/as-seen-on.png";
 import geneRylandAbout from "@/assets/gene-ryland-about-v2.png.asset.json";
