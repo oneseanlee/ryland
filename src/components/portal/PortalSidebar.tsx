@@ -1,10 +1,11 @@
 import {
   LayoutDashboard, Users, DollarSign,
-  ShoppingBag, CalendarDays, Mic2, UserCircle, LogOut
+  ShoppingBag, CalendarDays, Mic2, UserCircle, LogOut, ShieldCheck
 } from "lucide-react";
 import { useLocation } from "react-router-dom";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/hooks/useAuth";
+import { useAdminRole } from "@/hooks/useAdminRole";
 import {
   Sidebar,
   SidebarContent,
