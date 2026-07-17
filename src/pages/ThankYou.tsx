@@ -134,6 +134,7 @@ const ThankYou = () => {
       <PageMeta
         title="Thank You for Your Purchase | Ryland"
         description="Download your purchased e-books immediately."
+        noindex
       />
       <Navbar />
       <main className="min-h-screen bg-background pt-24 pb-16">

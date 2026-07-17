@@ -71,6 +71,7 @@ export default function OptIn() {
       <PageMeta
         title="SMS Opt-In | Ryland Partners"
         description="Sign up to receive text messages from Ryland Partners with exclusive updates, tips, and offers on business education and financial literacy."
+        noindex
       />
 
       <main className="min-h-screen bg-slate-950 flex items-center justify-center px-4 py-16 sm:py-24">

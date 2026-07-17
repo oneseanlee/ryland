@@ -40,6 +40,7 @@ export default function PortalLogin() {
       <PageMeta
         title="Partner Login | Ryland Partners"
         description="Log in to the Ryland Partners affiliate portal to manage your referrals, commissions, and resources."
+        noindex
       />
 
       <div className="w-full max-w-md">

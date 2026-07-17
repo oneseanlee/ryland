@@ -29,6 +29,7 @@ const DownloadRedirect = () => {
       <PageMeta
         title="Download E-Book | Ryland"
         description="Download your purchased e-book."
+        noindex
       />
       <Navbar />
       <main className="min-h-screen bg-background pt-24 pb-16 flex items-center justify-center">

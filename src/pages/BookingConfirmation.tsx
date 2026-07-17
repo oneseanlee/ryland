@@ -18,6 +18,7 @@ export default function BookingConfirmation() {
       <PageMeta
         title="Booking Confirmed | Ryland Partners"
         description="Your consultation has been booked. We look forward to speaking with you."
+        noindex
       />
       {/* Minimal dark header */}
       <header className="sticky top-0 z-20 bg-[#001228]/80 backdrop-blur-xl border-b border-white/5">

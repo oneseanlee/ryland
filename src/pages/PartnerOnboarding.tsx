@@ -22,6 +22,7 @@ export default function PartnerOnboarding() {
       <PageMeta
         title="Partner Onboarding | Ryland Partners"
         description="Schedule your 1-on-1 partner onboarding call. Get set up with your portal, referral link, and marketing assets."
+        noindex
       />
       <Navbar />
 
