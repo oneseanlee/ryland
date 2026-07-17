@@ -6,6 +6,7 @@ import Footer from "@/components/Footer";
 import InfiniteGrid from "@/components/ui/infinite-grid";
 import Navbar from "@/components/Navbar";
 import PageMeta from "@/components/PageMeta";
+import JsonLd, { breadcrumbSchema, serviceSchema } from "@/components/JsonLd";
 
 
 const FUNDING_TIERS = [
@@ -33,7 +34,27 @@ const BENEFITS = [
 export default function Funding() {
   return (
     <div className="min-h-screen selection:bg-blue-500/30 selection:text-white antialiased text-slate-900">
-      <PageMeta title="Business Funding | Ryland Partners" description="Get $50K–$250K+ in business funding at 0% APR. No revenue or tax returns required. Apply today with Ryland Partners." />
+      <PageMeta
+        title="Business Funding Education | Ryland Partners"
+        description="Business funding strategy and credit optimization for entrepreneurs. Learn how to position your business for lender approval. Results vary."
+        canonical="/funding"
+      />
+      <JsonLd
+        id="funding-breadcrumb"
+        data={breadcrumbSchema([
+          { name: "Home", path: "/" },
+          { name: "Business Funding", path: "/funding" },
+        ])}
+      />
+      <JsonLd
+        id="funding-service"
+        data={serviceSchema({
+          name: "Business Funding Strategy",
+          description: "Business credit education and funding readiness guidance for entrepreneurs.",
+          path: "/funding",
+          serviceType: "Business Funding Education",
+        })}
+      />
 
       {/* Background Grid */}
       <div className="fixed inset-0 -z-10 overflow-hidden bg-white pointer-events-none">

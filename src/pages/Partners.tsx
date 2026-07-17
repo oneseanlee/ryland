@@ -22,6 +22,7 @@ import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 
 import PageMeta from "@/components/PageMeta";
+import JsonLd, { breadcrumbSchema } from "@/components/JsonLd";
 import PartnerSignupForm from "@/components/PartnerSignupForm";
 import {
   DollarSign, ShieldCheck, Users, Handshake,
@@ -131,7 +132,15 @@ const Partners = () => {
     <div className="min-h-screen selection:bg-blue-500/30 selection:text-white antialiased text-slate-900">
       <PageMeta
         title="Become A Partner | Ryland Partners"
-        description="Join the Ryland Partners program and earn uncapped commissions by referring business owners to our funding services. 100% free to join."
+        description="Join the Ryland Partners affiliate program and earn uncapped commissions by referring business owners to our funding and credit services. Free to join."
+        canonical="/partners"
+      />
+      <JsonLd
+        id="partners-breadcrumb"
+        data={breadcrumbSchema([
+          { name: "Home", path: "/" },
+          { name: "Partners", path: "/partners" },
+        ])}
       />
       
 

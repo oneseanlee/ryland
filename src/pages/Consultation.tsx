@@ -6,6 +6,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
 import PageMeta from "@/components/PageMeta";
+import JsonLd, { breadcrumbSchema, serviceSchema } from "@/components/JsonLd";
 import geneRyland from "@/assets/gene-ryland-about.png";
 
 const TRUST_BADGES = [
@@ -26,8 +27,25 @@ export default function Consultation() {
     <div className="min-h-screen selection:bg-blue-500/30 selection:text-white antialiased">
       
       <PageMeta
-        title="Free Consultation | Ryland Partners"
-        description="Book a free strategy session with a funding specialist. Get a personalized plan for $50K–$250K in business funding."
+        title="Free Business Credit Consultation | Ryland Partners"
+        description="Book a complimentary strategy session with our funding team. Personalized business credit and funding roadmap. Results vary."
+        canonical="/consultation"
+      />
+      <JsonLd
+        id="consultation-breadcrumb"
+        data={breadcrumbSchema([
+          { name: "Home", path: "/" },
+          { name: "Free Consultation", path: "/consultation" },
+        ])}
+      />
+      <JsonLd
+        id="consultation-service"
+        data={serviceSchema({
+          name: "Free Business Credit Consultation",
+          description: "Complimentary strategy session covering business credit, funding readiness, and next steps.",
+          path: "/consultation",
+          serviceType: "Business Credit Consultation",
+        })}
       />
       <Navbar />
 

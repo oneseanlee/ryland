@@ -18,6 +18,7 @@ import ProductCard from "@/components/store/ProductCard";
 import Navbar from "@/components/Navbar";
 
 import PageMeta from "@/components/PageMeta";
+import JsonLd, { breadcrumbSchema } from "@/components/JsonLd";
 
 const BUNDLES = [
   { id: "credit-authority", tag: "Business Authority Bundle", name: "Business Authority Bundle", tagline: "Premium blueprints and lender lists to dominate business credit" },
@@ -84,7 +85,18 @@ const Store = () => {
   return (
     <div className="min-h-screen bg-slate-50 font-[Manrope,sans-serif]">
       
-      <PageMeta title="Digital Education Store | Ryland Partners" description="Browse eBooks, guides, and resources for business education, funding strategies, and financial literacy." />
+      <PageMeta
+        title="Digital Education Store | Ryland Partners"
+        description="Browse eBooks, guides, and resources for business education, funding strategy, and financial literacy."
+        canonical="/store"
+      />
+      <JsonLd
+        id="store-breadcrumb"
+        data={breadcrumbSchema([
+          { name: "Home", path: "/" },
+          { name: "Store", path: "/store" },
+        ])}
+      />
       <Navbar />
 
       {/* Hero */}

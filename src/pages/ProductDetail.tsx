@@ -10,6 +10,7 @@ import { productContentMap } from "@/data/productContent";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import PageMeta from "@/components/PageMeta";
+import JsonLd, { breadcrumbSchema } from "@/components/JsonLd";
 
 
 import listingUbcb1 from "@/assets/listing-ubcb-1.png";
@@ -263,6 +264,15 @@ const ProductDetail = () => {
       <PageMeta
         title={`${product.title} | Ryland Partners Store`}
         description={content?.headline || product.description?.slice(0, 160) || "Digital product from Ryland Partners."}
+        canonical={`/store/${product.handle}`}
+      />
+      <JsonLd
+        id="product-breadcrumb"
+        data={breadcrumbSchema([
+          { name: "Home", path: "/" },
+          { name: "Store", path: "/store" },
+          { name: product.title, path: `/store/${product.handle}` },
+        ])}
       />
       <script
         type="application/ld+json"

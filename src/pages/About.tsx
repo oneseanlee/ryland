@@ -1,5 +1,6 @@
 import { Shield, DollarSign, Users } from "lucide-react";
 import PageMeta from "@/components/PageMeta";
+import JsonLd, { breadcrumbSchema } from "@/components/JsonLd";
 import heroPortrait from "@/assets/hero-portrait.png";
 import asSeenOn from "@/assets/as-seen-on.png";
 import geneRylandAbout from "@/assets/gene-ryland-about-v2.png.asset.json";
@@ -13,7 +14,18 @@ import Navbar from "@/components/Navbar";
 const About = () => {
   return (
     <div className="min-h-screen selection:bg-blue-500/30 selection:text-white antialiased text-slate-900">
-      <PageMeta title="About Gene Ryland | Ryland Partners" description="Learn about Gene Ryland and Ryland Partners — helping entrepreneurs secure business funding and build credit since day one." />
+      <PageMeta
+        title="About Gene Ryland | Ryland Partners"
+        description="Learn about Gene Ryland and Ryland Partners — helping entrepreneurs secure business funding and build credit since day one."
+        canonical="/about"
+      />
+      <JsonLd
+        id="about-breadcrumb"
+        data={breadcrumbSchema([
+          { name: "Home", path: "/" },
+          { name: "About", path: "/about" },
+        ])}
+      />
       
       <style dangerouslySetInnerHTML={{__html: `
         .gradient-blur {
