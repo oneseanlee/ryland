@@ -85,7 +85,18 @@ const Store = () => {
   return (
     <div className="min-h-screen bg-slate-50 font-[Manrope,sans-serif]">
       
-      <PageMeta title="Digital Education Store | Ryland Partners" description="Browse eBooks, guides, and resources for business education, funding strategies, and financial literacy." />
+      <PageMeta
+        title="Digital Education Store | Ryland Partners"
+        description="Browse eBooks, guides, and resources for business education, funding strategy, and financial literacy."
+        canonical="/store"
+      />
+      <JsonLd
+        id="store-breadcrumb"
+        data={breadcrumbSchema([
+          { name: "Home", path: "/" },
+          { name: "Store", path: "/store" },
+        ])}
+      />
       <Navbar />
 
       {/* Hero */}
