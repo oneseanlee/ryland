@@ -6,6 +6,7 @@ import AuthGuard from "./AuthGuard";
 import PortalContentLoader from "./PortalContentLoader";
 import { useAuth } from "@/hooks/useAuth";
 import NotificationBell from "@/components/NotificationBell";
+import PageMeta from "@/components/PageMeta";
 import { Menu } from "lucide-react";
 
 export default function PortalLayout() {
@@ -13,6 +14,7 @@ export default function PortalLayout() {
 
   return (
     <AuthGuard>
+      <PageMeta title="Partner Portal | Ryland Partners" description="Ryland Partners affiliate partner portal." noindex />
       <SidebarProvider>
         <div className="min-h-screen flex w-full">
           <PortalSidebar />
