@@ -10,6 +10,7 @@ import { productContentMap } from "@/data/productContent";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import PageMeta from "@/components/PageMeta";
+import JsonLd, { breadcrumbSchema } from "@/components/JsonLd";
 
 
 import listingUbcb1 from "@/assets/listing-ubcb-1.png";
