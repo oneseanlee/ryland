@@ -136,7 +136,7 @@ const Index = () => {
                 <img
                   src="/gene-hero-beard.webp"
                   alt="Gene Ryland — Business Credit Strategist"
-                  fetchPriority="high"
+                  {...({ fetchpriority: "high" } as any)}
                   width={1280}
                   height={1600}
                   className="w-full rounded-2xl border border-white/10 ring-1 ring-white/5 shadow-2xl shadow-blue-500/10 object-cover aspect-[4/5]"
