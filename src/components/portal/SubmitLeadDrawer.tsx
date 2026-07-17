@@ -113,6 +113,7 @@ export default function SubmitLeadDrawer({ open, onClose, onSuccess }: SubmitLea
               partnerName,
               partnerAffiliateId: affiliate.affiliate_id,
               partnerEmail: affiliate.email,
+              ghlSynced,
             },
           },
         });
@@ -120,7 +121,15 @@ export default function SubmitLeadDrawer({ open, onClose, onSuccess }: SubmitLea
         console.error("Notification email failed (non-critical):", err);
       }
 
-      toast({ title: "Lead submitted", description: `${form.full_name} has been added to your pipeline.` });
+      if (ghlSynced) {
+        toast({ title: "Lead submitted", description: `${form.full_name} has been added to your pipeline.` });
+      } else {
+        toast({
+          title: "Lead saved — CRM sync pending",
+          description: `${form.full_name} is saved to your pipeline, but the CRM sync didn't confirm. We've been notified.`,
+          variant: "destructive",
+        });
+      }
       setForm({ full_name: "", email: "", phone: "", company_name: "", notes: "" });
       setErrors({});
       setSubmitted(false);
