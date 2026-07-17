@@ -30,7 +30,18 @@ const WHAT_YOU_LEARN = [
 export default function Community() {
   return (
     <div className="min-h-screen selection:bg-blue-500/30 selection:text-white antialiased text-slate-900">
-      <PageMeta title="Private Community | Ryland Partners" description="Join the Ryland Partners private community — digital business training, funding strategy workshops, and weekly live Q&A sessions." />
+      <PageMeta
+        title="Private Community | Ryland Partners"
+        description="Join the Ryland Partners private community — digital business training, funding strategy workshops, and weekly live Q&A sessions."
+        canonical="/community"
+      />
+      <JsonLd
+        id="community-breadcrumb"
+        data={breadcrumbSchema([
+          { name: "Home", path: "/" },
+          { name: "Community", path: "/community" },
+        ])}
+      />
 
       <div className="fixed inset-0 -z-10 overflow-hidden bg-white pointer-events-none">
         <InfiniteGrid baseGridColor="rgba(148, 163, 184, 0.5)" activeGridColor="rgba(59, 130, 246, 0.8)" />
