@@ -6,6 +6,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
 import PageMeta from "@/components/PageMeta";
+import JsonLd, { breadcrumbSchema, serviceSchema } from "@/components/JsonLd";
 import geneRyland from "@/assets/gene-ryland-about.png";
 
 const TRUST_BADGES = [
