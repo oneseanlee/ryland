@@ -25,6 +25,15 @@ const STATS = [
 ];
 
 export default function AffiliateBooking() {
+  const [params] = useSearchParams();
+
+  useEffect(() => {
+    const bookingUrl = new URL(AFFILIATE_BOOKING_URL);
+    const ref = params.get("ref");
+    if (ref) bookingUrl.searchParams.set("ref", ref);
+    window.location.href = bookingUrl.toString();
+  }, [params]);
+
   return (
     <div className="min-h-screen selection:bg-blue-500/30 selection:text-white antialiased">
       <PageMeta
