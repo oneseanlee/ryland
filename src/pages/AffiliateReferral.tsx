@@ -91,18 +91,12 @@ export default function AffiliateReferral() {
       const data = await res.json();
       if (!res.ok) throw new Error(data?.error || `HTTP ${res.status}`);
 
-      // Persist to sessionStorage so the booking page can prefill
-      sessionStorage.setItem(
-        "affiliate_referral_lead",
-        JSON.stringify({
-          name: parsed.data.fullName,
-          email: parsed.data.email,
-          phone: parsed.data.phone,
-        })
-      );
-
       toast.success("Thanks! Let's get you booked.");
-      navigate("/affiliate-booking");
+
+      // Redirect to the GHL affiliate booking widget, preserving the referring partner
+      const bookingUrl = new URL("https://link.rylandpartners.com/widget/booking/rpfgxBFIjZC7pWMCYBv9");
+      if (refParam) bookingUrl.searchParams.set("ref", refParam);
+      window.location.href = bookingUrl.toString();
     } catch (err: unknown) {
       console.error("Referral submit failed:", err);
       toast.error("Something went wrong. Please try again.");
