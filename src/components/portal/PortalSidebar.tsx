@@ -40,6 +40,8 @@ export default function PortalSidebar() {
   const collapsed = state === "collapsed";
   const location = useLocation();
   const { signOut, affiliate } = useAuth();
+  const { isAdmin } = useAdminRole();
+
 
   const isActive = (path: string) => {
     if (path === "/portal") return location.pathname === "/portal";
