@@ -92,7 +92,18 @@ const Contact = () => {
 
   return (
     <div className="min-h-screen selection:bg-blue-500/30 selection:text-white antialiased text-slate-900">
-      <PageMeta title="Contact Us | Ryland Partners" description="Get in touch with Ryland Partners for business funding, credit repair, or partnership inquiries. Our team responds within 24 hours." />
+      <PageMeta
+        title="Contact Ryland Partners | Business Funding & Credit"
+        description="Get in touch with Ryland Partners for business funding, credit restoration, or partnership inquiries. Our team responds within 24 hours."
+        canonical="/contact"
+      />
+      <JsonLd
+        id="contact-breadcrumb"
+        data={breadcrumbSchema([
+          { name: "Home", path: "/" },
+          { name: "Contact", path: "/contact" },
+        ])}
+      />
       
 
       {/* Background */}
