@@ -18,6 +18,7 @@ import ProductCard from "@/components/store/ProductCard";
 import Navbar from "@/components/Navbar";
 
 import PageMeta from "@/components/PageMeta";
+import JsonLd, { breadcrumbSchema } from "@/components/JsonLd";
 
 const BUNDLES = [
   { id: "credit-authority", tag: "Business Authority Bundle", name: "Business Authority Bundle", tagline: "Premium blueprints and lender lists to dominate business credit" },
