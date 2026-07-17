@@ -27,7 +27,11 @@ serve(async (req) => {
       return json({ error: "Server configuration error" }, 500);
     }
 
-    const { name, email, phone, businessName, tags, source, customFields, createOpportunity, opportunityName, monetaryValue } = await req.json();
+    const { name, email, phone, businessName, tags, source, customFields, createOpportunity, opportunityName, monetaryValue, notes } = await req.json();
+
+    if (notes !== undefined && notes !== null && (typeof notes !== "string" || notes.length > 5000)) {
+      return json({ error: "Invalid notes" }, 400);
+    }
 
     // Required field validation
     if (!name || !email) {
