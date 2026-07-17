@@ -34,7 +34,27 @@ const STATS = [
 export default function CreditRepair() {
   return (
     <div className="min-h-screen selection:bg-blue-500/30 selection:text-white antialiased text-slate-900">
-      <PageMeta title="Credit Restoration | Ryland Partners" description="Professional credit repair services. We dispute and remove negative items from all three bureaus — 85% removal rate." />
+      <PageMeta
+        title="Credit Restoration & Optimization | Ryland Partners"
+        description="Professional credit restoration and optimization. We dispute negative items across all three bureaus and coach clients toward lender-ready profiles. Results vary."
+        canonical="/credit-repair"
+      />
+      <JsonLd
+        id="credit-repair-breadcrumb"
+        data={breadcrumbSchema([
+          { name: "Home", path: "/" },
+          { name: "Credit Restoration", path: "/credit-repair" },
+        ])}
+      />
+      <JsonLd
+        id="credit-repair-service"
+        data={serviceSchema({
+          name: "Credit Restoration & Optimization",
+          description: "Dispute-based credit restoration and credit profile optimization for consumers and business owners.",
+          path: "/credit-repair",
+          serviceType: "Credit Restoration",
+        })}
+      />
 
       <div className="fixed inset-0 -z-10 overflow-hidden bg-white pointer-events-none">
         <InfiniteGrid baseGridColor="rgba(148, 163, 184, 0.5)" activeGridColor="rgba(59, 130, 246, 0.8)" />
