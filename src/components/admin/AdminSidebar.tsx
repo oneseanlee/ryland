@@ -16,16 +16,36 @@ import {
   UserCheck,
   BarChart3,
   LogOut,
+  ShoppingBag,
+  CalendarDays,
+  Mic2,
+  UserCircle,
+  Eye,
 } from "lucide-react";
+import {
+  SidebarGroup,
+  SidebarGroupLabel,
+  SidebarGroupContent,
+} from "@/components/ui/sidebar";
 
 
-const menuItems = [
+const adminItems = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/portal/admin" },
   { icon: Users, label: "Affiliates", path: "/portal/admin/affiliates" },
   { icon: UserCheck, label: "Leads", path: "/portal/admin/leads" },
   { icon: DollarSign, label: "Commissions", path: "/portal/admin/commissions" },
   { icon: CreditCard, label: "Payouts", path: "/portal/admin/payouts" },
   { icon: BarChart3, label: "Reports", path: "/portal/admin/reports" },
+];
+
+const partnerViewItems = [
+  { icon: Eye, label: "Partner Dashboard", path: "/portal" },
+  { icon: Users, label: "Leads", path: "/portal/leads" },
+  { icon: DollarSign, label: "Commissions", path: "/portal/commissions" },
+  { icon: ShoppingBag, label: "Store", path: "/portal/resources" },
+  { icon: CalendarDays, label: "Events", path: "/portal/events" },
+  { icon: Mic2, label: "Speaking", path: "/portal/speaking" },
+  { icon: UserCircle, label: "Profile & Payouts", path: "/portal/settings" },
 ];
 
 export default function AdminSidebar() {
@@ -57,30 +77,40 @@ export default function AdminSidebar() {
           </div>
         </div>
 
-        <div className="mt-3">
-          <SidebarMenu>
-            {menuItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = item.path === "/portal/admin"
-                ? location.pathname === "/portal/admin" || location.pathname === "/portal/admin/"
-                : location.pathname.startsWith(item.path);
-              
-              return (
-                <SidebarMenuItem key={item.path}>
-                  <NavLink to={item.path} end={item.path === "/portal/admin"}>
-                    <SidebarMenuButton
-                      isActive={isActive}
-                      className="w-full justify-start gap-3 px-4 py-2.5 text-sm font-medium text-slate-400 hover:text-white hover:bg-white/5 transition-colors data-[active=true]:bg-white/10 data-[active=true]:text-white"
-                    >
-                      <Icon className="h-4 w-4" />
-                      <span>{item.label}</span>
-                    </SidebarMenuButton>
-                  </NavLink>
-                </SidebarMenuItem>
-              );
-            })}
-          </SidebarMenu>
-        </div>
+        {[
+          { label: "Admin", items: adminItems },
+          { label: "Partner Portal View", items: partnerViewItems },
+        ].map((group) => (
+          <SidebarGroup key={group.label}>
+            <SidebarGroupLabel className="text-xs uppercase tracking-widest text-slate-500 font-medium px-4 mt-2">
+              {group.label}
+            </SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {group.items.map((item) => {
+                  const Icon = item.icon;
+                  const isActive = item.path === "/portal/admin" || item.path === "/portal"
+                    ? location.pathname === item.path || location.pathname === item.path + "/"
+                    : location.pathname.startsWith(item.path);
+                  return (
+                    <SidebarMenuItem key={item.path}>
+                      <NavLink to={item.path} end={item.path === "/portal/admin" || item.path === "/portal"}>
+                        <SidebarMenuButton
+                          isActive={isActive}
+                          className="w-full justify-start gap-3 px-4 py-2 text-sm font-medium text-slate-400 hover:text-white hover:bg-white/5 transition-colors data-[active=true]:bg-white/10 data-[active=true]:text-white"
+                        >
+                          <Icon className="h-4 w-4" />
+                          <span>{item.label}</span>
+                        </SidebarMenuButton>
+                      </NavLink>
+                    </SidebarMenuItem>
+                  );
+                })}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        ))}
+
       </SidebarContent>
 
       <SidebarFooter className="border-t border-slate-800 bg-slate-950">

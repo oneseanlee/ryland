@@ -1,10 +1,11 @@
 import {
   LayoutDashboard, Users, DollarSign,
-  ShoppingBag, CalendarDays, Mic2, UserCircle, LogOut
+  ShoppingBag, CalendarDays, Mic2, UserCircle, LogOut, ShieldCheck
 } from "lucide-react";
 import { useLocation } from "react-router-dom";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/hooks/useAuth";
+import { useAdminRole } from "@/hooks/useAdminRole";
 import {
   Sidebar,
   SidebarContent,
@@ -39,6 +40,8 @@ export default function PortalSidebar() {
   const collapsed = state === "collapsed";
   const location = useLocation();
   const { signOut, affiliate } = useAuth();
+  const { isAdmin } = useAdminRole();
+
 
   const isActive = (path: string) => {
     if (path === "/portal") return location.pathname === "/portal";
@@ -110,6 +113,9 @@ export default function PortalSidebar() {
           {renderGroup("Main", affiliateMainNav)}
           {renderGroup("Support", affiliateSupportNav)}
           {renderGroup("Account", affiliateAccountNav)}
+          {isAdmin && renderGroup("Admin", [
+            { title: "Admin Dashboard", url: "/portal/admin", icon: ShieldCheck },
+          ])}
         </div>
       </SidebarContent>
 
