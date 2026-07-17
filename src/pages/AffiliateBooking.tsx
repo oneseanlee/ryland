@@ -1,3 +1,5 @@
+import { useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ShieldCheck, Percent, Building2, Scale, Mail, Clock, Star } from "lucide-react";
 import HlsVideoBackground from "@/components/HlsVideoBackground";
@@ -6,6 +8,8 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import PageMeta from "@/components/PageMeta";
 import geneRyland from "@/assets/gene-ryland-about.png";
+
+const AFFILIATE_BOOKING_URL = "https://link.rylandpartners.com/widget/booking/rpfgxBFIjZC7pWMCYBv9";
 
 const TRUST_BADGES = [
   { icon: ShieldCheck, label: "No Hard Credit Pull" },
@@ -21,6 +25,15 @@ const STATS = [
 ];
 
 export default function AffiliateBooking() {
+  const [params] = useSearchParams();
+
+  useEffect(() => {
+    const bookingUrl = new URL(AFFILIATE_BOOKING_URL);
+    const ref = params.get("ref");
+    if (ref) bookingUrl.searchParams.set("ref", ref);
+    window.location.href = bookingUrl.toString();
+  }, [params]);
+
   return (
     <div className="min-h-screen selection:bg-blue-500/30 selection:text-white antialiased">
       <PageMeta
