@@ -22,6 +22,7 @@ import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 
 import PageMeta from "@/components/PageMeta";
+import JsonLd, { breadcrumbSchema } from "@/components/JsonLd";
 import PartnerSignupForm from "@/components/PartnerSignupForm";
 import {
   DollarSign, ShieldCheck, Users, Handshake,
