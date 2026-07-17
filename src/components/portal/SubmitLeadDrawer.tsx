@@ -84,6 +84,7 @@ export default function SubmitLeadDrawer({ open, onClose, onSuccess }: SubmitLea
             phone: form.phone.trim() || undefined,
             businessName: form.company_name.trim() || undefined,
             source: `Partner Referral: ${partnerName}`,
+            notes: form.notes.trim() || undefined,
             tags: ["partner-referral", partnerTag, `partner-id:${affiliate.affiliate_id}`],
             createOpportunity: true,
             opportunityName: `${form.full_name.trim()} — Referred by ${partnerName}`,
