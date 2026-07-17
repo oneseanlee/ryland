@@ -113,6 +113,7 @@ export default function ResetPassword() {
       <PageMeta
         title="Set Your Password | Ryland Partners"
         description="Create your portal password to access the Ryland Partners affiliate dashboard."
+        noindex
       />
 
       <div className="w-full max-w-md">

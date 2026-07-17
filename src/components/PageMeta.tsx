@@ -5,6 +5,8 @@ interface PageMetaProps {
   description: string;
   /** Absolute or path-relative canonical URL for this page. */
   canonical?: string;
+  /** When true, sets <meta name="robots" content="noindex, follow">. Use for portal, admin, checkout, thank-you, funnel, etc. */
+  noindex?: boolean;
 }
 
 const setMeta = (selector: string, attr: string, value: string) => {
@@ -18,8 +20,8 @@ const setMeta = (selector: string, attr: string, value: string) => {
   el.setAttribute(attr, value);
 };
 
-/** Sets per-page <title>, description, canonical, and Open Graph / Twitter tags. */
-const PageMeta = ({ title, description, canonical }: PageMetaProps) => {
+/** Sets per-page <title>, description, canonical, Open Graph / Twitter tags, and optional robots noindex. */
+const PageMeta = ({ title, description, canonical, noindex }: PageMetaProps) => {
   useEffect(() => {
     document.title = title;
 
@@ -28,6 +30,15 @@ const PageMeta = ({ title, description, canonical }: PageMetaProps) => {
     setMeta('meta[property="og:description"]', "content", description);
     setMeta('meta[name="twitter:title"]', "content", title);
     setMeta('meta[name="twitter:description"]', "content", description);
+
+    // Robots directive: only apply/remove when noindex is explicitly set,
+    // so pages without the prop keep the default (indexable) behavior.
+    if (noindex) {
+      setMeta('meta[name="robots"]', "content", "noindex, follow");
+    } else {
+      const existing = document.head.querySelector<HTMLMetaElement>('meta[name="robots"]');
+      if (existing) existing.setAttribute("content", "index, follow");
+    }
 
     const url = canonical
       ? canonical.startsWith("http")
@@ -47,7 +58,7 @@ const PageMeta = ({ title, description, canonical }: PageMetaProps) => {
       }
       link.setAttribute("href", url);
     }
-  }, [title, description, canonical]);
+  }, [title, description, canonical, noindex]);
 
   return null;
 };

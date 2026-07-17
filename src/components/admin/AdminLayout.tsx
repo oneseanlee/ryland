@@ -5,6 +5,7 @@ import AdminSidebar from "./AdminSidebar";
 import AdminGuard from "./AdminGuard";
 import PortalContentLoader from "@/components/portal/PortalContentLoader";
 import NotificationBell from "@/components/NotificationBell";
+import PageMeta from "@/components/PageMeta";
 import { useAuth } from "@/hooks/useAuth";
 import { Menu } from "lucide-react";
 
@@ -12,6 +13,7 @@ export default function AdminLayout() {
   const { user } = useAuth();
   return (
     <AdminGuard>
+      <PageMeta title="Admin | Ryland Partners" description="Ryland Partners admin dashboard." noindex />
       <SidebarProvider>
         <div className="min-h-screen flex w-full bg-slate-100">
           <AdminSidebar />

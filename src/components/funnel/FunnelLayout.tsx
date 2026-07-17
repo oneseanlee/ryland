@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import logoWhite from "@/assets/logo-white.png";
 import FunnelProgressBar from "./FunnelProgressBar";
+import PageMeta from "@/components/PageMeta";
 
 interface Props {
   step: number;
@@ -40,6 +41,8 @@ function CountdownTimer() {
 export default function FunnelLayout({ step, label, children }: Props) {
   return (
     <div className="min-h-screen flex flex-col bg-[#001228] font-[Manrope,sans-serif]">
+      {/* Funnel routes are paid-traffic conversion pages — kept out of organic search so they don't compete with /funding and /credit-repair. */}
+      <PageMeta title={`${label} | Ryland Partners`} description="Paid-traffic funnel page." noindex />
       {/* Shiny CTA styles */}
       <style dangerouslySetInnerHTML={{ __html: `
         .shiny-cta {

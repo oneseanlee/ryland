@@ -56,6 +56,7 @@ export default function AdminLogin() {
       <PageMeta
         title="Admin Login | Ryland Partners"
         description="Log in to the Ryland Partners admin portal."
+        noindex
       />
 
       <div className="w-full max-w-md">

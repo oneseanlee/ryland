@@ -20,6 +20,7 @@ export default function AffiliateBooking() {
       <PageMeta
         title="Affiliate Referral Booking | Ryland Partners"
         description="Book your funding consultation meeting as an affiliate referral."
+        noindex
       />
       <div className="flex flex-col items-center gap-4">
         <Loader2 className="w-8 h-8 animate-spin text-cyan-400" />

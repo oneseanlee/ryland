@@ -110,6 +110,7 @@ export default function AffiliateReferral() {
       <PageMeta
         title="Affiliate Referral | Ryland Partners"
         description="Submit your referral details and book a funding consultation."
+        noindex
       />
       <Navbar />
 

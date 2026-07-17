@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useCartSync } from "@/hooks/useCartSync";
 import { AuthProvider } from "@/hooks/useAuth";
 import Index from "./pages/Index";
+import HomepageRedirect from "./pages/HomepageRedirect";
 
 // Lazy-loaded routes
 const Partners = lazy(() => import("./pages/Partners"));
@@ -91,6 +92,7 @@ const AppContent = () => {
         <Suspense fallback={<div className="min-h-screen" />}>
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/homepage" element={<HomepageRedirect />} />
             <Route path="/about" element={<About />} />
             <Route path="/partners" element={<Partners />} />
             <Route path="/store" element={<Store />} />

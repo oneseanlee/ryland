@@ -190,6 +190,7 @@ export default function CreditIntake() {
       <PageMeta
         title="Client Intake | Ryland Partners"
         description="Complete your client intake form to get started with credit restoration."
+        noindex
       />
       {/* Header */}
       <header className="border-b border-slate-100 bg-white/80 backdrop-blur-xl">

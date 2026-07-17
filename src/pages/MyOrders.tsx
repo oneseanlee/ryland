@@ -84,6 +84,7 @@ const MyOrders = () => {
       <PageMeta
         title="My Downloads | Ryland"
         description="Access your purchased e-books and digital products."
+        noindex
       />
       <Navbar />
       <main className="min-h-screen bg-background pt-24 pb-16">
