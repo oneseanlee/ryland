@@ -115,7 +115,15 @@ export default function AddClientDrawer({ open, onClose, onSuccess }: AddClientD
     }
 
     setLoading(false);
-    toast({ title: "Client added", description: `${fullName} was added and sent to CRM.` });
+    if (ghlSynced) {
+      toast({ title: "Client added", description: `${fullName} was added and sent to CRM.` });
+    } else {
+      toast({
+        title: "Client saved — CRM sync pending",
+        description: `${fullName} is saved to your leads, but the CRM sync didn't confirm. We've been notified and will reconcile it.`,
+        variant: "destructive",
+      });
+    }
     setForm({ first_name: "", last_name: "", email: "", phone: "" });
     onSuccess?.();
     onClose();
