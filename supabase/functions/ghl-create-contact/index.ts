@@ -126,6 +126,33 @@ serve(async (req) => {
       console.log("GHL contact created:", contactId);
     }
 
+    // Attach a note to the contact if provided
+    if (contactId && notes && notes.trim()) {
+      try {
+        const noteRes = await fetch(
+          `https://services.leadconnectorhq.com/contacts/${contactId}/notes`,
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${apiKey}`,
+              "Content-Type": "application/json",
+              Version: "2021-07-28",
+            },
+            body: JSON.stringify({ body: notes.trim() }),
+          }
+        );
+        if (!noteRes.ok) {
+          const noteErr = await noteRes.text();
+          console.error("GHL note error:", noteRes.status, noteErr);
+        } else {
+          console.log("GHL note added to contact:", contactId);
+        }
+      } catch (noteErr) {
+        console.error("GHL note creation error (non-critical):", noteErr);
+      }
+    }
+
+
     // Optionally create opportunity in the Funding pipeline at the New Lead stage
     let opportunityId: string | null = null;
     if (createOpportunity && contactId) {
