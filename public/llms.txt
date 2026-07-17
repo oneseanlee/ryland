@@ -1,0 +1,25 @@
+# Ryland Partners
+
+> Business funding, credit optimization, and digital-economy education for entrepreneurs. Ryland Partners helps founders access high-limit business credit lines, restore personal credit, and reinvest capital into scalable digital businesses.
+
+## Pages
+
+- [Home](/): Overview of business funding, credit optimization, and the Ryland Partners community.
+- [About](/about): Who we are and how we help founders access capital.
+- [Business Funding](/funding): Strategic business credit programs and lender matching.
+- [Credit Optimization](/credit-repair): Done-for-you credit restoration and optimization services.
+- [Community](/community): Private Skool network for funded founders and digital-economy investors.
+- [Store](/store): Digital products, eBooks, and business-credit playbooks.
+- [Partners](/partners): Affiliate and referral partner program.
+- [Free Assessment](/assessment): Soft-pull assessment to gauge funding readiness.
+- [Consultation](/consultation): Book a 1-on-1 funding strategy call.
+- [Contact](/contact): Reach the Ryland Partners team.
+
+## Optional
+
+- [Privacy Policy](/privacy-policy)
+- [Terms of Service](/terms-of-service)
+- [Disclaimers](/disclaimers)
+- [Cookie Policy](/cookie-policy)
+- [CCPA Notice](/ccpa)
+- [TSR Compliance](/tsr-compliance)
