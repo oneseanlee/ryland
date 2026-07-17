@@ -16,16 +16,36 @@ import {
   UserCheck,
   BarChart3,
   LogOut,
+  ShoppingBag,
+  CalendarDays,
+  Mic2,
+  UserCircle,
+  Eye,
 } from "lucide-react";
+import {
+  SidebarGroup,
+  SidebarGroupLabel,
+  SidebarGroupContent,
+} from "@/components/ui/sidebar";
 
 
-const menuItems = [
+const adminItems = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/portal/admin" },
   { icon: Users, label: "Affiliates", path: "/portal/admin/affiliates" },
   { icon: UserCheck, label: "Leads", path: "/portal/admin/leads" },
   { icon: DollarSign, label: "Commissions", path: "/portal/admin/commissions" },
   { icon: CreditCard, label: "Payouts", path: "/portal/admin/payouts" },
   { icon: BarChart3, label: "Reports", path: "/portal/admin/reports" },
+];
+
+const partnerViewItems = [
+  { icon: Eye, label: "Partner Dashboard", path: "/portal" },
+  { icon: Users, label: "Leads", path: "/portal/leads" },
+  { icon: DollarSign, label: "Commissions", path: "/portal/commissions" },
+  { icon: ShoppingBag, label: "Store", path: "/portal/resources" },
+  { icon: CalendarDays, label: "Events", path: "/portal/events" },
+  { icon: Mic2, label: "Speaking", path: "/portal/speaking" },
+  { icon: UserCircle, label: "Profile & Payouts", path: "/portal/settings" },
 ];
 
 export default function AdminSidebar() {
