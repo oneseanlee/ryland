@@ -48,9 +48,25 @@ const Index = () => {
   return (
     <div className="min-h-screen selection:bg-blue-500/30 selection:text-white antialiased text-slate-900">
       <PageMeta
-        title="Ryland Partners | Business Credit Education & Financial Strategy"
-        description="Discover high-limit business credit strategies with Ryland Partners. Education-first approach to business funding, credit optimization, and the digital economy."
+        title="Ryland Partners | Business Credit & Funding Education"
+        description="Business credit education, funding strategy, and credit optimization for entrepreneurs — build, fund, and scale with Ryland Partners."
+        canonical="/"
       />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            mainEntity: FAQ_DATA.map((f) => ({
+              "@type": "Question",
+              name: f.q,
+              acceptedAnswer: { "@type": "Answer", text: f.a },
+            })),
+          }),
+        }}
+      />
+
       
       <style dangerouslySetInnerHTML={{__html: `
         .hover-blur:hover img { filter: blur(4px); }
@@ -161,18 +177,12 @@ const Index = () => {
           <div style={{ maskImage: 'linear-gradient(to right, transparent, black 15%, black 85%, transparent)', WebkitMaskImage: 'linear-gradient(to right, transparent, black 15%, black 85%, transparent)' }}>
             <div className="flex carousel-wrapper gap-x-10 lg:gap-x-20">
               <div className="flex gap-10 shrink-0 lg:gap-x-20 items-center">
-                <img src={logoChase} alt="Chase" width={1622} height={480} loading="lazy" className="h-[32px] w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
-                <img src={logoBoa} alt="Bank of America" width={1920} height={1080} loading="lazy" className="h-[40px] w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
-                <img src={logoUsBank} alt="US Bank" width={1920} height={558} loading="lazy" className="h-[36px] w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
-                <img src={logoNavyFed} alt="Navy Federal Credit Union" width={1920} height={1125} loading="lazy" className="h-[40px] w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
-                <img src={logoTruist} alt="Truist" width={1280} height={297} loading="lazy" className="h-[32px] w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
-              </div>
-              <div className="flex shrink-0 gap-10 lg:gap-x-20 items-center">
-                <img src={logoChase} alt="Chase" width={1622} height={480} loading="lazy" className="h-[32px] w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
-                <img src={logoBoa} alt="Bank of America" width={1920} height={1080} loading="lazy" className="h-[40px] w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
-                <img src={logoUsBank} alt="US Bank" width={1920} height={558} loading="lazy" className="h-[36px] w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
-                <img src={logoNavyFed} alt="Navy Federal Credit Union" width={1920} height={1125} loading="lazy" className="h-[40px] w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
-                <img src={logoTruist} alt="Truist" width={1280} height={297} loading="lazy" className="h-[32px] w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
+                <img src={logoChase} alt="Chase Bank logo" width={1622} height={480} loading="lazy" className="h-[32px] w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
+                <img src={logoBoa} alt="Bank of America logo" width={1920} height={1080} loading="lazy" className="h-[40px] w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
+                <img src={logoUsBank} alt="U.S. Bank logo" width={1920} height={558} loading="lazy" className="h-[36px] w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
+                <img src={logoNavyFed} alt="Navy Federal Credit Union logo" width={1920} height={1125} loading="lazy" className="h-[40px] w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
+                <img src={logoTruist} alt="Truist Bank logo" width={1280} height={297} loading="lazy" className="h-[32px] w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
+
               </div>
             </div>
           </div>
@@ -220,7 +230,7 @@ const Index = () => {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {[
-              { icon: iconFunding, title: "Get Business Funding", desc: "Explore strategic business credit options — learn what you may qualify for based on your profile.", cta: "Learn More", href: "/funding" },
+              { icon: iconFunding, title: "Get Business Funding", desc: "Explore strategic business credit options — learn what you may qualify for based on your profile.", cta: "Explore Funding Options", href: "/funding" },
               { icon: iconCredit, title: "Optimize My Credit Profile", desc: "Done-for-you credit optimization with negative item analysis and dispute management.", cta: "Get Started", href: "/credit-repair" },
               { icon: iconCommunity, title: "Join The Community", desc: "Access our private Skool network and learn to invest your funding into high-ROI digital businesses.", cta: "Join Now", href: "/community" },
               { icon: iconProducts, title: "Shop Digital Products", desc: "Browse our curated collection of eBooks and digital resources to accelerate your business growth.", cta: "Shop Now", href: "/store" },
@@ -233,7 +243,7 @@ const Index = () => {
                   <img src={card.icon} alt={card.title} loading="lazy" width={112} height={112} className="w-28 h-28 mx-auto mb-6 object-contain" />
                   <h3 className="text-xl font-bold text-white mb-3 font-manrope">{card.title}</h3>
                   <p className="text-sm text-zinc-300 mb-6 leading-relaxed">{card.desc}</p>
-                  <Link to={card.href} className="mt-auto inline-flex transition-all duration-300 hover:opacity-90 hover:scale-[1.02] active:scale-[0.98] active:duration-75 text-sm font-semibold text-[#003A70] bg-white rounded-full py-3 px-8 items-center justify-center">
+                  <Link to={card.href} aria-label={`${card.cta} — ${card.title}`} className="mt-auto inline-flex transition-all duration-300 hover:opacity-90 hover:scale-[1.02] active:scale-[0.98] active:duration-75 text-sm font-semibold text-[#003A70] bg-white rounded-full py-3 px-8 items-center justify-center">
                     {card.cta}
                   </Link>
                   <p className="text-[9px] text-zinc-400 mt-2">{DISCLAIMER_TEXT}</p>

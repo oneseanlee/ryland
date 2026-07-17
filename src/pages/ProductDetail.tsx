@@ -264,6 +264,25 @@ const ProductDetail = () => {
         title={`${product.title} | Ryland Partners Store`}
         description={content?.headline || product.description?.slice(0, 160) || "Digital product from Ryland Partners."}
       />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Product",
+            name: product.title,
+            description: content?.headline || product.description || undefined,
+            image: mainImage?.url,
+            offers: {
+              "@type": "Offer",
+              price: price.toFixed(2),
+              priceCurrency: variant?.price?.currencyCode || product.priceRange.minVariantPrice.currencyCode || "USD",
+              availability: "https://schema.org/InStock",
+              url: typeof window !== "undefined" ? window.location.href : undefined,
+            },
+          }),
+        }}
+      />
       
       <Navbar />
 
