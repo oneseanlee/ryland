@@ -113,6 +113,9 @@ export default function PortalSidebar() {
           {renderGroup("Main", affiliateMainNav)}
           {renderGroup("Support", affiliateSupportNav)}
           {renderGroup("Account", affiliateAccountNav)}
+          {isAdmin && renderGroup("Admin", [
+            { title: "Admin Dashboard", url: "/portal/admin", icon: ShieldCheck },
+          ])}
         </div>
       </SidebarContent>
 
