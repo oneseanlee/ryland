@@ -28,12 +28,36 @@ function generatePassword(): string {
   return pw;
 }
 
+function timingSafeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  let out = 0;
+  for (let i = 0; i < a.length; i++) out |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return out === 0;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
+    // ─── Auth: require shared secret via Authorization: Bearer <secret> or x-webhook-secret header ───
+    const webhookSecret = Deno.env.get("GHL_WEBHOOK_SECRET");
+    if (!webhookSecret) {
+      console.error("GHL_WEBHOOK_SECRET is not configured");
+      return json({ error: "Webhook secret not configured" }, 500);
+    }
+    const authHeader = req.headers.get("authorization") || "";
+    const bearer = authHeader.toLowerCase().startsWith("bearer ")
+      ? authHeader.slice(7).trim()
+      : "";
+    const alt = req.headers.get("x-webhook-secret") || "";
+    const provided = bearer || alt;
+    if (!provided || !timingSafeEqual(provided, webhookSecret)) {
+      console.warn("Rejected ghl webhook: missing/invalid secret");
+      return json({ error: "Unauthorized" }, 401);
+    }
+
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const ghlApiKey = Deno.env.get("GHL_API_KEY");
