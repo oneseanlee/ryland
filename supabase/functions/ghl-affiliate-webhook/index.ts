@@ -100,7 +100,10 @@ serve(async (req) => {
       const ghlOpportunityId = body.opportunity_id;
       const pipelineStage = body.pipeline_stage || body.stage_name;
       const status = body.status || pipelineStage;
-      const dealAmount = body.monetary_value || body.deal_amount || 0;
+      const rawAmount = Number(body.monetary_value ?? body.deal_amount ?? 0);
+      const dealAmount = Number.isFinite(rawAmount) && rawAmount >= 0
+        ? Math.min(rawAmount, 10_000_000) // cap to prevent abuse
+        : 0;
 
       if (!ghlContactId && !ghlOpportunityId) {
         return json({ error: "contact_id or opportunity_id required" }, 400);
