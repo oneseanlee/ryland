@@ -25,3 +25,7 @@ dist-ssr
 DEVELOPMENT_NOTES.md
 PROJECT_CHANGELOG.md
 /command-center/
+
+# PII / data exports — never commit
+*.csv
+affiliates-export-*.csv
