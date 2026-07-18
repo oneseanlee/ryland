@@ -13,6 +13,23 @@ function json(data: unknown, status = 200) {
   });
 }
 
+// In-memory per-IP rate limiter (best-effort; resets on cold start).
+// Combined with verify_jwt=true this prevents unauthenticated bulk PII submissions.
+const RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000; // 10 minutes
+const RATE_LIMIT_MAX = 5;
+const rlBuckets = new Map<string, number[]>();
+function rateLimited(ip: string): boolean {
+  const now = Date.now();
+  const arr = (rlBuckets.get(ip) || []).filter((t) => now - t < RATE_LIMIT_WINDOW_MS);
+  if (arr.length >= RATE_LIMIT_MAX) {
+    rlBuckets.set(ip, arr);
+    return true;
+  }
+  arr.push(now);
+  rlBuckets.set(ip, arr);
+  return false;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -23,6 +40,17 @@ serve(async (req) => {
     if (!webhookUrl) {
       console.error("Missing SCOREXER_ZAPIER_WEBHOOK_URL");
       return json({ error: "Server configuration error" }, 500);
+    }
+
+    // Rate limit by client IP (from Supabase gateway forwarded headers)
+    const ip =
+      req.headers.get("cf-connecting-ip") ||
+      req.headers.get("x-real-ip") ||
+      (req.headers.get("x-forwarded-for") || "").split(",")[0].trim() ||
+      "unknown";
+    if (rateLimited(ip)) {
+      console.warn("scorexer-intake rate limited", { ip });
+      return json({ error: "Too many requests. Please try again later." }, 429);
     }
 
     const body = await req.json();
