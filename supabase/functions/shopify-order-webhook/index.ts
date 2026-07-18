@@ -99,13 +99,16 @@ serve(async (req) => {
 
     const body = await req.text();
 
-    // Verify HMAC if secret is configured
-    if (webhookSecret) {
-      const hmac = req.headers.get("x-shopify-hmac-sha256");
-      if (!hmac) return json({ error: "Missing HMAC header" }, 401);
-      const valid = await verifyShopifyHmac(body, hmac, webhookSecret);
-      if (!valid) return json({ error: "Invalid HMAC" }, 401);
+    // Verify HMAC — REQUIRED. Refuse if secret is not configured so forged
+    // webhooks can't be accepted when the env var is missing.
+    if (!webhookSecret) {
+      console.error("SHOPIFY_WEBHOOK_SECRET is not configured");
+      return json({ error: "Webhook secret not configured" }, 500);
     }
+    const hmac = req.headers.get("x-shopify-hmac-sha256");
+    if (!hmac) return json({ error: "Missing HMAC header" }, 401);
+    const valid = await verifyShopifyHmac(body, hmac, webhookSecret);
+    if (!valid) return json({ error: "Invalid HMAC" }, 401);
 
     const order = JSON.parse(body);
     console.log("Shopify order received:", order.id, order.email);

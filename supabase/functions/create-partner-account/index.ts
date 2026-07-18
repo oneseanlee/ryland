@@ -131,7 +131,7 @@ serve(async (req) => {
       email: trimmedEmail,
       phone: phone || null,
       company_name: business_name || null,
-      status: "approved",
+      status: "pending",
     });
 
     if (affiliateError) {
