@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" version="1.2" baseProfile="tiny-ps" viewBox="0 0 512 512" preserveAspectRatio="xMidYMid meet">
+  <title>Ryland Partners</title>
+  <rect x="0" y="0" width="512" height="512" fill="#003A70"/>
+  <g transform="translate(-34,0)">
+    <path fill="#FFFFFF" fill-rule="evenodd" d="M118 156 H232 C262 156 286 179 286 208 C286 237 262 260 232 260 H196 L286 356 H240 L152 262 V356 H118 Z M152 190 V226 H228 C240 226 250 218 250 208 C250 198 240 190 228 190 Z"/>
+    <path fill="#FFFFFF" fill-rule="evenodd" d="M300 156 H404 C436 156 462 181 462 214 C462 247 436 272 404 272 H334 V356 H300 Z M334 190 V238 H400 C414 238 426 227 426 214 C426 201 414 190 400 190 Z"/>
+    <rect x="118" y="392" width="344" height="16" fill="#0060A9"/>
+  </g>
+</svg>
