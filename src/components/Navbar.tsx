@@ -156,13 +156,13 @@ const Navbar = ({ active, showServicesDropdown = true }: NavbarProps) => {
             </li>
           ))}
           <li>
-            <a
-              href="https://wins.rylandpartners.com"
+            <Link
+              to="/wins"
               onClick={() => setMobileOpen(false)}
               className="block rounded-lg px-2 py-2 text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors"
             >
               Client Wins
-            </a>
+            </Link>
           </li>
         </ul>
         <div className="mt-6 flex flex-col gap-3">
