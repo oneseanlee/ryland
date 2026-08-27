@@ -84,6 +84,12 @@ const Navbar = ({ active, showServicesDropdown = true }: NavbarProps) => {
 
             <Link to="/community" className={navLinkClass("/community")}>Community</Link>
             <Link to="/store" className={navLinkClass("/store")}>Store</Link>
+            <a
+              href="https://wins.rylandpartners.com"
+              className={navLinkClass("/wins")}
+            >
+              Client Wins
+            </a>
             <Link
               to="/partners"
               className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-900 transition-colors"
@@ -154,6 +160,15 @@ const Navbar = ({ active, showServicesDropdown = true }: NavbarProps) => {
               </Link>
             </li>
           ))}
+          <li>
+            <a
+              href="https://wins.rylandpartners.com"
+              onClick={() => setMobileOpen(false)}
+              className="block rounded-lg px-2 py-2 text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors"
+            >
+              Client Wins
+            </a>
+          </li>
         </ul>
         <div className="mt-6 flex flex-col gap-3">
           <Link
