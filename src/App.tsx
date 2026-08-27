@@ -30,6 +30,7 @@ const Assessment = lazy(() => import("./pages/Assessment"));
 const Funding = lazy(() => import("./pages/Funding"));
 const CreditRepair = lazy(() => import("./pages/CreditRepair"));
 const Community = lazy(() => import("./pages/Community"));
+const Wins = lazy(() => import("./pages/Wins"));
 const Consultation = lazy(() => import("./pages/Consultation"));
 const BookingConfirmation = lazy(() => import("./pages/BookingConfirmation"));
 const PartnerOnboarding = lazy(() => import("./pages/PartnerOnboarding"));
