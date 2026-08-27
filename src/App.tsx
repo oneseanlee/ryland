@@ -113,6 +113,7 @@ const AppContent = () => {
             <Route path="/funding" element={<Funding />} />
             <Route path="/credit-repair" element={<CreditRepair />} />
             <Route path="/community" element={<Community />} />
+            <Route path="/wins" element={<Wins />} />
             <Route path="/booking-confirmed" element={<BookingConfirmation />} />
             <Route path="/consultation" element={<Consultation />} />
             <Route path="/partner-onboarding" element={<PartnerOnboarding />} />
