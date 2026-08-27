@@ -17,6 +17,7 @@ export const RESERVED_SLUGS = new Set<string>([
   "funding",
   "credit-repair",
   "community",
+  "wins",
   "consultation",
   "booking-confirmed",
   "partner-onboarding",
