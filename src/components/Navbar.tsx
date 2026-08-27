@@ -84,12 +84,7 @@ const Navbar = ({ active, showServicesDropdown = true }: NavbarProps) => {
 
             <Link to="/community" className={navLinkClass("/community")}>Community</Link>
             <Link to="/store" className={navLinkClass("/store")}>Store</Link>
-            <a
-              href="https://wins.rylandpartners.com"
-              className={navLinkClass("/wins")}
-            >
-              Client Wins
-            </a>
+            <Link to="/wins" className={navLinkClass("/wins")}>Client Wins</Link>
             <Link
               to="/partners"
               className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-900 transition-colors"
