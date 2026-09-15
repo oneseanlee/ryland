@@ -29,11 +29,11 @@ function useCountdown(deadline: number) {
   }, []);
   const remaining = Math.max(0, deadline - now);
   const expired = remaining <= 0;
-  const days = Math.floor(remaining / 86_400_000);
-  const hours = Math.floor((remaining % 86_400_000) / 3_600_000);
+  // Show total remaining hours (not days) — a single ticking clock reads as more urgent.
+  const totalHours = Math.floor(remaining / 3_600_000);
   const minutes = Math.floor((remaining % 3_600_000) / 60_000);
   const seconds = Math.floor((remaining % 60_000) / 1000);
-  return { days, hours, minutes, seconds, expired };
+  return { totalHours, minutes, seconds, expired };
 }
 
 const pad = (n: number) => String(n).padStart(2, "0");
@@ -134,7 +134,7 @@ const TimerBox = ({ value, label }: { value: string; label: string }) => (
 
 export default function Offer() {
   const deadline = useMemo(() => getDeadline(), []);
-  const { days, hours, minutes, seconds, expired } = useCountdown(deadline);
+  const { totalHours, minutes, seconds, expired } = useCountdown(deadline);
   const deadlineLabel = useMemo(
     () =>
       new Date(deadline).toLocaleString(undefined, {
