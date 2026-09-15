@@ -35,6 +35,7 @@ const Consultation = lazy(() => import("./pages/Consultation"));
 const BookingConfirmation = lazy(() => import("./pages/BookingConfirmation"));
 const PartnerOnboarding = lazy(() => import("./pages/PartnerOnboarding"));
 const OptIn = lazy(() => import("./pages/OptIn"));
+const Offer = lazy(() => import("./pages/Offer"));
 const ThankYou = lazy(() => import("./pages/ThankYou"));
 const MyOrders = lazy(() => import("./pages/MyOrders"));
 const DownloadRedirect = lazy(() => import("./pages/DownloadRedirect"));
@@ -118,6 +119,7 @@ const AppContent = () => {
             <Route path="/consultation" element={<Consultation />} />
             <Route path="/partner-onboarding" element={<PartnerOnboarding />} />
             <Route path="/opt-in" element={<OptIn />} />
+            <Route path="/offer" element={<Offer />} />
             <Route path="/thank-you" element={<ThankYou />} />
             <Route path="/my-orders" element={<MyOrders />} />
             <Route path="/download/:token" element={<DownloadRedirect />} />

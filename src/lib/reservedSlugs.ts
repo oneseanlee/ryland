@@ -22,6 +22,7 @@ export const RESERVED_SLUGS = new Set<string>([
   "booking-confirmed",
   "partner-onboarding",
   "opt-in",
+  "offer",
   "thank-you",
   "my-orders",
   "download",
