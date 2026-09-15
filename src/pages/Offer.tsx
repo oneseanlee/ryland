@@ -10,7 +10,7 @@ import {
   CalendarDays,
   Sparkles,
 } from "lucide-react";
-import logoDark from "@/assets/logo-dark.png";
+import logoWhite from "@/assets/logo-white.png";
 import PageMeta from "@/components/PageMeta";
 import InfiniteGrid from "@/components/ui/infinite-grid";
 
@@ -29,11 +29,11 @@ function useCountdown(deadline: number) {
   }, []);
   const remaining = Math.max(0, deadline - now);
   const expired = remaining <= 0;
-  const days = Math.floor(remaining / 86_400_000);
-  const hours = Math.floor((remaining % 86_400_000) / 3_600_000);
+  // Show total remaining hours (not days) — a single ticking clock reads as more urgent.
+  const totalHours = Math.floor(remaining / 3_600_000);
   const minutes = Math.floor((remaining % 3_600_000) / 60_000);
   const seconds = Math.floor((remaining % 60_000) / 1000);
-  return { days, hours, minutes, seconds, expired };
+  return { totalHours, minutes, seconds, expired };
 }
 
 const pad = (n: number) => String(n).padStart(2, "0");
@@ -134,7 +134,7 @@ const TimerBox = ({ value, label }: { value: string; label: string }) => (
 
 export default function Offer() {
   const deadline = useMemo(() => getDeadline(), []);
-  const { days, hours, minutes, seconds, expired } = useCountdown(deadline);
+  const { totalHours, minutes, seconds, expired } = useCountdown(deadline);
   const deadlineLabel = useMemo(
     () =>
       new Date(deadline).toLocaleString(undefined, {
@@ -163,15 +163,18 @@ export default function Offer() {
 
       {/* Hero with countdown */}
       <section className="relative mx-4 sm:mx-6 lg:mx-auto mt-4 sm:mt-8 max-w-7xl pt-14 sm:pt-20 pb-16 px-4 sm:px-8 rounded-2xl border border-[#004E8C] overflow-hidden bg-gradient-to-br from-[#003A70] via-[#004E8C] to-[#0060A9]">
-        <div className="relative z-10 max-w-3xl mx-auto text-center">
+        <div className="relative z-10 max-w-3xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
+            className="text-center"
           >
-            <Link to="/" className="inline-block mb-8" aria-label="Ryland Partners home">
-              <img src={logoDark} alt="Ryland Partners" width={189} height={56} className="h-9 w-auto mx-auto rounded-lg bg-white/95 px-3 py-2" />
-            </Link>
+            <div className="flex justify-start mb-10">
+              <Link to="/" aria-label="Ryland Partners home">
+                <img src={logoWhite} alt="Ryland Partners" className="h-10 sm:h-12 w-auto" />
+              </Link>
+            </div>
 
             <div className="inline-flex items-center gap-2 rounded-full bg-white/10 border border-white/20 px-4 py-1.5 text-xs uppercase tracking-widest text-blue-100 mb-6">
               <Sparkles className="w-3.5 h-3.5" />
@@ -187,12 +190,12 @@ export default function Offer() {
             </p>
           </motion.div>
 
-          {/* Countdown */}
+          {/* Countdown — hours-first for urgency */}
           <motion.div
             initial={{ opacity: 0, scale: 0.97 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5, delay: 0.15 }}
-            className="mt-10"
+            className="mt-10 text-center"
           >
             {expired ? (
               <div className="inline-flex flex-col items-center gap-3 rounded-2xl bg-white/10 border border-white/20 px-8 py-6">
@@ -208,10 +211,14 @@ export default function Offer() {
               </div>
             ) : (
               <>
+                <p className="text-sm font-medium uppercase tracking-widest text-blue-200 mb-4">
+                  {totalHours > 0 ? `Only ${totalHours} hour${totalHours === 1 ? "" : "s"} left` : "Final minutes"}
+                </p>
                 <div className="flex items-center justify-center gap-3 sm:gap-4">
-                  <TimerBox value={pad(days)} label="Days" />
-                  <TimerBox value={pad(hours)} label="Hours" />
+                  <TimerBox value={pad(totalHours)} label="Hours" />
+                  <span className="text-3xl sm:text-4xl font-semibold text-blue-300 font-[Manrope,sans-serif] pb-6" aria-hidden="true">:</span>
                   <TimerBox value={pad(minutes)} label="Minutes" />
+                  <span className="text-3xl sm:text-4xl font-semibold text-blue-300 font-[Manrope,sans-serif] pb-6" aria-hidden="true">:</span>
                   <TimerBox value={pad(seconds)} label="Seconds" />
                 </div>
                 <p className="mt-4 text-xs text-blue-200/90">
