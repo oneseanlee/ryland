@@ -19,8 +19,8 @@ function getDeadline(): number {
   return Date.now() + 72 * 60 * 60 * 1000;
 }
 
-function useCountdown(deadline: number) {
-  const [now, setNow] = useState(() => Date.now());
+function useCountdown(deadline: number, initialNow: number) {
+  const [now, setNow] = useState(initialNow);
   useEffect(() => {
     const id = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(id);
