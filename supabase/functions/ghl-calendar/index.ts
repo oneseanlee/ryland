@@ -78,12 +78,13 @@ serve(async (req) => {
       url.searchParams.set("endDate", String(endDate as number));
       url.searchParams.set("timezone", String(timezone));
 
-      // userId is optional but required for round-robin / collective calendar types.
-      // Only attach it for partner/affiliate calendars — the consultation calendar
-      // ("Free Business Credit Consultation") uses its own team assignments, and
-      // filtering by a userId that isn't on that calendar returns zero slots.
+      // Attach the assigned user for all calendar types. GHL's free-slots
+      // endpoint returns 422 "No users found in the calendar" for calendars
+      // assigned to a specific user when no userId is provided. If the user
+      // isn't assigned to the calendar, GHL returns zero slots — in that case
+      // retry once without the userId filter.
       const userId = Deno.env.get("GHL_USER_ID");
-      if (userId && (isPartner || isAffiliate)) {
+      if (userId) {
         url.searchParams.set("userId", userId);
       }
 
@@ -97,8 +98,22 @@ serve(async (req) => {
         url: url.toString(),
       });
 
-      const res = await fetch(url.toString(), { headers: ghlHeaders });
-      const data = await res.json();
+      let res = await fetch(url.toString(), { headers: ghlHeaders });
+      let data = await res.json();
+
+      // 422 "No users found in the calendar" → retry without the userId filter
+      if (!res.ok && res.status === 422 && userId) {
+        console.warn("GHL free-slots 422 with userId, retrying without userId filter");
+        const retryUrl = new URL(
+          `https://services.leadconnectorhq.com/calendars/${calendarId}/free-slots`
+        );
+        retryUrl.searchParams.set("startDate", String(startDate as number));
+        retryUrl.searchParams.set("endDate", String(endDate as number));
+        retryUrl.searchParams.set("timezone", String(timezone));
+
+        res = await fetch(retryUrl.toString(), { headers: ghlHeaders });
+        data = await res.json();
+      }
 
       if (!res.ok) {
         console.error("GHL free-slots error:", {
