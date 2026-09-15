@@ -58,6 +58,25 @@ serve(async (req) => {
     // body already parsed above for calendarType
     const { action } = body;
 
+    // ── ASSIGN USER TO CALENDAR (fix: calendar has no team members) ──
+    if (action === "assign-user") {
+      const assignUserId = (body.userId as string) || Deno.env.get("GHL_USER_ID");
+      if (!assignUserId) return json({ error: "No userId available" }, 400);
+
+      const res = await fetch(
+        `https://services.leadconnectorhq.com/calendars/${calendarId}`,
+        {
+          method: "PUT",
+          headers: ghlHeaders,
+          body: JSON.stringify({ teamMembers: [{ id: assignUserId, primary: true }] }),
+        }
+      );
+      const data = await res.json();
+      const members = (data?.calendar?.teamMembers ?? []).map((m: { id?: string }) => m.id);
+      console.log("GHL assign-user result:", res.status, JSON.stringify(members));
+      return json({ ok: res.ok, status: res.status, teamMembers: members }, res.ok ? 200 : 500);
+    }
+
     // ── CALENDAR INFO (diagnostics) ──
     if (action === "calendar-info") {
       const res = await fetch(
