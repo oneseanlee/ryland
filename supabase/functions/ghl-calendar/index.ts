@@ -58,6 +58,17 @@ serve(async (req) => {
     // body already parsed above for calendarType
     const { action } = body;
 
+    // ── CALENDAR INFO (diagnostics) ──
+    if (action === "calendar-info") {
+      const res = await fetch(
+        `https://services.leadconnectorhq.com/calendars/${calendarId}`,
+        { headers: ghlHeaders }
+      );
+      const data = await res.json();
+      console.log("GHL calendar-info:", JSON.stringify(data).slice(0, 2000));
+      return json(data, res.ok ? 200 : 500);
+    }
+
     // ── GET FREE SLOTS ──
     if (action === "get-slots") {
       const { startDate, endDate, timezone } = body;
