@@ -14,15 +14,13 @@ import logoWhite from "@/assets/logo-white.png";
 import PageMeta from "@/components/PageMeta";
 import InfiniteGrid from "@/components/ui/infinite-grid";
 
-/** Deadline: 72 hours after today at 12:00 noon (local time). Computed once per visit. */
+/** Deadline: exactly 72 hours from the moment the visitor opens the page. Computed once per visit. */
 function getDeadline(): number {
-  const noon = new Date();
-  noon.setHours(12, 0, 0, 0);
-  return noon.getTime() + 72 * 60 * 60 * 1000;
+  return Date.now() + 72 * 60 * 60 * 1000;
 }
 
-function useCountdown(deadline: number) {
-  const [now, setNow] = useState(() => Date.now());
+function useCountdown(deadline: number, initialNow: number) {
+  const [now, setNow] = useState(initialNow);
   useEffect(() => {
     const id = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(id);
@@ -133,8 +131,9 @@ const TimerBox = ({ value, label }: { value: string; label: string }) => (
 );
 
 export default function Offer() {
+  const startTime = useMemo(() => Date.now(), []);
   const deadline = useMemo(() => getDeadline(), []);
-  const { totalHours, minutes, seconds, expired } = useCountdown(deadline);
+  const { totalHours, minutes, seconds, expired } = useCountdown(deadline, startTime);
   const deadlineLabel = useMemo(
     () =>
       new Date(deadline).toLocaleString(undefined, {
