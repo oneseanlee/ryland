@@ -68,7 +68,7 @@ serve(async (req) => {
         {
           method: "PUT",
           headers: ghlHeaders,
-          body: JSON.stringify({ teamMembers: [{ id: assignUserId, primary: true }] }),
+          body: JSON.stringify({ teamMembers: [{ userId: assignUserId }] }),
         }
       );
       const data = await res.json();
