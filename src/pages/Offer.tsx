@@ -131,8 +131,9 @@ const TimerBox = ({ value, label }: { value: string; label: string }) => (
 );
 
 export default function Offer() {
+  const startTime = useMemo(() => Date.now(), []);
   const deadline = useMemo(() => getDeadline(), []);
-  const { totalHours, minutes, seconds, expired } = useCountdown(deadline);
+  const { totalHours, minutes, seconds, expired } = useCountdown(deadline, startTime);
   const deadlineLabel = useMemo(
     () =>
       new Date(deadline).toLocaleString(undefined, {
