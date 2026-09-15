@@ -14,11 +14,9 @@ import logoWhite from "@/assets/logo-white.png";
 import PageMeta from "@/components/PageMeta";
 import InfiniteGrid from "@/components/ui/infinite-grid";
 
-/** Deadline: 72 hours after today at 12:00 noon (local time). Computed once per visit. */
+/** Deadline: exactly 72 hours from the moment the visitor opens the page. Computed once per visit. */
 function getDeadline(): number {
-  const noon = new Date();
-  noon.setHours(12, 0, 0, 0);
-  return noon.getTime() + 72 * 60 * 60 * 1000;
+  return Date.now() + 72 * 60 * 60 * 1000;
 }
 
 function useCountdown(deadline: number) {
