@@ -73,8 +73,8 @@ serve(async (req) => {
       );
       const data = await res.json();
       const members = (data?.calendar?.teamMembers ?? []).map((m: { id?: string }) => m.id);
-      console.log("GHL assign-user result:", res.status, JSON.stringify(members));
-      return json({ ok: res.ok, status: res.status, teamMembers: members }, res.ok ? 200 : 500);
+      console.log("GHL assign-user result:", res.status, JSON.stringify(data).slice(0, 1000));
+      return json({ ok: res.ok, status: res.status, teamMembers: members, detail: data }, res.ok ? 200 : 500);
     }
 
     // ── CALENDAR INFO (diagnostics) ──
