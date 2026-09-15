@@ -195,7 +195,7 @@ export default function Offer() {
             initial={{ opacity: 0, scale: 0.97 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5, delay: 0.15 }}
-            className="mt-10"
+            className="mt-10 text-center"
           >
             {expired ? (
               <div className="inline-flex flex-col items-center gap-3 rounded-2xl bg-white/10 border border-white/20 px-8 py-6">
