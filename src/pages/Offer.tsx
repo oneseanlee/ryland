@@ -138,17 +138,6 @@ export default function Offer() {
   const startTime = useMemo(() => Date.now(), []);
   const deadline = useMemo(() => getDeadline(), []);
   const { totalHours, minutes, seconds, expired } = useCountdown(deadline, startTime);
-  const deadlineLabel = useMemo(
-    () =>
-      new Date(deadline).toLocaleString(undefined, {
-        weekday: "long",
-        month: "long",
-        day: "numeric",
-        hour: "numeric",
-        minute: "2-digit",
-      }),
-    [deadline],
-  );
 
   return (
     <div className="min-h-screen bg-white antialiased text-slate-900 selection:bg-blue-500/30 selection:text-white">
