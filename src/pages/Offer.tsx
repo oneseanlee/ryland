@@ -14,9 +14,13 @@ import logoWhite from "@/assets/logo-white.png";
 import PageMeta from "@/components/PageMeta";
 import InfiniteGrid from "@/components/ui/infinite-grid";
 
-/** Deadline: exactly 72 hours from the moment the visitor opens the page. Computed once per visit. */
+/**
+ * Fixed campaign deadline: Sunday, September 20, 2026 at midnight Eastern Time (EDT, UTC-4).
+ * 2026-09-20T00:00:00-04:00 === 2026-09-20T04:00:00Z
+ * Every visitor sees the same real deadline — the counter reflects genuine time remaining.
+ */
 function getDeadline(): number {
-  return Date.now() + 72 * 60 * 60 * 1000;
+  return new Date("2026-09-20T04:00:00Z").getTime();
 }
 
 function useCountdown(deadline: number, initialNow: number) {
@@ -177,15 +181,15 @@ export default function Offer() {
 
             <div className="inline-flex items-center gap-2 rounded-full bg-white/10 border border-white/20 px-4 py-1.5 text-xs uppercase tracking-widest text-blue-100 mb-6">
               <Sparkles className="w-3.5 h-3.5" />
-              Webinar Exclusive — 72 Hours Only
+              Webinar Exclusive — Ends Sunday at Midnight
             </div>
 
             <h1 className="text-3xl sm:text-5xl lg:text-6xl font-medium tracking-tighter text-white font-[Manrope,sans-serif] leading-[1.02]">
               Choose Your Program
             </h1>
             <p className="text-base sm:text-lg text-blue-100 mt-5 max-w-2xl mx-auto leading-relaxed">
-              This special enrollment is open for the next 72 hours. Pick the program that fits where
-              you are today — pay in full or split it into three monthly payments.
+              This special enrollment closes Sunday, September 20 at midnight. Pick the program that
+              fits where you are today — pay in full or split it into three monthly payments.
             </p>
           </motion.div>
 
