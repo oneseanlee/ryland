@@ -15,12 +15,12 @@ import PageMeta from "@/components/PageMeta";
 import InfiniteGrid from "@/components/ui/infinite-grid";
 
 /**
- * Fixed campaign deadline: Sunday, September 20, 2026 at midnight Eastern Time (EDT, UTC-4).
- * 2026-09-20T00:00:00-04:00 === 2026-09-20T04:00:00Z
+ * Fixed campaign deadline: Friday, September 18, 2026 at midnight Eastern Time (EDT, UTC-4).
+ * 2026-09-19T00:00:00-04:00 === 2026-09-19T04:00:00Z
  * Every visitor sees the same real deadline — the counter reflects genuine time remaining.
  */
 function getDeadline(): number {
-  return new Date("2026-09-20T04:00:00Z").getTime();
+  return new Date("2026-09-19T04:00:00Z").getTime();
 }
 
 function useCountdown(deadline: number, initialNow: number) {
@@ -143,7 +143,7 @@ export default function Offer() {
     <div className="min-h-screen bg-white antialiased text-slate-900 selection:bg-blue-500/30 selection:text-white">
       <PageMeta
         title="Limited-Time Program Offer | Ryland Partners"
-        description="Choose your program — Funding Ready or Credit Work Needed. This limited-time offer ends Sunday, September 20 at midnight and includes flexible payment plans. Results vary and are not guaranteed."
+        description="Choose your program — Funding Ready or Credit Work Needed. This limited-time offer ends Friday, September 18 at midnight and includes flexible payment plans. Results vary and are not guaranteed."
         canonical="/offer"
         noindex
       />
@@ -170,14 +170,14 @@ export default function Offer() {
 
             <div className="inline-flex items-center gap-2 rounded-full bg-white/10 border border-white/20 px-4 py-1.5 text-xs uppercase tracking-widest text-blue-100 mb-6">
               <Sparkles className="w-3.5 h-3.5" />
-              Webinar Exclusive — Ends Sunday at Midnight
+              Webinar Exclusive — Ends Friday at Midnight
             </div>
 
             <h1 className="text-3xl sm:text-5xl lg:text-6xl font-medium tracking-tighter text-white font-[Manrope,sans-serif] leading-[1.02]">
               Choose Your Program
             </h1>
             <p className="text-base sm:text-lg text-blue-100 mt-5 max-w-2xl mx-auto leading-relaxed">
-              This special enrollment closes Sunday, September 20 at midnight. Pick the program that
+              This special enrollment closes Friday, September 18 at midnight. Pick the program that
               fits where you are today — pay in full or split it into three monthly payments.
             </p>
           </motion.div>
@@ -214,7 +214,7 @@ export default function Offer() {
                   <TimerBox value={pad(seconds)} label="Seconds" />
                 </div>
                 <p className="mt-4 text-xs text-blue-200/90">
-                  Offer ends Sunday, September 20 at 12:00 AM (Eastern Time)
+                  Offer ends Friday night, September 18 at midnight (Eastern Time)
                 </p>
               </>
             )}
