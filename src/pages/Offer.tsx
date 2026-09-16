@@ -14,9 +14,13 @@ import logoWhite from "@/assets/logo-white.png";
 import PageMeta from "@/components/PageMeta";
 import InfiniteGrid from "@/components/ui/infinite-grid";
 
-/** Deadline: exactly 72 hours from the moment the visitor opens the page. Computed once per visit. */
+/**
+ * Fixed campaign deadline: Sunday, September 20, 2026 at midnight Eastern Time (EDT, UTC-4).
+ * 2026-09-20T00:00:00-04:00 === 2026-09-20T04:00:00Z
+ * Every visitor sees the same real deadline — the counter reflects genuine time remaining.
+ */
 function getDeadline(): number {
-  return Date.now() + 72 * 60 * 60 * 1000;
+  return new Date("2026-09-20T04:00:00Z").getTime();
 }
 
 function useCountdown(deadline: number, initialNow: number) {
@@ -134,23 +138,12 @@ export default function Offer() {
   const startTime = useMemo(() => Date.now(), []);
   const deadline = useMemo(() => getDeadline(), []);
   const { totalHours, minutes, seconds, expired } = useCountdown(deadline, startTime);
-  const deadlineLabel = useMemo(
-    () =>
-      new Date(deadline).toLocaleString(undefined, {
-        weekday: "long",
-        month: "long",
-        day: "numeric",
-        hour: "numeric",
-        minute: "2-digit",
-      }),
-    [deadline],
-  );
 
   return (
     <div className="min-h-screen bg-white antialiased text-slate-900 selection:bg-blue-500/30 selection:text-white">
       <PageMeta
-        title="72-Hour Program Offer | Ryland Partners"
-        description="Choose your program — Funding Ready or Credit Work Needed. This 72-hour offer includes flexible payment plans. Results vary and are not guaranteed."
+        title="Limited-Time Program Offer | Ryland Partners"
+        description="Choose your program — Funding Ready or Credit Work Needed. This limited-time offer ends Sunday, September 20 at midnight and includes flexible payment plans. Results vary and are not guaranteed."
         canonical="/offer"
         noindex
       />
@@ -177,15 +170,15 @@ export default function Offer() {
 
             <div className="inline-flex items-center gap-2 rounded-full bg-white/10 border border-white/20 px-4 py-1.5 text-xs uppercase tracking-widest text-blue-100 mb-6">
               <Sparkles className="w-3.5 h-3.5" />
-              Webinar Exclusive — 72 Hours Only
+              Webinar Exclusive — Ends Sunday at Midnight
             </div>
 
             <h1 className="text-3xl sm:text-5xl lg:text-6xl font-medium tracking-tighter text-white font-[Manrope,sans-serif] leading-[1.02]">
               Choose Your Program
             </h1>
             <p className="text-base sm:text-lg text-blue-100 mt-5 max-w-2xl mx-auto leading-relaxed">
-              This special enrollment is open for the next 72 hours. Pick the program that fits where
-              you are today — pay in full or split it into three monthly payments.
+              This special enrollment closes Sunday, September 20 at midnight. Pick the program that
+              fits where you are today — pay in full or split it into three monthly payments.
             </p>
           </motion.div>
 
@@ -221,7 +214,7 @@ export default function Offer() {
                   <TimerBox value={pad(seconds)} label="Seconds" />
                 </div>
                 <p className="mt-4 text-xs text-blue-200/90">
-                  Offer ends {deadlineLabel}
+                  Offer ends Sunday, September 20 at 12:00 AM (Eastern Time)
                 </p>
               </>
             )}
@@ -342,7 +335,7 @@ export default function Offer() {
           {[
             { icon: ShieldCheck, label: "Secure checkout", desc: "Processed on our secure payment page" },
             { icon: CalendarDays, label: "Starts today", desc: "Your program begins the moment you enroll" },
-            { icon: Clock, label: "72-hour window", desc: "Pricing returns to standard after the deadline" },
+            { icon: Clock, label: "Ends Sunday at midnight", desc: "Pricing returns to standard after the deadline" },
           ].map((item) => (
             <div key={item.label} className="rounded-2xl border border-slate-200 bg-white p-5">
               <item.icon className="w-5 h-5 mx-auto text-[#0060A9]" />
