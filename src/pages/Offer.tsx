@@ -225,7 +225,7 @@ export default function Offer() {
                   <TimerBox value={pad(seconds)} label="Seconds" />
                 </div>
                 <p className="mt-4 text-xs text-blue-200/90">
-                  Offer ends {deadlineLabel}
+                  Offer ends Sunday, September 20 at 12:00 AM (Eastern Time)
                 </p>
               </>
             )}
