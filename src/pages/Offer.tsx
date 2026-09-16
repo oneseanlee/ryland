@@ -335,7 +335,7 @@ export default function Offer() {
           {[
             { icon: ShieldCheck, label: "Secure checkout", desc: "Processed on our secure payment page" },
             { icon: CalendarDays, label: "Starts today", desc: "Your program begins the moment you enroll" },
-            { icon: Clock, label: "Ends Sunday at midnight", desc: "Pricing returns to standard after the deadline" },
+            { icon: Clock, label: "Ends Friday at midnight", desc: "Pricing returns to standard after the deadline" },
           ].map((item) => (
             <div key={item.label} className="rounded-2xl border border-slate-200 bg-white p-5">
               <item.icon className="w-5 h-5 mx-auto text-[#0060A9]" />
