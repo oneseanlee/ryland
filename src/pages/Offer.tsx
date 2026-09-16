@@ -153,8 +153,8 @@ export default function Offer() {
   return (
     <div className="min-h-screen bg-white antialiased text-slate-900 selection:bg-blue-500/30 selection:text-white">
       <PageMeta
-        title="72-Hour Program Offer | Ryland Partners"
-        description="Choose your program — Funding Ready or Credit Work Needed. This 72-hour offer includes flexible payment plans. Results vary and are not guaranteed."
+        title="Limited-Time Program Offer | Ryland Partners"
+        description="Choose your program — Funding Ready or Credit Work Needed. This limited-time offer ends Sunday, September 20 at midnight and includes flexible payment plans. Results vary and are not guaranteed."
         canonical="/offer"
         noindex
       />
@@ -346,7 +346,7 @@ export default function Offer() {
           {[
             { icon: ShieldCheck, label: "Secure checkout", desc: "Processed on our secure payment page" },
             { icon: CalendarDays, label: "Starts today", desc: "Your program begins the moment you enroll" },
-            { icon: Clock, label: "72-hour window", desc: "Pricing returns to standard after the deadline" },
+            { icon: Clock, label: "Ends Sunday at midnight", desc: "Pricing returns to standard after the deadline" },
           ].map((item) => (
             <div key={item.label} className="rounded-2xl border border-slate-200 bg-white p-5">
               <item.icon className="w-5 h-5 mx-auto text-[#0060A9]" />
