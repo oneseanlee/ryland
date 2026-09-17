@@ -15,12 +15,12 @@ import InfiniteGrid from "@/components/ui/infinite-grid";
 
 /**
  * Fixed campaign window: opens Thursday, September 17, 2026 at 8:00 PM EDT and runs
- * for 72 hours — deadline is Monday, September 21, 2026 at 8:00 PM EDT.
- * 2026-09-22T00:00:00Z === 2026-09-21T20:00:00-04:00
+ * for 72 hours — deadline is Sunday, September 20, 2026 at 8:00 PM EDT.
+ * 2026-09-21T00:00:00Z === 2026-09-20T20:00:00-04:00
  * Every visitor sees the same real deadline — the counter reflects genuine time remaining.
  */
 function getDeadline(): number {
-  return new Date("2026-09-22T00:00:00Z").getTime();
+  return new Date("2026-09-21T00:00:00Z").getTime();
 }
 
 function useCountdown(deadline: number, initialNow: number) {
@@ -143,7 +143,7 @@ export default function Offer() {
     <div className="min-h-screen bg-white antialiased text-slate-900 selection:bg-blue-500/30 selection:text-white">
       <PageMeta
         title="Limited-Time Program Offer | Ryland Partners"
-        description="Choose your program — Funding Ready or Credit Work Needed. This limited-time offer ends Monday, September 21 at 8:00 PM EDT and includes flexible payment plans. Results vary and are not guaranteed."
+        description="Choose your program — Funding Ready or Credit Work Needed. This limited-time offer ends Sunday, September 20 at 8:00 PM EDT and includes flexible payment plans. Results vary and are not guaranteed."
         canonical="/offer"
         noindex
       />
@@ -172,7 +172,7 @@ export default function Offer() {
               Choose Your Program
             </h1>
             <p className="text-sm sm:text-base text-blue-100 mt-3 max-w-2xl mx-auto leading-relaxed">
-              Webinar special enrollment ends Monday, Sept 21 at 8:00 PM EDT.
+              Webinar special enrollment ends Sunday, Sept 20 at 8:00 PM EDT.
             </p>
           </motion.div>
 
@@ -321,7 +321,7 @@ export default function Offer() {
           {[
             { icon: ShieldCheck, label: "Secure checkout", desc: "Processed on our secure payment page" },
             { icon: CalendarDays, label: "Starts today", desc: "Your program begins the moment you enroll" },
-            { icon: Clock, label: "Ends Monday at 8 PM", desc: "Pricing returns to standard after the deadline" },
+            { icon: Clock, label: "Ends Sunday at 8 PM", desc: "Pricing returns to standard after the deadline" },
           ].map((item) => (
             <div key={item.label} className="rounded-2xl border border-slate-200 bg-white p-5">
               <item.icon className="w-5 h-5 mx-auto text-[#0060A9]" />
