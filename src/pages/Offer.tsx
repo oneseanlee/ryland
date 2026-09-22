@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   TrendingUp,
-  CreditCard,
   CheckCircle2,
   Clock,
   ShieldCheck,
@@ -63,65 +62,42 @@ interface Program {
   highlight?: boolean;
 }
 
-const PROGRAMS: Program[] = [
-  {
-    id: "funding-ready",
-    icon: TrendingUp,
-    name: "Funding Ready",
-    price: "$999",
-    successFee: "+ 7% success fee",
-    tagline: "Your credit is in good shape — let's position you for business funding.",
-    bestFor: "Best if your credit score is already 680+",
-    features: [
-      "Full credit & funding readiness review",
-      "Personalized funding roadmap",
-      "Lender positioning & application strategy",
-      "1-on-1 guidance from our funding team",
-    ],
-    options: [
-      {
-        label: "Pay $999 in Full",
-        sublabel: "One payment today",
-        href: "https://link.rylandpartners.com/payment-link/6aa936eaceb12d9fc1a8cf96",
-        featured: true,
-      },
-      {
-        label: "3 Monthly Payments of $333",
-        sublabel: "$999 total — first payment today",
-        href: "https://link.rylandpartners.com/payment-link/6aa93740ceb12d9fc1a8cf97",
-      },
-    ],
-    highlight: true,
-  },
-  {
-    id: "credit-work-needed",
-    icon: CreditCard,
-    name: "Credit Work Needed",
-    price: "$1,500",
-    successFee: "+ 7% success fee",
-    tagline: "We'll do the credit work first, then position you for funding.",
-    bestFor: "Best if your credit needs repair or optimization first",
-    features: [
-      "Everything in Funding Ready",
-      "Done-for-you credit repair & optimization",
-      "Dispute & bureau correspondence handled for you",
-      "Ongoing credit monitoring & progress reviews",
-    ],
-    options: [
-      {
-        label: "Pay $1,500 in Full",
-        sublabel: "One payment today",
-        href: "https://link.rylandpartners.com/payment-link/6aa937cc9f7ff2c808a75ad2",
-        featured: true,
-      },
-      {
-        label: "3 Monthly Payments of $500",
-        sublabel: "$1,500 total — first payment today",
-        href: "https://link.rylandpartners.com/payment-link/6aa938699f7ff2c808a75ad7",
-      },
-    ],
-  },
-];
+/**
+ * Single all-inclusive program: full credit optimization plus funding readiness,
+ * with all bonus offerings included. Same payment links as the prior $1,500 offer.
+ */
+const PROGRAM: Program = {
+  id: "complete-program",
+  icon: TrendingUp,
+  name: "Complete Business Funding Program",
+  price: "$1,500",
+  successFee: "+ 7% success fee",
+  tagline:
+    "One program with everything included — full credit optimization, funding readiness, and all bonus offerings.",
+  bestFor: "Best for entrepreneurs who want their credit and funding fully handled",
+  features: [
+    "Full credit & funding readiness review",
+    "Complete credit optimization & ongoing monitoring",
+    "Dispute & bureau correspondence handled for you",
+    "BONUS: Personalized funding roadmap",
+    "BONUS: Lender positioning & application strategy",
+    "BONUS: 1-on-1 guidance from our funding team",
+  ],
+  options: [
+    {
+      label: "Pay $1,500 in Full",
+      sublabel: "One payment today",
+      href: "https://link.rylandpartners.com/payment-link/6aa937cc9f7ff2c808a75ad2",
+      featured: true,
+    },
+    {
+      label: "3 Monthly Payments of $500",
+      sublabel: "$1,500 total — first payment today",
+      href: "https://link.rylandpartners.com/payment-link/6aa938699f7ff2c808a75ad7",
+    },
+  ],
+  highlight: true,
+};
 
 const TimerBox = ({ value, label }: { value: string; label: string }) => (
   <div className="flex flex-col items-center">
@@ -143,7 +119,7 @@ export default function Offer() {
     <div className="min-h-screen bg-white antialiased text-slate-900 selection:bg-blue-500/30 selection:text-white">
       <PageMeta
         title="Limited-Time Program Offer | Ryland Partners"
-        description="Choose your program — Funding Ready or Credit Work Needed. This limited-time offer ends Sunday, September 20 at 8:00 PM EDT and includes flexible payment plans. Results vary and are not guaranteed."
+        description="One program with everything included — full credit optimization, funding readiness, and all bonus offerings for $1,500, with flexible payment plans. This limited-time offer ends Sunday, September 20 at 8:00 PM EDT. Results vary and are not guaranteed."
         canonical="/offer"
         noindex
       />
@@ -208,82 +184,74 @@ export default function Offer() {
         </div>
       </section>
 
-      {/* Programs */}
+      {/* Program */}
       <section className="max-w-6xl mx-auto px-4 sm:px-6 py-14 sm:py-20">
-        <div className="grid md:grid-cols-2 gap-6 lg:gap-8 items-stretch">
-          {PROGRAMS.map((program, idx) => (
-            <motion.div
-              key={program.id}
-              initial={{ opacity: 0, y: 24 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-60px" }}
-              transition={{ duration: 0.5, delay: idx * 0.1 }}
-              className={`relative flex flex-col rounded-3xl border p-6 sm:p-8 ${
-                program.highlight
-                  ? "border-[#0060A9] bg-white shadow-[0_24px_70px_-24px_rgba(0,58,112,0.35)] ring-1 ring-[#0060A9]/20"
-                  : "border-slate-200 bg-white shadow-[0_16px_50px_-24px_rgba(0,58,112,0.2)]"
-              }`}
-            >
-              {program.highlight && (
-                <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-[#003A70] px-4 py-1.5 text-[11px] font-semibold uppercase tracking-widest text-white">
-                  Most Popular
-                </div>
-              )}
+        <div className="max-w-2xl mx-auto">
+          <motion.div
+            key={PROGRAM.id}
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-60px" }}
+            transition={{ duration: 0.5 }}
+            className="relative flex flex-col rounded-3xl border border-[#0060A9] bg-white p-6 sm:p-8 shadow-[0_24px_70px_-24px_rgba(0,58,112,0.35)] ring-1 ring-[#0060A9]/20"
+          >
+            <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-[#003A70] px-4 py-1.5 text-[11px] font-semibold uppercase tracking-widest text-white">
+              Everything Included
+            </div>
 
-              <div className="flex items-start gap-4">
-                <div className="shrink-0 w-12 h-12 rounded-2xl bg-[#0060A9]/10 border border-[#0060A9]/20 flex items-center justify-center">
-                  <program.icon className="w-6 h-6 text-[#0060A9]" />
-                </div>
-                <div>
-                  <h2 className="text-2xl font-semibold text-slate-900 font-[Manrope,sans-serif]">
-                    {program.name}
-                  </h2>
-                  <p className="text-sm text-slate-500 mt-1 leading-relaxed">{program.tagline}</p>
-                </div>
+            <div className="flex items-start gap-4">
+              <div className="shrink-0 w-12 h-12 rounded-2xl bg-[#0060A9]/10 border border-[#0060A9]/20 flex items-center justify-center">
+                <PROGRAM.icon className="w-6 h-6 text-[#0060A9]" />
               </div>
-
-              <div className="mt-6 flex items-baseline gap-2">
-                <span className="text-4xl font-semibold tracking-tight text-slate-900 font-[Manrope,sans-serif]">
-                  {program.price}
-                </span>
-                <span className="text-sm font-medium text-slate-500">{program.successFee}</span>
+              <div>
+                <h2 className="text-2xl font-semibold text-slate-900 font-[Manrope,sans-serif]">
+                  {PROGRAM.name}
+                </h2>
+                <p className="text-sm text-slate-500 mt-1 leading-relaxed">{PROGRAM.tagline}</p>
               </div>
-              <p className="mt-1 text-xs text-slate-500">{program.bestFor}</p>
+            </div>
 
-              <ul className="mt-6 space-y-3 flex-1">
-                {program.features.map((feature) => (
-                  <li key={feature} className="flex items-start gap-2.5 text-sm text-slate-700">
-                    <CheckCircle2 className="w-4 h-4 mt-0.5 shrink-0 text-[#0060A9]" />
-                    <span>{feature}</span>
-                  </li>
-                ))}
-              </ul>
+            <div className="mt-6 flex items-baseline gap-2">
+              <span className="text-4xl font-semibold tracking-tight text-slate-900 font-[Manrope,sans-serif]">
+                {PROGRAM.price}
+              </span>
+              <span className="text-sm font-medium text-slate-500">{PROGRAM.successFee}</span>
+            </div>
+            <p className="mt-1 text-xs text-slate-500">{PROGRAM.bestFor}</p>
 
-              <div className="mt-8 space-y-3">
-                {program.options.map((option) => (
-                  <div key={option.href}>
-                    <a
-                      href={option.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={
-                        option.featured
-                          ? "shiny-cta !py-3.5 !px-6 !text-base w-full flex items-center justify-center"
-                          : "w-full inline-flex items-center justify-center rounded-full bg-slate-100 px-6 py-3 text-sm font-medium text-slate-600 hover:bg-slate-200 transition-colors"
-                      }
-                    >
-                      <span>{option.label}</span>
-                    </a>
-                    <p className="mt-1.5 text-center text-xs text-slate-500">{option.sublabel}</p>
-                  </div>
-                ))}
-              </div>
+            <ul className="mt-6 space-y-3 flex-1">
+              {PROGRAM.features.map((feature) => (
+                <li key={feature} className="flex items-start gap-2.5 text-sm text-slate-700">
+                  <CheckCircle2 className="w-4 h-4 mt-0.5 shrink-0 text-[#0060A9]" />
+                  <span>{feature}</span>
+                </li>
+              ))}
+            </ul>
 
-              <p className="mt-5 text-[11px] leading-relaxed text-slate-500 text-center">
-                {CTA_DISCLAIMER}
-              </p>
-            </motion.div>
-          ))}
+            <div className="mt-8 space-y-3">
+              {PROGRAM.options.map((option) => (
+                <div key={option.href}>
+                  <a
+                    href={option.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={
+                      option.featured
+                        ? "shiny-cta !py-3.5 !px-6 !text-base w-full flex items-center justify-center"
+                        : "w-full inline-flex items-center justify-center rounded-full bg-slate-100 px-6 py-3 text-sm font-medium text-slate-600 hover:bg-slate-200 transition-colors"
+                    }
+                  >
+                    <span>{option.label}</span>
+                  </a>
+                  <p className="mt-1.5 text-center text-xs text-slate-500">{option.sublabel}</p>
+                </div>
+              ))}
+            </div>
+
+            <p className="mt-5 text-[11px] leading-relaxed text-slate-500 text-center">
+              {CTA_DISCLAIMER}
+            </p>
+          </motion.div>
         </div>
 
         {/* How payments work */}
@@ -334,7 +302,7 @@ export default function Offer() {
         {/* Questions */}
         <div className="mt-12 text-center">
           <p className="text-sm text-slate-600">
-            Not sure which program is right for you?
+            Have questions about the program?
           </p>
           <Link
             to="/consultation"
