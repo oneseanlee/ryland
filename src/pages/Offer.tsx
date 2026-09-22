@@ -63,65 +63,42 @@ interface Program {
   highlight?: boolean;
 }
 
-const PROGRAMS: Program[] = [
-  {
-    id: "funding-ready",
-    icon: TrendingUp,
-    name: "Funding Ready",
-    price: "$999",
-    successFee: "+ 7% success fee",
-    tagline: "Your credit is in good shape — let's position you for business funding.",
-    bestFor: "Best if your credit score is already 680+",
-    features: [
-      "Full credit & funding readiness review",
-      "Personalized funding roadmap",
-      "Lender positioning & application strategy",
-      "1-on-1 guidance from our funding team",
-    ],
-    options: [
-      {
-        label: "Pay $999 in Full",
-        sublabel: "One payment today",
-        href: "https://link.rylandpartners.com/payment-link/6aa936eaceb12d9fc1a8cf96",
-        featured: true,
-      },
-      {
-        label: "3 Monthly Payments of $333",
-        sublabel: "$999 total — first payment today",
-        href: "https://link.rylandpartners.com/payment-link/6aa93740ceb12d9fc1a8cf97",
-      },
-    ],
-    highlight: true,
-  },
-  {
-    id: "credit-work-needed",
-    icon: CreditCard,
-    name: "Credit Work Needed",
-    price: "$1,500",
-    successFee: "+ 7% success fee",
-    tagline: "We'll do the credit work first, then position you for funding.",
-    bestFor: "Best if your credit needs repair or optimization first",
-    features: [
-      "Everything in Funding Ready",
-      "Done-for-you credit repair & optimization",
-      "Dispute & bureau correspondence handled for you",
-      "Ongoing credit monitoring & progress reviews",
-    ],
-    options: [
-      {
-        label: "Pay $1,500 in Full",
-        sublabel: "One payment today",
-        href: "https://link.rylandpartners.com/payment-link/6aa937cc9f7ff2c808a75ad2",
-        featured: true,
-      },
-      {
-        label: "3 Monthly Payments of $500",
-        sublabel: "$1,500 total — first payment today",
-        href: "https://link.rylandpartners.com/payment-link/6aa938699f7ff2c808a75ad7",
-      },
-    ],
-  },
-];
+/**
+ * Single all-inclusive program: full credit optimization plus funding readiness,
+ * with all bonus offerings included. Same payment links as the prior $1,500 offer.
+ */
+const PROGRAM: Program = {
+  id: "complete-program",
+  icon: TrendingUp,
+  name: "Complete Business Funding Program",
+  price: "$1,500",
+  successFee: "+ 7% success fee",
+  tagline:
+    "One program with everything included — full credit optimization, funding readiness, and all bonus offerings.",
+  bestFor: "Best for entrepreneurs who want their credit and funding fully handled",
+  features: [
+    "Full credit & funding readiness review",
+    "Complete credit optimization & ongoing monitoring",
+    "Dispute & bureau correspondence handled for you",
+    "BONUS: Personalized funding roadmap",
+    "BONUS: Lender positioning & application strategy",
+    "BONUS: 1-on-1 guidance from our funding team",
+  ],
+  options: [
+    {
+      label: "Pay $1,500 in Full",
+      sublabel: "One payment today",
+      href: "https://link.rylandpartners.com/payment-link/6aa937cc9f7ff2c808a75ad2",
+      featured: true,
+    },
+    {
+      label: "3 Monthly Payments of $500",
+      sublabel: "$1,500 total — first payment today",
+      href: "https://link.rylandpartners.com/payment-link/6aa938699f7ff2c808a75ad7",
+    },
+  ],
+  highlight: true,
+};
 
 const TimerBox = ({ value, label }: { value: string; label: string }) => (
   <div className="flex flex-col items-center">
