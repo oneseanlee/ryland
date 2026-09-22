@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   TrendingUp,
-  CreditCard,
   CheckCircle2,
   Clock,
   ShieldCheck,
@@ -120,7 +119,7 @@ export default function Offer() {
     <div className="min-h-screen bg-white antialiased text-slate-900 selection:bg-blue-500/30 selection:text-white">
       <PageMeta
         title="Limited-Time Program Offer | Ryland Partners"
-        description="Choose your program — Funding Ready or Credit Work Needed. This limited-time offer ends Sunday, September 20 at 8:00 PM EDT and includes flexible payment plans. Results vary and are not guaranteed."
+        description="One program with everything included — full credit optimization, funding readiness, and all bonus offerings for $1,500, with flexible payment plans. This limited-time offer ends Sunday, September 20 at 8:00 PM EDT. Results vary and are not guaranteed."
         canonical="/offer"
         noindex
       />
@@ -303,7 +302,7 @@ export default function Offer() {
         {/* Questions */}
         <div className="mt-12 text-center">
           <p className="text-sm text-slate-600">
-            Not sure which program is right for you?
+            Have questions about the program?
           </p>
           <Link
             to="/consultation"
