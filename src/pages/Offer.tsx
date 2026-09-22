@@ -185,82 +185,74 @@ export default function Offer() {
         </div>
       </section>
 
-      {/* Programs */}
+      {/* Program */}
       <section className="max-w-6xl mx-auto px-4 sm:px-6 py-14 sm:py-20">
-        <div className="grid md:grid-cols-2 gap-6 lg:gap-8 items-stretch">
-          {PROGRAMS.map((program, idx) => (
-            <motion.div
-              key={program.id}
-              initial={{ opacity: 0, y: 24 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-60px" }}
-              transition={{ duration: 0.5, delay: idx * 0.1 }}
-              className={`relative flex flex-col rounded-3xl border p-6 sm:p-8 ${
-                program.highlight
-                  ? "border-[#0060A9] bg-white shadow-[0_24px_70px_-24px_rgba(0,58,112,0.35)] ring-1 ring-[#0060A9]/20"
-                  : "border-slate-200 bg-white shadow-[0_16px_50px_-24px_rgba(0,58,112,0.2)]"
-              }`}
-            >
-              {program.highlight && (
-                <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-[#003A70] px-4 py-1.5 text-[11px] font-semibold uppercase tracking-widest text-white">
-                  Most Popular
-                </div>
-              )}
+        <div className="max-w-2xl mx-auto">
+          <motion.div
+            key={PROGRAM.id}
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-60px" }}
+            transition={{ duration: 0.5 }}
+            className="relative flex flex-col rounded-3xl border border-[#0060A9] bg-white p-6 sm:p-8 shadow-[0_24px_70px_-24px_rgba(0,58,112,0.35)] ring-1 ring-[#0060A9]/20"
+          >
+            <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-[#003A70] px-4 py-1.5 text-[11px] font-semibold uppercase tracking-widest text-white">
+              Everything Included
+            </div>
 
-              <div className="flex items-start gap-4">
-                <div className="shrink-0 w-12 h-12 rounded-2xl bg-[#0060A9]/10 border border-[#0060A9]/20 flex items-center justify-center">
-                  <program.icon className="w-6 h-6 text-[#0060A9]" />
-                </div>
-                <div>
-                  <h2 className="text-2xl font-semibold text-slate-900 font-[Manrope,sans-serif]">
-                    {program.name}
-                  </h2>
-                  <p className="text-sm text-slate-500 mt-1 leading-relaxed">{program.tagline}</p>
-                </div>
+            <div className="flex items-start gap-4">
+              <div className="shrink-0 w-12 h-12 rounded-2xl bg-[#0060A9]/10 border border-[#0060A9]/20 flex items-center justify-center">
+                <PROGRAM.icon className="w-6 h-6 text-[#0060A9]" />
               </div>
-
-              <div className="mt-6 flex items-baseline gap-2">
-                <span className="text-4xl font-semibold tracking-tight text-slate-900 font-[Manrope,sans-serif]">
-                  {program.price}
-                </span>
-                <span className="text-sm font-medium text-slate-500">{program.successFee}</span>
+              <div>
+                <h2 className="text-2xl font-semibold text-slate-900 font-[Manrope,sans-serif]">
+                  {PROGRAM.name}
+                </h2>
+                <p className="text-sm text-slate-500 mt-1 leading-relaxed">{PROGRAM.tagline}</p>
               </div>
-              <p className="mt-1 text-xs text-slate-500">{program.bestFor}</p>
+            </div>
 
-              <ul className="mt-6 space-y-3 flex-1">
-                {program.features.map((feature) => (
-                  <li key={feature} className="flex items-start gap-2.5 text-sm text-slate-700">
-                    <CheckCircle2 className="w-4 h-4 mt-0.5 shrink-0 text-[#0060A9]" />
-                    <span>{feature}</span>
-                  </li>
-                ))}
-              </ul>
+            <div className="mt-6 flex items-baseline gap-2">
+              <span className="text-4xl font-semibold tracking-tight text-slate-900 font-[Manrope,sans-serif]">
+                {PROGRAM.price}
+              </span>
+              <span className="text-sm font-medium text-slate-500">{PROGRAM.successFee}</span>
+            </div>
+            <p className="mt-1 text-xs text-slate-500">{PROGRAM.bestFor}</p>
 
-              <div className="mt-8 space-y-3">
-                {program.options.map((option) => (
-                  <div key={option.href}>
-                    <a
-                      href={option.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={
-                        option.featured
-                          ? "shiny-cta !py-3.5 !px-6 !text-base w-full flex items-center justify-center"
-                          : "w-full inline-flex items-center justify-center rounded-full bg-slate-100 px-6 py-3 text-sm font-medium text-slate-600 hover:bg-slate-200 transition-colors"
-                      }
-                    >
-                      <span>{option.label}</span>
-                    </a>
-                    <p className="mt-1.5 text-center text-xs text-slate-500">{option.sublabel}</p>
-                  </div>
-                ))}
-              </div>
+            <ul className="mt-6 space-y-3 flex-1">
+              {PROGRAM.features.map((feature) => (
+                <li key={feature} className="flex items-start gap-2.5 text-sm text-slate-700">
+                  <CheckCircle2 className="w-4 h-4 mt-0.5 shrink-0 text-[#0060A9]" />
+                  <span>{feature}</span>
+                </li>
+              ))}
+            </ul>
 
-              <p className="mt-5 text-[11px] leading-relaxed text-slate-500 text-center">
-                {CTA_DISCLAIMER}
-              </p>
-            </motion.div>
-          ))}
+            <div className="mt-8 space-y-3">
+              {PROGRAM.options.map((option) => (
+                <div key={option.href}>
+                  <a
+                    href={option.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={
+                      option.featured
+                        ? "shiny-cta !py-3.5 !px-6 !text-base w-full flex items-center justify-center"
+                        : "w-full inline-flex items-center justify-center rounded-full bg-slate-100 px-6 py-3 text-sm font-medium text-slate-600 hover:bg-slate-200 transition-colors"
+                    }
+                  >
+                    <span>{option.label}</span>
+                  </a>
+                  <p className="mt-1.5 text-center text-xs text-slate-500">{option.sublabel}</p>
+                </div>
+              ))}
+            </div>
+
+            <p className="mt-5 text-[11px] leading-relaxed text-slate-500 text-center">
+              {CTA_DISCLAIMER}
+            </p>
+          </motion.div>
         </div>
 
         {/* How payments work */}
