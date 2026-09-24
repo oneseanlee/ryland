@@ -123,7 +123,7 @@ export default function Offer() {
                   >
                     <div className="flex items-start gap-3 min-w-0">
                       <CheckCircle2
-                        className="w-4.5 h-4.5 w-[18px] h-[18px] mt-0.5 shrink-0 text-[#E8BE5D]"
+                        className="w-[18px] h-[18px] mt-0.5 shrink-0 text-[#E8BE5D]"
                         aria-hidden="true"
                       />
                       <div className="min-w-0">
