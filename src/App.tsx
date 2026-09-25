@@ -40,7 +40,6 @@ const ThankYou = lazy(() => import("./pages/ThankYou"));
 const MyOrders = lazy(() => import("./pages/MyOrders"));
 const DownloadRedirect = lazy(() => import("./pages/DownloadRedirect"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
-const CreditIntake = lazy(() => import("./pages/CreditIntake"));
 const Intake = lazy(() => import("./pages/Intake"));
 const Unsubscribe = lazy(() => import("./pages/Unsubscribe"));
 const PortalLogin = lazy(() => import("./pages/portal/PortalLogin"));
@@ -125,7 +124,7 @@ const AppContent = () => {
             <Route path="/my-orders" element={<MyOrders />} />
             <Route path="/download/:token" element={<DownloadRedirect />} />
             <Route path="/reset-password" element={<ResetPassword />} />
-            <Route path="/credit-intake" element={<CreditIntake />} />
+            <Route path="/credit-intake" element={<Intake />} />
             <Route path="/intake" element={<Intake />} />
             <Route path="/unsubscribe" element={<Unsubscribe />} />
             <Route path="/r/:ref" element={<ReferralRedirect />} />
