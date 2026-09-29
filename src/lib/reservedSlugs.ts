@@ -29,6 +29,7 @@ export const RESERVED_SLUGS = new Set<string>([
   "reset-password",
   "credit-intake",
   "intake",
+  "fundability",
   "unsubscribe",
   "r",
   "affiliate-referral",
