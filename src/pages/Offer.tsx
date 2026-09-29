@@ -110,14 +110,14 @@ export default function Offer() {
             <div className="p-6 sm:p-10 lg:border-r lg:border-white/10">
               <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-widest text-[#E8BE5D]">
                 <Sparkles className="w-3.5 h-3.5" />
-                Everything Included
+                Everything You Get
               </div>
               <h2 className="mt-2 text-2xl sm:text-3xl font-semibold text-white font-[Manrope,sans-serif] tracking-tight">
                 Complete Business Funding Program
               </h2>
 
               <ul className="mt-6 divide-y divide-white/10">
-                {VALUE_STACK.map((item, i) => (
+                {CORE_STACK.map((item, i) => (
                   <motion.li
                     key={item.name}
                     initial={{ opacity: 0, x: -12 }}
@@ -133,9 +133,7 @@ export default function Offer() {
                       />
                       <div className="min-w-0">
                         <p
-                          className={`text-sm sm:text-[15px] leading-snug ${
-                            item.isBonus ? "font-medium text-white" : "font-semibold text-white"
-                          }`}
+                          className={`text-sm sm:text-[15px] leading-snug font-medium text-white`}
                         >
                           {item.name}
                           {item.detail && (
@@ -145,8 +143,7 @@ export default function Offer() {
                       </div>
                     </div>
                     <span
-                      className="shrink-0 text-sm sm:text-base font-semibold tabular-nums"
-                      style={{ color: GOLD }}
+                      className="shrink-0 text-sm sm:text-base font-semibold tabular-nums text-white"
                     >
                       {item.price}
                     </span>
@@ -154,10 +151,52 @@ export default function Offer() {
                 ))}
               </ul>
 
-              <div className="mt-5 flex items-center justify-end gap-3 border-t border-white/10 pt-4">
-                <span className="text-sm text-blue-200">Total value</span>
-                <span className="text-lg sm:text-xl font-semibold line-through decoration-red-400/70 decoration-2" style={{ color: "rgba(232,190,93,0.75)" }}>
-                  $12,470
+              {/* Upgrades — included FREE with enrollment */}
+              <div className="mt-5 border-t border-white/10 pt-5">
+                <ul className="divide-y divide-white/10">
+                  {UPGRADE_STACK.map((item, i) => (
+                    <motion.li
+                      key={item.name}
+                      initial={{ opacity: 0, x: -12 }}
+                      whileInView={{ opacity: 1, x: 0 }}
+                      viewport={{ once: true, margin: "-40px" }}
+                      transition={{ duration: 0.35, delay: i * 0.05 }}
+                      className="flex items-center justify-between gap-4 py-3.5"
+                    >
+                      <div className="flex items-start gap-3 min-w-0">
+                        <CheckCircle2
+                          className="w-[18px] h-[18px] mt-0.5 shrink-0 text-[#E8BE5D]"
+                          aria-hidden="true"
+                        />
+                        <div className="min-w-0">
+                          <p
+                            className={`text-sm sm:text-[15px] leading-snug font-medium`}
+                            style={{ color: GOLD }}
+                          >
+                            {item.name}
+                            {item.detail && (
+                              <span className="text-blue-200 font-normal"> ({item.detail})</span>
+                            )}
+                          </p>
+                        </div>
+                      </div>
+                      <span
+                        className="shrink-0 text-sm sm:text-base font-semibold tabular-nums"
+                        style={{ color: GOLD }}
+                      >
+                        {item.price}
+                      </span>
+                    </motion.li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="mt-5 flex items-center justify-between border-t border-white/10 pt-4">
+                <span className="text-sm font-semibold uppercase tracking-widest text-white">
+                  Total Value
+                </span>
+                <span className="text-xl sm:text-2xl font-semibold tabular-nums" style={{ color: GOLD }}>
+                  $16,973
                 </span>
               </div>
             </div>
