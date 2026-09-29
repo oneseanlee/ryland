@@ -19,18 +19,23 @@ interface ValueItem {
   name: string;
   detail?: string;
   price: string;
-  isBonus?: boolean;
+  highlight?: boolean;
 }
 
-const VALUE_STACK: ValueItem[] = [
-  { name: "The Fundability Program", detail: "Done-for-you, 12 months", price: "$2,500" },
-  { name: "Bonus #1: The Ryland Partners Community", detail: "12 months", price: "$1,188", isBonus: true },
-  { name: "Bonus #2: Business Compliance Presence Package", price: "$1,997", isBonus: true },
-  { name: "Bonus #3: Your Custom Profit Blueprint", price: "$4,997", isBonus: true },
-  { name: "Bonus #4: Done-For-You 9-Benchmark Scorecard", price: "$497", isBonus: true },
-  { name: "Bonus #5: Personal Card Offload Plan", price: "$497", isBonus: true },
-  { name: "Bonus #6: Banker Call & Reconsideration Scripts", price: "$297", isBonus: true },
-  { name: "Bonus #7: 0% Deployment & Payoff Playbook", price: "$497", isBonus: true },
+const CORE_STACK: ValueItem[] = [
+  { name: "Ryland Partners Community", detail: "FREE for 12 months", price: "$1,188" },
+  { name: "Business Compliance Online Presence Package", detail: "FREE", price: "$2,500" },
+  { name: "Your Custom Profit Blueprint", detail: "FREE", price: "$4,997" },
+  { name: "Done-For-You 9-Benchmark Scorecard", detail: "FREE", price: "$497" },
+  { name: "0% Deployment & Payoff Playbook", detail: "FREE", price: "$497" },
+  { name: "Personal Card Offload Plan", detail: "FREE", price: "$497" },
+  { name: "Banker Call & Reconsideration Scripts", detail: "FREE", price: "$297" },
+  { name: "The Fundability Program", detail: "done-for-you, 12 months", price: "$2,500" },
+];
+
+const UPGRADE_STACK: ValueItem[] = [
+  { name: "Lifetime Membership", detail: "FREE (enroll within 72 hours)", price: "$2,500", highlight: true },
+  { name: "Accelerated Plan", detail: "FREE (first 3 enrollments)", price: "$1,500", highlight: true },
 ];
 
 const GUARANTEE_PILLS = [
@@ -105,14 +110,14 @@ export default function Offer() {
             <div className="p-6 sm:p-10 lg:border-r lg:border-white/10">
               <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-widest text-[#E8BE5D]">
                 <Sparkles className="w-3.5 h-3.5" />
-                Everything Included
+                Everything You Get
               </div>
               <h2 className="mt-2 text-2xl sm:text-3xl font-semibold text-white font-[Manrope,sans-serif] tracking-tight">
                 Complete Business Funding Program
               </h2>
 
               <ul className="mt-6 divide-y divide-white/10">
-                {VALUE_STACK.map((item, i) => (
+                {CORE_STACK.map((item, i) => (
                   <motion.li
                     key={item.name}
                     initial={{ opacity: 0, x: -12 }}
@@ -128,9 +133,7 @@ export default function Offer() {
                       />
                       <div className="min-w-0">
                         <p
-                          className={`text-sm sm:text-[15px] leading-snug ${
-                            item.isBonus ? "font-medium text-white" : "font-semibold text-white"
-                          }`}
+                          className={`text-sm sm:text-[15px] leading-snug font-medium text-white`}
                         >
                           {item.name}
                           {item.detail && (
@@ -140,8 +143,7 @@ export default function Offer() {
                       </div>
                     </div>
                     <span
-                      className="shrink-0 text-sm sm:text-base font-semibold tabular-nums"
-                      style={{ color: GOLD }}
+                      className="shrink-0 text-sm sm:text-base font-semibold tabular-nums text-white"
                     >
                       {item.price}
                     </span>
@@ -149,10 +151,52 @@ export default function Offer() {
                 ))}
               </ul>
 
-              <div className="mt-5 flex items-center justify-end gap-3 border-t border-white/10 pt-4">
-                <span className="text-sm text-blue-200">Total value</span>
-                <span className="text-lg sm:text-xl font-semibold line-through decoration-red-400/70 decoration-2" style={{ color: "rgba(232,190,93,0.75)" }}>
-                  $12,470
+              {/* Upgrades — included FREE with enrollment */}
+              <div className="mt-5 border-t border-white/10 pt-5">
+                <ul className="divide-y divide-white/10">
+                  {UPGRADE_STACK.map((item, i) => (
+                    <motion.li
+                      key={item.name}
+                      initial={{ opacity: 0, x: -12 }}
+                      whileInView={{ opacity: 1, x: 0 }}
+                      viewport={{ once: true, margin: "-40px" }}
+                      transition={{ duration: 0.35, delay: i * 0.05 }}
+                      className="flex items-center justify-between gap-4 py-3.5"
+                    >
+                      <div className="flex items-start gap-3 min-w-0">
+                        <CheckCircle2
+                          className="w-[18px] h-[18px] mt-0.5 shrink-0 text-[#E8BE5D]"
+                          aria-hidden="true"
+                        />
+                        <div className="min-w-0">
+                          <p
+                            className={`text-sm sm:text-[15px] leading-snug font-medium`}
+                            style={{ color: GOLD }}
+                          >
+                            {item.name}
+                            {item.detail && (
+                              <span className="text-blue-200 font-normal"> ({item.detail})</span>
+                            )}
+                          </p>
+                        </div>
+                      </div>
+                      <span
+                        className="shrink-0 text-sm sm:text-base font-semibold tabular-nums"
+                        style={{ color: GOLD }}
+                      >
+                        {item.price}
+                      </span>
+                    </motion.li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="mt-5 flex items-center justify-between border-t border-white/10 pt-4">
+                <span className="text-sm font-semibold uppercase tracking-widest text-white">
+                  Total Value
+                </span>
+                <span className="text-xl sm:text-2xl font-semibold tabular-nums" style={{ color: GOLD }}>
+                  $16,973
                 </span>
               </div>
             </div>
