@@ -19,18 +19,23 @@ interface ValueItem {
   name: string;
   detail?: string;
   price: string;
-  isBonus?: boolean;
+  highlight?: boolean;
 }
 
-const VALUE_STACK: ValueItem[] = [
-  { name: "The Fundability Program", detail: "Done-for-you, 12 months", price: "$2,500" },
-  { name: "Bonus #1: The Ryland Partners Community", detail: "12 months", price: "$1,188", isBonus: true },
-  { name: "Bonus #2: Business Compliance Presence Package", price: "$1,997", isBonus: true },
-  { name: "Bonus #3: Your Custom Profit Blueprint", price: "$4,997", isBonus: true },
-  { name: "Bonus #4: Done-For-You 9-Benchmark Scorecard", price: "$497", isBonus: true },
-  { name: "Bonus #5: Personal Card Offload Plan", price: "$497", isBonus: true },
-  { name: "Bonus #6: Banker Call & Reconsideration Scripts", price: "$297", isBonus: true },
-  { name: "Bonus #7: 0% Deployment & Payoff Playbook", price: "$497", isBonus: true },
+const CORE_STACK: ValueItem[] = [
+  { name: "Ryland Partners Community", detail: "FREE for 12 months", price: "$1,188" },
+  { name: "Business Compliance Online Presence Package", detail: "FREE", price: "$2,500" },
+  { name: "Your Custom Profit Blueprint", detail: "FREE", price: "$4,997" },
+  { name: "Done-For-You 9-Benchmark Scorecard", detail: "FREE", price: "$497" },
+  { name: "0% Deployment & Payoff Playbook", detail: "FREE", price: "$497" },
+  { name: "Personal Card Offload Plan", detail: "FREE", price: "$497" },
+  { name: "Banker Call & Reconsideration Scripts", detail: "FREE", price: "$297" },
+  { name: "The Fundability Program", detail: "done-for-you, 12 months", price: "$2,500" },
+];
+
+const UPGRADE_STACK: ValueItem[] = [
+  { name: "Lifetime Membership", detail: "FREE (enroll within 72 hours)", price: "$2,500", highlight: true },
+  { name: "Accelerated Plan", detail: "FREE (first 3 enrollments)", price: "$1,500", highlight: true },
 ];
 
 const GUARANTEE_PILLS = [
