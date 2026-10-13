@@ -13,7 +13,7 @@ import PageMeta from "@/components/PageMeta";
 import InfiniteGrid from "@/components/ui/infinite-grid";
 
 const CTA_DISCLAIMER =
-  "Ryland Partners provides business education and credit optimization services. Results vary by individual and are not guaranteed.";
+  "Ryland Partners provides business education, Credit Optimization, and funding readiness services. Results vary and are not guaranteed.";
 
 interface ValueItem {
   name: string;
@@ -23,25 +23,17 @@ interface ValueItem {
 }
 
 const CORE_STACK: ValueItem[] = [
-  { name: "Ryland Partners Community", detail: "FREE for 12 months", price: "$1,188" },
-  { name: "Business Compliance Online Presence Package", detail: "FREE", price: "$2,500" },
-  { name: "Your Custom Profit Blueprint", detail: "FREE", price: "$4,997" },
-  { name: "Done-For-You 9-Benchmark Scorecard", detail: "FREE", price: "$497" },
-  { name: "0% Deployment & Payoff Playbook", detail: "FREE", price: "$497" },
-  { name: "Personal Card Offload Plan", detail: "FREE", price: "$497" },
-  { name: "Banker Call & Reconsideration Scripts", detail: "FREE", price: "$297" },
-  { name: "The Fundability Program", detail: "done-for-you, 12 months", price: "$2,500" },
-];
-
-const UPGRADE_STACK: ValueItem[] = [
-  { name: "Lifetime Membership", detail: "FREE (enroll within 72 hours)", price: "$2,500", highlight: true },
-  { name: "Accelerated Plan", detail: "FREE (first 3 enrollments)", price: "$1,500", highlight: true },
+  { name: "12-Benchmark File Review", detail: "your file read against all 12, in writing, within 3 business days", price: "$497" },
+  { name: "Personal Credit Optimization", detail: "payment history, utilization, inquiries, depth", price: "$2,500" },
+  { name: "Business Fundability Setup", detail: "entity, D&B file, website, domain email, business phone and address, industry code", price: "$3,500" },
+  { name: "Banking Sequence + Funding Rounds", detail: "where you apply, in what order, and when", price: "$1,500" },
+  { name: "Your Specialist", detail: "one person who knows your file by name, weekly updates", price: "Included" },
 ];
 
 const GUARANTEE_PILLS = [
-  "100% Money-Back Guarantee",
-  "Lifetime Membership: 72 Hours",
-  "Accelerated: First 3",
+  "File Fit Promise",
+  "90-Day Movement Guarantee",
+  "Never-Quit Promise",
 ];
 
 const GOLD = "#E8BE5D";
@@ -50,8 +42,8 @@ export default function Offer() {
   return (
     <div className="min-h-screen bg-white antialiased text-slate-900 selection:bg-blue-500/30 selection:text-white">
       <PageMeta
-        title="Webinar Special — Today Only | Ryland Partners"
-        description="Complete Business Funding Program — everything included: full credit optimization, funding readiness, and all bonus offerings for $1,500 or 3 payments of $500. Webinar special, today only. Results vary and are not guaranteed."
+        title="The Fundability Program — Webinar Price | Ryland Partners"
+        description="Get your file read against all 12 Fundability Benchmarks with The Fundability Program. Webinar price: $1,500 or 3 payments of $500, good for 72 hours after your session. Results vary and are not guaranteed."
         canonical="/offer"
         noindex
       />
@@ -81,16 +73,17 @@ export default function Offer() {
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-[#E8BE5D]" />
               </span>
               <span className="text-[11px] sm:text-xs font-semibold uppercase tracking-widest text-white">
-                Webinar Special — Today Only
+                 Webinar Price · Good for 72 Hours
               </span>
             </div>
 
             <h1 className="mt-4 text-3xl sm:text-4xl lg:text-5xl font-medium tracking-tighter text-white font-[Manrope,sans-serif] leading-[1.02]">
-              Choose Your Program
+               Get Your File Read Before the Bank Reads It
             </h1>
             <p className="text-sm sm:text-base text-blue-100 mt-2.5 max-w-2xl mx-auto leading-relaxed">
-              One program with everything included — full credit optimization, funding readiness,
-              and every bonus below. This special pricing is available today only.
+               One program. We read your file against all 12 Fundability Benchmarks, fix
+               what's red on the personal side, the business side, or both, and then map
+               the order you apply in. Webinar price is good for 72 hours after your session.
             </p>
           </motion.div>
         </div>
@@ -110,10 +103,10 @@ export default function Offer() {
             <div className="p-6 sm:p-10 lg:border-r lg:border-white/10">
               <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-widest text-[#E8BE5D]">
                 <Sparkles className="w-3.5 h-3.5" />
-                Everything You Get
+                 What You Get
               </div>
               <h2 className="mt-2 text-2xl sm:text-3xl font-semibold text-white font-[Manrope,sans-serif] tracking-tight">
-                Complete Business Funding Program
+                 The Fundability Program
               </h2>
 
               <ul className="mt-6 divide-y divide-white/10">
@@ -151,52 +144,12 @@ export default function Offer() {
                 ))}
               </ul>
 
-              {/* Upgrades — included FREE with enrollment */}
-              <div className="mt-5 border-t border-white/10 pt-5">
-                <ul className="divide-y divide-white/10">
-                  {UPGRADE_STACK.map((item, i) => (
-                    <motion.li
-                      key={item.name}
-                      initial={{ opacity: 0, x: -12 }}
-                      whileInView={{ opacity: 1, x: 0 }}
-                      viewport={{ once: true, margin: "-40px" }}
-                      transition={{ duration: 0.35, delay: i * 0.05 }}
-                      className="flex items-center justify-between gap-4 py-3.5"
-                    >
-                      <div className="flex items-start gap-3 min-w-0">
-                        <CheckCircle2
-                          className="w-[18px] h-[18px] mt-0.5 shrink-0 text-[#E8BE5D]"
-                          aria-hidden="true"
-                        />
-                        <div className="min-w-0">
-                          <p
-                            className={`text-sm sm:text-[15px] leading-snug font-medium`}
-                            style={{ color: GOLD }}
-                          >
-                            {item.name}
-                            {item.detail && (
-                              <span className="text-blue-200 font-normal"> ({item.detail})</span>
-                            )}
-                          </p>
-                        </div>
-                      </div>
-                      <span
-                        className="shrink-0 text-sm sm:text-base font-semibold tabular-nums"
-                        style={{ color: GOLD }}
-                      >
-                        {item.price}
-                      </span>
-                    </motion.li>
-                  ))}
-                </ul>
-              </div>
-
               <div className="mt-5 flex items-center justify-between border-t border-white/10 pt-4">
                 <span className="text-sm font-semibold uppercase tracking-widest text-white">
                   Total Value
                 </span>
                 <span className="text-xl sm:text-2xl font-semibold tabular-nums" style={{ color: GOLD }}>
-                  $16,973
+                   $7,997
                 </span>
               </div>
             </div>
@@ -205,8 +158,9 @@ export default function Offer() {
             <div className="p-6 sm:p-10 flex flex-col justify-center bg-white/[0.03]">
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-widest text-blue-200">
-                  Webinar Special — Today Only
+                   Webinar Price
                 </p>
+                 <p className="mt-3 text-lg text-blue-200"><span className="sr-only">Original price: </span><s>$2,500</s></p>
                 <div className="mt-2 flex items-baseline gap-2">
                   <span className="text-5xl sm:text-6xl font-semibold tracking-tight" style={{ color: GOLD }}>
                     $1,500
@@ -215,6 +169,9 @@ export default function Offer() {
                 <p className="mt-1.5 text-base sm:text-lg text-white font-medium">
                   or 3 payments of $500
                 </p>
+                 <p className="mt-3 text-sm text-blue-200 leading-relaxed">
+                   Webinar price. Save $1,000. Good for 72 hours, then $2,500.
+                 </p>
 
                 <div className="mt-7 space-y-3">
                   <a
@@ -250,6 +207,16 @@ export default function Offer() {
                   ))}
                 </div>
 
+                 <section className="mt-7 border-t border-white/10 pt-6" aria-labelledby="offer-promises">
+                   <h2 id="offer-promises" className="text-lg font-semibold text-white font-[Manrope,sans-serif]">Your Three Promises</h2>
+                   <div className="mt-4 space-y-4 text-sm leading-relaxed text-blue-200">
+                     <p><strong className="text-white">File Fit Promise.</strong> We read your file within 3 business days. If we don't believe we can help, you get a full refund before any work starts.</p>
+                     <p><strong className="text-white">90-Day Movement Guarantee.</strong> If your file doesn't move in 90 days, you get 100% of your money back. “Move” means at least one negative item removed from your credit report, or, if you have no negative items, at least one red business benchmark turned green.</p>
+                     <p><strong className="text-white">Never-Quit Promise.</strong> Once your file is funding-ready, we keep working it through the funding process until you're funded or you tell us to stop.</p>
+                     <p className="italic">None of this is a guarantee of funding approval. Lenders make the final decision based on your profile and underwriting.</p>
+                   </div>
+                 </section>
+
                 <p className="mt-6 text-[11px] leading-relaxed text-blue-200/80">
                   {CTA_DISCLAIMER}
                 </p>
@@ -284,18 +251,14 @@ export default function Offer() {
               </div>
             ))}
           </div>
-          <p className="mt-5 text-sm text-slate-600 leading-relaxed">
-            The 7% success fee is separate and only applies when funding is secured. It is not
-            charged with your program payments.
-          </p>
         </motion.div>
 
         {/* Reassurance strip */}
         <div className="mt-8 grid sm:grid-cols-3 gap-4 text-center">
           {[
             { icon: ShieldCheck, label: "Secure checkout", desc: "Processed on our secure payment page" },
-            { icon: CalendarDays, label: "Starts today", desc: "Your program begins the moment you enroll" },
-            { icon: Clock, label: "Today only", desc: "This webinar special pricing ends tonight" },
+             { icon: CalendarDays, label: "Starts this week", desc: "Your file review comes back within 3 business days" },
+             { icon: Clock, label: "72 hours only", desc: "Webinar price, then it goes back to $2,500" },
           ].map((item) => (
             <div key={item.label} className="rounded-2xl border border-slate-200 bg-white p-5">
               <item.icon className="w-5 h-5 mx-auto text-[#0060A9]" />
@@ -307,10 +270,10 @@ export default function Offer() {
 
         {/* Questions */}
         <div className="mt-12 text-center">
-          <p className="text-sm text-slate-600">Have questions about the program?</p>
+           <p className="text-sm text-slate-600">Questions before you enroll? Reply to your webinar email or text, or ask in the live Q&A.</p>
           <Link
             to="/consultation"
-            className="mt-3 inline-flex items-center justify-center rounded-full border border-slate-300 bg-white px-8 py-3 text-sm font-medium text-[#003A70] hover:bg-slate-50 hover:border-[#0060A9]/50 transition-colors"
+             className="mt-3 inline-flex min-h-11 items-center justify-center text-sm text-[#003A70] underline underline-offset-4"
           >
             Book a free consultation
           </Link>
@@ -321,10 +284,11 @@ export default function Offer() {
       <footer className="border-t border-slate-200 py-10 px-4">
         <div className="max-w-3xl mx-auto text-center space-y-3">
           <p className="text-xs text-slate-500 leading-relaxed">
-            Ryland Partners provides business education, credit optimization, and funding
-            readiness services. We do not lend money, and results — including credit score
-            changes and funding amounts — vary by individual and are not guaranteed. The 7%
-            success fee applies only to funding successfully secured through the program.
+             Ryland Partners provides business education, Credit Optimization, and funding
+             readiness services. We do not lend money. Results, including credit
+             changes and funding amounts, vary by individual and are not guaranteed. A
+             separate success fee applies only if funding is secured. Exact terms are in
+             your agreement before you pay.
           </p>
           <div className="flex items-center justify-center gap-4 text-[11px] text-slate-400">
             <Link to="/privacy-policy" className="hover:text-slate-600 transition-colors">Privacy Policy</Link>
