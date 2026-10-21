@@ -711,7 +711,7 @@ export default function PortalInquiries() {
                             )}
                           </TableCell>
                           <TableCell className="text-right">
-                            <Button variant="outline" size="sm" onClick={() => openEditOrder(o, false)}>
+                            <Button variant="outline" size="sm" onClick={() => openEditOrder(o)}>
                               <Pencil className="h-3.5 w-3.5 mr-1" />
                               Edit
                             </Button>
@@ -1121,7 +1121,7 @@ export default function PortalInquiries() {
                             </TableCell>
                             <TableCell className="text-right">
                               <div className="flex justify-end gap-1">
-                                <Button variant="ghost" size="sm" onClick={() => openEditOrder(o, true)}>
+                                <Button variant="ghost" size="sm" onClick={() => openEditOrder(o)}>
                                   <Pencil className="h-3.5 w-3.5" />
                                 </Button>
                                 <Button variant="ghost" size="sm" onClick={() => removeFromCart(o)}>
