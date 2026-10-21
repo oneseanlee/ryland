@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { FunctionsHttpError } from "@supabase/supabase-js";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -108,6 +109,7 @@ export default function AdminInquiries() {
   const [confirmingPayment, setConfirmingPayment] = useState<AdminBatch | null>(null);
   const [paymentRef, setPaymentRef] = useState("");
   const [confirming, setConfirming] = useState(false);
+  const [sendingLead, setSendingLead] = useState(false);
 
   const inquiryQ = useQuery({
     queryKey,
@@ -145,6 +147,18 @@ export default function AdminInquiries() {
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data ?? [];
+    },
+  });
+  const deliveryQ = useQuery({
+    queryKey: ["inquiry-delivery", user?.id, detail?.id],
+    enabled: !!user && !!detail,
+    queryFn: async () => {
+      if (!detail) return null;
+      const { data, error } = await supabase.from("inquiry_lead_delivery")
+        .select("state, document_state, ghl_contact_id, ghl_opportunity_id, slack_ts, last_error")
+        .eq("order_id", detail.id).maybeSingle();
+      if (error) throw error;
+      return data;
     },
   });
   const orders = inquiryQ.data?.orders ?? [];
@@ -205,6 +219,22 @@ export default function AdminInquiries() {
     setDetail(o);
     setAdminNotes(o.admin_notes ?? "");
     setRequestText("");
+  };
+
+  const sendLead = async () => {
+    if (!detail) return;
+    setSendingLead(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("deliver-inquiry-lead", { body: { orderIds: [detail.id] } });
+      if (error) throw new Error(error instanceof FunctionsHttpError ? await error.context.text() : error.message);
+      if (!data?.success) throw new Error(data?.results?.find((r: { error?: string }) => r.error)?.error || "Delivery did not complete");
+      toast.success("GoHighLevel and Slack delivery updated");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not send the lead");
+    } finally {
+      setSendingLead(false);
+      queryClient.invalidateQueries({ queryKey: ["inquiry-delivery", user?.id, detail.id] });
+    }
   };
 
   const updateOrder = async (orderId: string, patch: InquiryOrderUpdate) => {
@@ -635,6 +665,27 @@ export default function AdminInquiries() {
               })()}
 
               <div className="flex gap-2 flex-wrap">{statusBadge(detail.payment_status, detail.service_status)}</div>
+
+              {detail.status === "submitted" && (
+                <div className="space-y-2 border-t pt-3">
+                  <p className="text-sm font-medium">Lead delivery</p>
+                  {deliveryQ.isLoading ? <Skeleton className="h-10 w-full" /> : (
+                    <p className="text-sm text-muted-foreground">
+                      GoHighLevel: {deliveryQ.data?.ghl_contact_id && deliveryQ.data?.ghl_opportunity_id ? "Sent" : "Pending"}
+                      {" · "}Slack: {deliveryQ.data?.slack_ts ? "Sent to #new-inquiry-removal" : "Pending"}
+                    </p>
+                  )}
+                  {deliveryQ.data?.document_state === "blocked_private_upload" && (
+                    <Alert><AlertDescription>Document copies are pending a verified private upload method in GoHighLevel. Originals remain available below.</AlertDescription></Alert>
+                  )}
+                  {deliveryQ.data?.last_error && <Alert><AlertDescription>{deliveryQ.data.last_error}</AlertDescription></Alert>}
+                  {deliveryQ.error && <p className="text-sm text-muted-foreground">Could not load delivery status.</p>}
+                  <Button variant="outline" size="sm" onClick={sendLead} disabled={sendingLead || deliveryQ.data?.state === "processing" || deliveryQ.data?.state === "complete"}>
+                    {sendingLead ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
+                    {deliveryQ.data?.state === "complete" ? "Lead delivered" : "Send / retry lead delivery"}
+                  </Button>
+                </div>
+              )}
 
               <div className="space-y-1.5">
                 <Label>Service status</Label>

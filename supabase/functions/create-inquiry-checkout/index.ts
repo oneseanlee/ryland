@@ -1,11 +1,8 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
+import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
-};
+declare const EdgeRuntime: { waitUntil(promise: Promise<unknown>): void };
 
 function json(data: unknown, status = 200) {
   return new Response(JSON.stringify(data), {
@@ -126,9 +123,10 @@ serve(async (req) => {
   }
 
   try {
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+    const supabaseUrl = Deno.env.get("SUPABASE_URL");
+    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    const anonKey = Deno.env.get("SUPABASE_ANON_KEY");
+    if (!supabaseUrl || !serviceRoleKey || !anonKey) return json({ error: "Server configuration missing" }, 503);
 
     // Authenticate the caller with their own JWT
     const authHeader = req.headers.get("Authorization") ?? "";
@@ -300,6 +298,27 @@ serve(async (req) => {
       type: "system",
       link: "/portal/inquiries",
     });
+
+    // Seed durable per-order delivery records before starting background work.
+    const queued = await supabase.from("inquiry_lead_delivery").upsert(
+      orderIds.map((order_id: string) => ({ order_id })),
+      { onConflict: "order_id", ignoreDuplicates: true }
+    );
+    if (queued.error) console.error("inquiry delivery queue error:", queued.error.message);
+    const deliver = async () => {
+      const response = await fetch(`${supabaseUrl}/functions/v1/deliver-inquiry-lead`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${serviceRoleKey}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ orderIds }),
+      });
+      const result = await response.text();
+      if (!response.ok) console.error("inquiry delivery request failed:", response.status, result);
+    };
+    if (typeof EdgeRuntime !== "undefined" && typeof EdgeRuntime.waitUntil === "function") {
+      EdgeRuntime.waitUntil(deliver().catch(e => console.error("inquiry delivery failed:", e)));
+    } else {
+      await deliver().catch(e => console.error("inquiry delivery failed:", e));
+    }
 
     const paymentUrl = invoice.url;
 
