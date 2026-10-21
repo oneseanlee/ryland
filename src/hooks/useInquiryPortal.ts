@@ -127,9 +127,10 @@ export function missingCategories(
   docs: InquiryDocument[],
   settings: InquirySettings | null
 ): string[] {
-  const required = (settings?.required_document_categories || []) as string[];
-  const present = new Set(docs.map((d) => d.category));
-  return required.filter((c) => !present.has(c));
+  // Document uploads are optional; no category blocks an order.
+  void docs;
+  void settings;
+  return [];
 }
 
 export async function downloadInquiryDocument(storagePath: string): Promise<string | null> {

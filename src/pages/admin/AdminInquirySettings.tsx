@@ -83,7 +83,7 @@ export default function AdminInquirySettings() {
         service_price: Number(servicePrice) || 0,
         per_bureau_price: Number(perBureauPrice) || 0,
         add_ons: addOns.filter((a) => a.name.trim()) as unknown as Json,
-        required_document_categories: requiredDocs as unknown as Json,
+        required_document_categories: [] as unknown as Json,
         ghl_payment_link: paymentLink.trim(),
         retention_days: Math.max(1, Number(retentionDays) || 365),
       };
@@ -196,25 +196,6 @@ export default function AdminInquirySettings() {
             >
               Add add-on
             </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Required document categories</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground mb-3">
-            Affiliates cannot add an order to the cart until every checked category is uploaded.
-          </p>
-          <div className="grid sm:grid-cols-2 gap-3">
-            {DOC_CATEGORY_OPTIONS.map((opt) => (
-              <label key={opt.key} className="flex items-center gap-2 text-sm">
-                <Checkbox checked={requiredDocs.includes(opt.key)} onCheckedChange={() => toggleDoc(opt.key)} />
-                {opt.label}
-              </label>
-            ))}
           </div>
         </CardContent>
       </Card>
