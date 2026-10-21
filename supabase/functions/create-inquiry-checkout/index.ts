@@ -21,6 +21,96 @@ function makeReference(): string {
   return out;
 }
 
+const GHL_BASE = "https://services.leadconnectorhq.com";
+
+async function ghl(path: string, init: RequestInit) {
+  const res = await fetch(`${GHL_BASE}${path}`, {
+    ...init,
+    headers: {
+      Authorization: `Bearer ${Deno.env.get("GHL_API_KEY")}`,
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      Version: "2021-07-28",
+    },
+  });
+  const text = await res.text();
+  if (!res.ok) throw new Error(`[${res.status}] ${path}: ${text}`);
+  return text ? JSON.parse(text) : {};
+}
+
+async function createGhlInvoice(args: {
+  reference: string;
+  affiliate: { full_name: string; email: string; phone: string | null; ghl_contact_id: string | null };
+  lineItems: { name: string; description: string; amount: number; qty: number }[];
+}): Promise<{ id: string; url: string }> {
+  const locationId = Deno.env.get("GHL_LOCATION_ID");
+  if (!locationId || !Deno.env.get("GHL_API_KEY")) throw new Error("GHL not configured");
+  const { affiliate } = args;
+
+  let contactId = affiliate.ghl_contact_id;
+  if (!contactId) {
+    const [firstName, ...rest] = affiliate.full_name.split(" ");
+    const up = await ghl("/contacts/upsert", {
+      method: "POST",
+      body: JSON.stringify({
+        locationId,
+        firstName,
+        lastName: rest.join(" "),
+        email: affiliate.email,
+        phone: affiliate.phone || undefined,
+      }),
+    });
+    contactId = up?.contact?.id;
+  }
+  if (!contactId) throw new Error("No GHL contact id");
+
+  const today = new Date().toISOString().slice(0, 10);
+  const inv = await ghl("/invoices/", {
+    method: "POST",
+    body: JSON.stringify({
+      altId: locationId,
+      altType: "location",
+      name: `Credit Inquiry Removal — ${args.reference}`,
+      title: "INVOICE",
+      currency: "USD",
+      liveMode: true,
+      issueDate: today,
+      dueDate: today,
+      invoiceNumber: args.reference,
+      businessDetails: { name: "Ryland Partners" },
+      contactDetails: {
+        id: contactId,
+        name: affiliate.full_name,
+        email: affiliate.email,
+        phoneNo: affiliate.phone || undefined,
+      },
+      items: args.lineItems.map((i) => ({ ...i, currency: "USD", type: "one_time" })),
+      discount: { value: 0, type: "percentage" },
+      termsNotes: `Batch reference ${args.reference}`,
+    }),
+  });
+  const id = inv?._id || inv?.invoice?._id || inv?.id;
+  if (!id) throw new Error(`Invoice created without id: ${JSON.stringify(inv)}`);
+
+  // Mark as sent so the public payment page is live
+  try {
+    await ghl(`/invoices/${id}/send`, {
+      method: "POST",
+      body: JSON.stringify({
+        altId: locationId,
+        altType: "location",
+        userId: Deno.env.get("GHL_USER_ID"),
+        action: "send_manually",
+        liveMode: true,
+      }),
+    });
+  } catch (e) {
+    console.warn("invoice send warning:", e instanceof Error ? e.message : e);
+  }
+
+  return { id, url: `https://link.rylandpartners.com/invoice/${id}` };
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -55,7 +145,7 @@ serve(async (req) => {
     // Resolve the caller's affiliate record
     const { data: affiliate, error: affErr } = await supabase
       .from("affiliates")
-      .select("id, full_name")
+      .select("id, full_name, email, phone, ghl_contact_id")
       .eq("user_id", userId)
       .maybeSingle();
     if (affErr || !affiliate) {
@@ -87,7 +177,7 @@ serve(async (req) => {
       console.error("settings query error:", setErr.message);
       return json({ error: "Could not load pricing" }, 500);
     }
-    if (!settings || settings.ghl_payment_link == null) {
+    if (!settings) {
       return json(
         { error: "Checkout is not configured yet. Pricing or the payment link still needs to be set up by the admin." },
         503
@@ -98,6 +188,7 @@ serve(async (req) => {
     const perBureauPrice = Number(settings.per_bureau_price) || 0;
 
     let total = 0;
+    const lineItems: { name: string; description: string; amount: number; qty: number }[] = [];
     for (const order of cartOrders) {
       const bureaus = Array.isArray(order.bureaus) ? order.bureaus.length : 0;
       const addOns = Array.isArray(order.add_ons) ? order.add_ons : [];
@@ -105,7 +196,18 @@ serve(async (req) => {
         (sum: number, a: { name?: string; price?: number }) => sum + (Number(a?.price) || 0),
         0
       );
-      total += servicePrice + perBureauPrice * bureaus + addOnTotal;
+      const orderTotal = servicePrice + perBureauPrice * bureaus + addOnTotal;
+      total += orderTotal;
+      const addOnNames = addOns.map((a: { name?: string }) => a?.name).filter(Boolean).join(", ");
+      lineItems.push({
+        name: order.service_name || "Credit Inquiry Removal",
+        description: [
+          `Bureaus: ${(order.bureaus || []).join(", ") || "none"}`,
+          addOnNames ? `Add-ons: ${addOnNames}` : "",
+        ].filter(Boolean).join(" · "),
+        amount: Math.round(orderTotal * 100) / 100,
+        qty: 1,
+      });
     }
     total = Math.round(total * 100) / 100;
 
@@ -114,6 +216,19 @@ serve(async (req) => {
     }
 
     const reference = makeReference();
+
+    // Create a GoHighLevel invoice for the exact cart total
+    let invoice: { id: string; url: string };
+    try {
+      invoice = await createGhlInvoice({
+        reference,
+        affiliate,
+        lineItems,
+      });
+    } catch (e) {
+      console.error("GHL invoice error:", e instanceof Error ? e.message : e);
+      return json({ error: "Could not create the payment invoice. Your cart was not changed — please try again." }, 502);
+    }
     const orderIds = cartOrders.map((o: { id: string }) => o.id);
 
     // Create the batch (payment_token is generated by the DB default)
@@ -125,6 +240,7 @@ serve(async (req) => {
         order_count: orderIds.length,
         total,
         status: "awaiting_payment",
+        payment_ref: `ghl-invoice:${invoice.id}`,
       })
       .select("id, reference, total, payment_token")
       .single();
@@ -176,9 +292,7 @@ serve(async (req) => {
       link: "/portal/inquiries",
     });
 
-    // Static GHL payment link — reference appended so a configured workflow
-    // webhook can echo it back for automatic verification.
-    const paymentUrl = `${settings.ghl_payment_link}${settings.ghl_payment_link.includes("?") ? "&" : "?"}ref=${encodeURIComponent(reference)}`;
+    const paymentUrl = invoice.url;
 
     return json({
       success: true,
