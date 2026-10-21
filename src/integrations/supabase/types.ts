@@ -986,7 +986,7 @@ export type Database = {
           affiliate_id: string
           city: string | null
           created_at: string
-          email: string
+          email: string | null
           first_name: string
           id: string
           last_name: string
@@ -1002,7 +1002,7 @@ export type Database = {
           affiliate_id: string
           city?: string | null
           created_at?: string
-          email: string
+          email?: string | null
           first_name: string
           id?: string
           last_name: string
@@ -1018,7 +1018,7 @@ export type Database = {
           affiliate_id?: string
           city?: string | null
           created_at?: string
-          email?: string
+          email?: string | null
           first_name?: string
           id?: string
           last_name?: string

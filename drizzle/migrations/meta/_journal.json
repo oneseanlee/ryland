@@ -15,6 +15,13 @@
       "when": 1792617062764,
       "tag": "0001_inquiry_documents_storage_policies",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792622594563,
+      "tag": "0002_inquiry_clients_email_optional",
+      "breakpoints": true
     }
   ]
 }
