@@ -1226,16 +1226,6 @@ export default function PortalInquiries() {
                 }
               />
             </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="cf-city">City</Label>
-              <Input
-                id="cf-city"
-                value={clientDialog.values.city}
-                onChange={(e) =>
-                  setClientDialog((p) => ({ ...p, values: { ...p.values, city: e.target.value } }))
-                }
-              />
-            </div>
           </div>
           <DialogFooter>
             <Button
