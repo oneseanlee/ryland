@@ -171,7 +171,7 @@ export default function PortalInquiries() {
   const cartOrders = orders.filter((o) => o.status === "cart");
   const draftOrders = orders.filter((o) => o.status === "draft");
   const submittedOrders = orders.filter((o) => o.status === "submitted");
-  const settingsReady = !!settings && !!settings.ghl_payment_link && Number(settings.service_price) > 0;
+  const settingsReady = !!settings && Number(settings.service_price) > 0;
 
   const documentsByOrder = useMemo(() => {
     const map = new Map<string, InquiryDocument[]>();
@@ -474,9 +474,12 @@ export default function PortalInquiries() {
         toast.error(data.error);
         return;
       }
-      setCheckoutResult(data);
       invalidateAll();
-      toast.success(`Checkout batch ${data.reference} created`);
+      if (data?.paymentUrl) {
+        window.location.href = data.paymentUrl;
+      } else {
+        setCheckoutResult(data);
+      }
     } catch (err) {
       console.error(err);
       toast.error("Checkout failed. Your cart was not changed — please try again.");
