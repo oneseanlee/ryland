@@ -56,6 +56,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import PageMeta from "@/components/PageMeta";
+import InquiryProfileFallback from "@/components/portal/InquiryProfileFallback";
 import { toast } from "sonner";
 import {
   FilePlus2,
@@ -641,12 +642,7 @@ export default function PortalInquiries() {
   );
 
   if (!affiliate) {
-    return (
-      <div className="space-y-4">
-        <Skeleton className="h-10 w-64" />
-        <Skeleton className="h-64 w-full" />
-      </div>
-    );
+    return <InquiryProfileFallback />;
   }
 
   return (

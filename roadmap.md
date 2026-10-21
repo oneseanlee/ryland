@@ -4,3 +4,5 @@
 - [x] Reuse inquiry settings and replace repeated record scans with lookups.
 - [x] Run focused tests (5 passed), confirm successful compilation, and check both sign-in redirects without runtime errors.
 - [ ] Measure signed-in inquiry navigation: blocked because no testing session matches the requesting account; user must sign in through the preview.
+- [ ] Fix the blank affiliate inquiry page for admin accounts without partner profiles.
+- [ ] Verify signed-in admin inquiry navigation and run regression tests.
