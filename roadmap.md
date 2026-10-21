@@ -6,3 +6,9 @@
 - [x] Measure signed-in admin inquiry navigation: cached sidebar navigation displayed the page in 0.122 seconds.
 - [x] Fix the blank affiliate inquiry page for admin accounts without partner profiles.
 - [x] Verify signed-in admin inquiry redirect, tabs and sidebar links without runtime errors; 8 regression tests passed and compilation succeeded.
+
+# Inquiry lead delivery
+- [ ] Deliver submitted inquiry clients to GoHighLevel with referring partner attribution and New Lead pipeline placement.
+- [ ] Associate uploaded documents with each lead without making sensitive files public.
+- [ ] Send new-submission notifications to the selected Slack channel.
+- [ ] Verify integration credentials and test delivery without changing existing real carts.
