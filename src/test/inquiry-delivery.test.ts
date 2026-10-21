@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { deliverInquiry, inquiryTags, normalizePhone, slackNotice, type DeliveryContext, type DeliveryRecord } from './inquiry-delivery';
+import { deliverInquiry, inquiryTags, normalizePhone, slackNotice, type DeliveryContext, type DeliveryRecord } from '../../supabase/functions/_shared/inquiry-delivery';
 
 const context: DeliveryContext = {
   order: { id: 'order-1', client_id: 'client-1', affiliate_id: 'affiliate-1', checkout_batch_id: 'batch-1', status: 'submitted', permission_confirmed: true, service_name: 'Credit Inquiry Removal', bureaus: ['Equifax', 'Experian'], add_ons: [], instructions: null, payment_status: 'unpaid' },
