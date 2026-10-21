@@ -324,6 +324,59 @@ export type Database = {
           },
         ]
       }
+      checkout_batches: {
+        Row: {
+          affiliate_id: string
+          created_at: string
+          id: string
+          order_count: number
+          paid_at: string | null
+          payment_confirmed_by: string | null
+          payment_ref: string | null
+          payment_token: string
+          reference: string
+          status: string
+          total: number
+          updated_at: string
+        }
+        Insert: {
+          affiliate_id: string
+          created_at?: string
+          id?: string
+          order_count?: number
+          paid_at?: string | null
+          payment_confirmed_by?: string | null
+          payment_ref?: string | null
+          payment_token?: string
+          reference: string
+          status?: string
+          total?: number
+          updated_at?: string
+        }
+        Update: {
+          affiliate_id?: string
+          created_at?: string
+          id?: string
+          order_count?: number
+          paid_at?: string | null
+          payment_confirmed_by?: string | null
+          payment_ref?: string | null
+          payment_token?: string
+          reference?: string
+          status?: string
+          total?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "checkout_batches_affiliate_id_fkey"
+            columns: ["affiliate_id"]
+            isOneToOne: false
+            referencedRelation: "affiliates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       client_activity_log: {
         Row: {
           action_type: string
@@ -896,6 +949,214 @@ export type Database = {
         }
         Relationships: []
       }
+      inquiry_audit_log: {
+        Row: {
+          action: string
+          actor_id: string | null
+          created_at: string
+          details: Json | null
+          entity_id: string | null
+          entity_type: string
+          id: string
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          created_at?: string
+          details?: Json | null
+          entity_id?: string | null
+          entity_type: string
+          id?: string
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          created_at?: string
+          details?: Json | null
+          entity_id?: string | null
+          entity_type?: string
+          id?: string
+        }
+        Relationships: []
+      }
+      inquiry_clients: {
+        Row: {
+          address_line1: string | null
+          address_line2: string | null
+          affiliate_id: string
+          city: string | null
+          created_at: string
+          email: string
+          first_name: string
+          id: string
+          last_name: string
+          notes: string | null
+          phone: string | null
+          state: string | null
+          updated_at: string
+          zip: string | null
+        }
+        Insert: {
+          address_line1?: string | null
+          address_line2?: string | null
+          affiliate_id: string
+          city?: string | null
+          created_at?: string
+          email: string
+          first_name: string
+          id?: string
+          last_name: string
+          notes?: string | null
+          phone?: string | null
+          state?: string | null
+          updated_at?: string
+          zip?: string | null
+        }
+        Update: {
+          address_line1?: string | null
+          address_line2?: string | null
+          affiliate_id?: string
+          city?: string | null
+          created_at?: string
+          email?: string
+          first_name?: string
+          id?: string
+          last_name?: string
+          notes?: string | null
+          phone?: string | null
+          state?: string | null
+          updated_at?: string
+          zip?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inquiry_clients_affiliate_id_fkey"
+            columns: ["affiliate_id"]
+            isOneToOne: false
+            referencedRelation: "affiliates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      inquiry_documents: {
+        Row: {
+          category: string
+          created_at: string
+          filename: string
+          id: string
+          mime_type: string | null
+          order_id: string
+          size_bytes: number | null
+          storage_path: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          filename: string
+          id?: string
+          mime_type?: string | null
+          order_id: string
+          size_bytes?: number | null
+          storage_path: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          filename?: string
+          id?: string
+          mime_type?: string | null
+          order_id?: string
+          size_bytes?: number | null
+          storage_path?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inquiry_documents_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "inquiry_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      inquiry_orders: {
+        Row: {
+          add_ons: Json
+          admin_notes: string | null
+          affiliate_id: string
+          affiliate_message: string | null
+          bureaus: string[]
+          checkout_batch_id: string | null
+          client_id: string | null
+          created_at: string
+          id: string
+          instructions: string | null
+          payment_status: string
+          permission_confirmed: boolean
+          price: number
+          service_name: string
+          service_status: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          add_ons?: Json
+          admin_notes?: string | null
+          affiliate_id: string
+          affiliate_message?: string | null
+          bureaus?: string[]
+          checkout_batch_id?: string | null
+          client_id?: string | null
+          created_at?: string
+          id?: string
+          instructions?: string | null
+          payment_status?: string
+          permission_confirmed?: boolean
+          price?: number
+          service_name?: string
+          service_status?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          add_ons?: Json
+          admin_notes?: string | null
+          affiliate_id?: string
+          affiliate_message?: string | null
+          bureaus?: string[]
+          checkout_batch_id?: string | null
+          client_id?: string | null
+          created_at?: string
+          id?: string
+          instructions?: string | null
+          payment_status?: string
+          permission_confirmed?: boolean
+          price?: number
+          service_name?: string
+          service_status?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inquiry_orders_affiliate_id_fkey"
+            columns: ["affiliate_id"]
+            isOneToOne: false
+            referencedRelation: "affiliates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inquiry_orders_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "inquiry_clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       inquiry_removals: {
         Row: {
           assigned_to: string | null
@@ -936,6 +1197,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      inquiry_settings: {
+        Row: {
+          add_ons: Json
+          ghl_payment_link: string | null
+          id: number
+          per_bureau_price: number
+          required_document_categories: Json
+          retention_days: number
+          service_price: number
+          updated_at: string
+        }
+        Insert: {
+          add_ons?: Json
+          ghl_payment_link?: string | null
+          id?: number
+          per_bureau_price?: number
+          required_document_categories?: Json
+          retention_days?: number
+          service_price?: number
+          updated_at?: string
+        }
+        Update: {
+          add_ons?: Json
+          ghl_payment_link?: string | null
+          id?: number
+          per_bureau_price?: number
+          required_document_categories?: Json
+          retention_days?: number
+          service_price?: number
+          updated_at?: string
+        }
+        Relationships: []
       }
       notifications: {
         Row: {
@@ -1332,6 +1626,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_confirm_batch_payment: {
+        Args: { _batch_id: string; _payment_ref?: string }
+        Returns: boolean
+      }
+      can_access_inquiry_document: {
+        Args: { _name: string; _require_draft?: boolean }
+        Returns: boolean
+      }
       create_notification: {
         Args: {
           _link?: string
@@ -1346,6 +1648,7 @@ export type Database = {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
       }
+      delete_inquiry_document: { Args: { _doc_id: string }; Returns: boolean }
       email_queue_dispatch: { Args: never; Returns: undefined }
       enqueue_email: {
         Args: { payload: Json; queue_name: string }
