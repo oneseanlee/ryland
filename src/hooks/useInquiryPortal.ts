@@ -1,6 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import type { Database } from "@/integrations/supabase/types";
+
+export type InquiryOrderUpdate = Database["public"]["Tables"]["inquiry_orders"]["Update"];
 
 export interface InquiryClient {
   id: string;
@@ -149,7 +152,7 @@ export function useInquirySettings() {
         .eq("id", 1)
         .maybeSingle();
       if (error) throw error;
-      return (data as InquirySettings) ?? null;
+      return (data as unknown as InquirySettings) ?? null;
     },
     staleTime: 60 * 1000,
   });
@@ -182,7 +185,7 @@ export function useInquiryOrders() {
         .select("*")
         .order("updated_at", { ascending: false });
       if (error) throw error;
-      return (data ?? []) as InquiryOrder[];
+      return (data ?? []) as unknown as InquiryOrder[];
     },
   });
 }
