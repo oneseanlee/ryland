@@ -8,7 +8,8 @@
 - [x] Verify signed-in admin inquiry redirect, tabs and sidebar links without runtime errors; 8 regression tests passed and compilation succeeded.
 
 # Inquiry lead delivery
-- [ ] Deliver submitted inquiry clients to GoHighLevel with referring partner attribution and New Lead pipeline placement.
-- [ ] Associate uploaded documents with each lead without making sensitive files public.
-- [ ] Send new-submission notifications to the selected Slack channel.
-- [ ] Verify integration credentials and test delivery without changing existing real carts.
+- [x] Implement and deploy submitted inquiry client delivery to GoHighLevel with partner attribution and New Lead placement; admin status and manual retries added.
+- [ ] Copy uploaded documents to GoHighLevel: blocked until GoHighLevel supplies a verified private contact-upload method. Originals stay private; contact notes point authorized staff to the order.
+- [x] Connect #new-inquiry-removal and verify a clearly labeled Slack setup message (Lovable App).
+- [x] Verify Slack runtime credentials, read GoHighLevel pipeline stages, and pass 18 regression tests without changing real carts.
+- [ ] Verify real submitted-order delivery end-to-end: needs an authenticated admin session and permission to deliver a real order or a designated test submission. Automatic downstream GoHighLevel workflow execution remains unverified.

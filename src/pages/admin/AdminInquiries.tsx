@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -91,6 +92,8 @@ interface AdminBatch extends CheckoutBatch {
 
 export default function AdminInquiries() {
   const [tab, setTab] = useState("orders");
+  const [searchParams] = useSearchParams();
+  const linkedOrderId = searchParams.get("order");
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const queryKey = ["admin-inquiries", user?.id];
@@ -164,6 +167,14 @@ export default function AdminInquiries() {
   const orders = inquiryQ.data?.orders ?? [];
   const batches = inquiryQ.data?.batches ?? [];
   const clients = inquiryQ.data?.clients ?? [];
+  useEffect(() => {
+    if (!linkedOrderId || !inquiryQ.data) return;
+    const order = inquiryQ.data.orders.find(o => o.id === linkedOrderId);
+    if (!order) return;
+    setDetail(order);
+    setAdminNotes(order.admin_notes ?? "");
+    setRequestText("");
+  }, [linkedOrderId, inquiryQ.data]);
   const documents = documentsQ.data ?? [];
   const loading = inquiryQ.isLoading;
   const batchesById = useMemo(() => new Map(batches.map((batch) => [batch.id, batch])), [batches]);

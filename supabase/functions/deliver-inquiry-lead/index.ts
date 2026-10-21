@@ -96,7 +96,8 @@ serve(async req => {
             const pipelines = await ghl(`/opportunities/pipelines?locationId=${encodeURIComponent(locationId)}`, 'GET');
             const stage = pipelines.pipelines?.find((p: { id: string }) => p.id === pipelineId)?.stages?.find((s: { name: string }) => /^new\s+lead$/i.test(s.name));
             if (!stage?.id) throw new Error('The Funding pipeline New Lead stage was not found');
-            const data = await ghl('/opportunities/upsert', 'POST', { pipelineId, pipelineStageId: stage.id, locationId, contactId, name: `${c.client.first_name} ${c.client.last_name} — Credit Inquiry Removal (${c.reference})`, status: 'open', source: `Partner: ${c.affiliate.full_name}` });
+            // Create this inquiry's opportunity; never reset an existing Funding opportunity via upsert.
+            const data = await ghl('/opportunities/', 'POST', { pipelineId, pipelineStageId: stage.id, locationId, contactId, name: `${c.client.first_name} ${c.client.last_name} — Credit Inquiry Removal (${c.reference})`, status: 'open', source: `Partner: ${c.affiliate.full_name}` });
             const id = data.opportunity?.id || data.id;
             if (!id) throw new Error('GoHighLevel returned no opportunity ID');
             return id;
