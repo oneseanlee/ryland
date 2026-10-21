@@ -159,9 +159,9 @@ export function useInquirySettings() {
 }
 
 export function useInquiryClients() {
-  const { affiliate, user, loading } = useAuth();
+  const { user, loading } = useAuth();
   return useQuery<InquiryClient[]>({
-    queryKey: ["inquiry-clients", affiliate?.id, user?.id],
+    queryKey: ["inquiry-clients", user?.id],
     enabled: !!user && !loading,
     queryFn: async () => {
       const { data, error } = await supabase
@@ -175,9 +175,9 @@ export function useInquiryClients() {
 }
 
 export function useInquiryOrders() {
-  const { affiliate, user, loading } = useAuth();
+  const { user, loading } = useAuth();
   return useQuery<InquiryOrder[]>({
-    queryKey: ["inquiry-orders", affiliate?.id, user?.id],
+    queryKey: ["inquiry-orders", user?.id],
     enabled: !!user && !loading,
     queryFn: async () => {
       const { data, error } = await supabase
@@ -191,9 +191,9 @@ export function useInquiryOrders() {
 }
 
 export function useInquiryDocuments() {
-  const { affiliate, user, loading } = useAuth();
+  const { user, loading } = useAuth();
   return useQuery<InquiryDocument[]>({
-    queryKey: ["inquiry-documents", affiliate?.id, user?.id],
+    queryKey: ["inquiry-documents", user?.id],
     enabled: !!user && !loading,
     queryFn: async () => {
       // RLS restricts rows to documents on the affiliate's own orders.
@@ -208,9 +208,9 @@ export function useInquiryDocuments() {
 }
 
 export function useCheckoutBatches() {
-  const { affiliate, user, loading } = useAuth();
+  const { user, loading } = useAuth();
   return useQuery<CheckoutBatch[]>({
-    queryKey: ["checkout-batches", affiliate?.id, user?.id],
+    queryKey: ["checkout-batches", user?.id],
     enabled: !!user && !loading,
     queryFn: async () => {
       const { data, error } = await supabase

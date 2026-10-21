@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -88,11 +90,9 @@ interface AdminBatch extends CheckoutBatch {
 
 export default function AdminInquiries() {
   const [tab, setTab] = useState("orders");
-  const [orders, setOrders] = useState<AdminOrder[]>([]);
-  const [batches, setBatches] = useState<AdminBatch[]>([]);
-  const [clients, setClients] = useState<InquiryClient[]>([]);
-  const [documents, setDocuments] = useState<InquiryDocument[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+  const queryKey = ["admin-inquiries", user?.id];
 
   // Filters
   const [search, setSearch] = useState("");
@@ -109,40 +109,57 @@ export default function AdminInquiries() {
   const [paymentRef, setPaymentRef] = useState("");
   const [confirming, setConfirming] = useState(false);
 
-  useEffect(() => {
-    fetchAll();
-  }, []);
-
-  const fetchAll = async () => {
-    try {
-      setLoading(true);
-      const [ordersRes, batchesRes, clientsRes, docsRes] = await Promise.all([
+  const inquiryQ = useQuery({
+    queryKey,
+    enabled: !!user,
+    queryFn: async () => {
+      const [ordersRes, batchesRes, clientsRes] = await Promise.all([
         supabase
           .from("inquiry_orders")
           .select("*, affiliates(full_name, email)")
           .order("updated_at", { ascending: false }),
         supabase
           .from("checkout_batches")
-          .select("*, affiliates(full_name, email)")
+          .select("id, reference, affiliate_id, order_count, total, status, payment_ref, paid_at, created_at, affiliates(full_name, email)")
           .order("created_at", { ascending: false }),
         supabase.from("inquiry_clients").select("*"),
-        supabase.from("inquiry_documents").select("*").order("created_at", { ascending: false }),
       ]);
       if (ordersRes.error) throw ordersRes.error;
       if (batchesRes.error) throw batchesRes.error;
       if (clientsRes.error) throw clientsRes.error;
-      if (docsRes.error) throw docsRes.error;
-      setOrders((ordersRes.data ?? []) as unknown as AdminOrder[]);
-      setBatches((batchesRes.data ?? []) as AdminBatch[]);
-      setClients((clientsRes.data ?? []) as InquiryClient[]);
-      setDocuments((docsRes.data ?? []) as InquiryDocument[]);
-    } catch (err) {
-      console.error(err);
-      toast.error("Could not load inquiry data");
-    } finally {
-      setLoading(false);
-    }
-  };
+      return {
+        orders: (ordersRes.data ?? []) as unknown as AdminOrder[],
+        batches: (batchesRes.data ?? []) as AdminBatch[],
+        clients: (clientsRes.data ?? []) as InquiryClient[],
+      };
+    },
+  });
+  const documentsQ = useQuery<InquiryDocument[]>({
+    queryKey: ["admin-inquiry-documents", user?.id, detail?.id],
+    enabled: !!user && !!detail,
+    queryFn: async () => {
+      if (!detail) return [];
+      const { data, error } = await supabase.from("inquiry_documents")
+        .select("id, order_id, category, filename, storage_path, mime_type, size_bytes, created_at")
+        .eq("order_id", detail.id)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+  const orders = inquiryQ.data?.orders ?? [];
+  const batches = inquiryQ.data?.batches ?? [];
+  const clients = inquiryQ.data?.clients ?? [];
+  const documents = documentsQ.data ?? [];
+  const loading = inquiryQ.isLoading;
+  const batchesById = useMemo(() => new Map(batches.map((batch) => [batch.id, batch])), [batches]);
+
+  useEffect(() => {
+    if (inquiryQ.error) toast.error("Could not load inquiry data");
+  }, [inquiryQ.error]);
+  useEffect(() => {
+    if (documentsQ.error) toast.error("Could not load order documents");
+  }, [documentsQ.error]);
 
   const clientsById = useMemo(() => {
     const map = new Map<string, InquiryClient>();
@@ -180,7 +197,8 @@ export default function AdminInquiries() {
   }, [orders, clientsById, search, affiliateFilter, serviceFilter, paymentFilter, fromDate]);
 
   const refresh = () => {
-    fetchAll();
+    queryClient.invalidateQueries({ queryKey });
+    queryClient.invalidateQueries({ queryKey: ["admin-inquiry-documents", user?.id, detail?.id] });
   };
 
   const openDetail = (o: AdminOrder) => {
@@ -254,7 +272,10 @@ export default function AdminInquiries() {
         return;
       }
       toast.success("Document deleted (recorded in audit log)");
-      setDocuments((prev) => prev.filter((d) => d.id !== doc.id));
+      queryClient.setQueryData<InquiryDocument[]>(
+        ["admin-inquiry-documents", user?.id, detail?.id],
+        (prev) => (prev ?? []).filter((d) => d.id !== doc.id)
+      );
     } catch (err) {
       console.error(err);
       toast.error("Could not delete document");
@@ -461,7 +482,7 @@ export default function AdminInquiries() {
                           <TableCell>{o.bureaus.join(", ")}</TableCell>
                           <TableCell>{formatMoney(o.price)}</TableCell>
                           <TableCell className="font-mono text-xs">
-                            {batches.find((b) => b.id === o.checkout_batch_id)?.reference ?? "—"}
+                            {batchesById.get(o.checkout_batch_id ?? "")?.reference ?? "—"}
                           </TableCell>
                           <TableCell>{statusBadge(o.payment_status, o.service_status)}</TableCell>
                           <TableCell className="text-xs">
@@ -572,7 +593,7 @@ export default function AdminInquiries() {
               <DialogHeader>
                 <DialogTitle>
                   {detail.client_id && clientsById.get(detail.client_id)
-                    ? `${clientsById.get(detail.client_id)!.first_name} ${clientsById.get(detail.client_id)!.last_name}`
+                    ? `${clientsById.get(detail.client_id)?.first_name} ${clientsById.get(detail.client_id)?.last_name}`
                     : "Client order"}
                 </DialogTitle>
                 <DialogDescription>
@@ -664,7 +685,8 @@ export default function AdminInquiries() {
               <div>
                 <p className="text-sm font-medium mb-2">Documents</p>
                 <div className="space-y-2">
-                  {docsFor(detail.id).length === 0 && (
+                  {documentsQ.isLoading && <Skeleton className="h-10 w-full" />}
+                  {!documentsQ.isLoading && docsFor(detail.id).length === 0 && (
                     <p className="text-sm text-muted-foreground">No documents uploaded yet.</p>
                   )}
                   {docsFor(detail.id).map((d) => (
@@ -708,7 +730,7 @@ export default function AdminInquiries() {
               </div>
 
               {(() => {
-                const batch = batches.find((b) => b.id === detail.checkout_batch_id);
+                const batch = batchesById.get(detail.checkout_batch_id ?? "");
                 if (!batch) return null;
                 return (
                   <Alert>
