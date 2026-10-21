@@ -196,8 +196,8 @@ export default function PortalInquiries() {
 
   const saveClient = async (): Promise<InquiryClient | null> => {
     const v = clientDialog.values;
-    if (!v.first_name.trim() || !v.last_name.trim() || !v.email.trim()) {
-      toast.error("First name, last name, and email are required");
+    if (!v.first_name.trim() || !v.last_name.trim()) {
+      toast.error("First name and last name are required");
       return null;
     }
     if (v.email.length > 255) {
@@ -212,7 +212,7 @@ export default function PortalInquiries() {
           .update({
             first_name: v.first_name.trim(),
             last_name: v.last_name.trim(),
-            email: v.email.trim(),
+            email: v.email.trim() || null,
             phone: v.phone.trim() || null,
             address_line1: v.address_line1.trim() || null,
             address_line2: v.address_line2.trim() || null,
@@ -234,7 +234,7 @@ export default function PortalInquiries() {
           affiliate_id: affiliate!.id,
           first_name: v.first_name.trim(),
           last_name: v.last_name.trim(),
-          email: v.email.trim(),
+          email: v.email.trim() || null,
           phone: v.phone.trim() || null,
           address_line1: v.address_line1.trim() || null,
           address_line2: v.address_line2.trim() || null,
@@ -262,12 +262,8 @@ export default function PortalInquiries() {
   const validateOrderForm = (form: OrderFormState): boolean => {
     if (form.clientId === "new") {
       const c = form.newClient;
-      if (!c.first_name.trim() || !c.last_name.trim() || !c.email.trim()) {
-        toast.error("Client first name, last name, and email are required");
-        return false;
-      }
-      if (!c.address_line1?.trim() || !c.city?.trim() || !c.state?.trim() || !c.zip?.trim()) {
-        toast.error("Client physical address (street, city, state, ZIP) is required");
+      if (!c.first_name.trim() || !c.last_name.trim()) {
+        toast.error("Client first name and last name are required");
         return false;
       }
     }
@@ -295,7 +291,7 @@ export default function PortalInquiries() {
             affiliate_id: affiliate!.id,
             first_name: v.first_name.trim(),
             last_name: v.last_name.trim(),
-            email: v.email.trim(),
+            email: v.email.trim() || null,
             phone: v.phone.trim() || null,
             address_line1: v.address_line1.trim() || null,
             address_line2: v.address_line2.trim() || null,
@@ -821,7 +817,7 @@ export default function PortalInquiries() {
                         <SelectItem value="new">+ New client</SelectItem>
                         {clients.map((c) => (
                           <SelectItem key={c.id} value={c.id}>
-                            {c.first_name} {c.last_name} ({c.email})
+                            {c.first_name} {c.last_name} {c.email ? `(${c.email})` : ""}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -860,7 +856,7 @@ export default function PortalInquiries() {
                         />
                       </div>
                       <div className="space-y-1.5">
-                        <Label htmlFor="of-email">Email *</Label>
+                        <Label htmlFor="of-email">Email</Label>
                         <Input
                           id="of-email"
                           type="email"
@@ -885,73 +881,6 @@ export default function PortalInquiries() {
                             })
                           }
                         />
-                      </div>
-                      <div className="space-y-1.5 sm:col-span-2">
-                        <Label htmlFor="of-addr1">Street address *</Label>
-                        <Input
-                          id="of-addr1"
-                          value={orderForm.newClient.address_line1}
-                          onChange={(e) =>
-                            setOrderForm({
-                              ...orderForm,
-                              newClient: { ...orderForm.newClient, address_line1: e.target.value },
-                            })
-                          }
-                        />
-                      </div>
-                      <div className="space-y-1.5 sm:col-span-2">
-                        <Label htmlFor="of-addr2">Apt / unit</Label>
-                        <Input
-                          id="of-addr2"
-                          value={orderForm.newClient.address_line2}
-                          onChange={(e) =>
-                            setOrderForm({
-                              ...orderForm,
-                              newClient: { ...orderForm.newClient, address_line2: e.target.value },
-                            })
-                          }
-                        />
-                      </div>
-                      <div className="space-y-1.5">
-                        <Label htmlFor="of-city">City *</Label>
-                        <Input
-                          id="of-city"
-                          value={orderForm.newClient.city}
-                          onChange={(e) =>
-                            setOrderForm({
-                              ...orderForm,
-                              newClient: { ...orderForm.newClient, city: e.target.value },
-                            })
-                          }
-                        />
-                      </div>
-                      <div className="grid grid-cols-2 gap-3">
-                        <div className="space-y-1.5">
-                          <Label htmlFor="of-state">State *</Label>
-                          <Input
-                            id="of-state"
-                            value={orderForm.newClient.state}
-                            onChange={(e) =>
-                              setOrderForm({
-                                ...orderForm,
-                                newClient: { ...orderForm.newClient, state: e.target.value },
-                              })
-                            }
-                          />
-                        </div>
-                        <div className="space-y-1.5">
-                          <Label htmlFor="of-zip">ZIP *</Label>
-                          <Input
-                            id="of-zip"
-                            value={orderForm.newClient.zip}
-                            onChange={(e) =>
-                              setOrderForm({
-                                ...orderForm,
-                                newClient: { ...orderForm.newClient, zip: e.target.value },
-                              })
-                            }
-                          />
-                        </div>
                       </div>
                       <div className="space-y-1.5 sm:col-span-2">
                         <Label htmlFor="of-notes">Notes</Label>
@@ -1277,7 +1206,7 @@ export default function PortalInquiries() {
               />
             </div>
             <div className="space-y-1.5 col-span-2">
-              <Label htmlFor="cf-email">Email *</Label>
+              <Label htmlFor="cf-email">Email</Label>
               <Input
                 id="cf-email"
                 type="email"
