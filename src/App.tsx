@@ -41,6 +41,9 @@ const MyOrders = lazy(() => import("./pages/MyOrders"));
 const DownloadRedirect = lazy(() => import("./pages/DownloadRedirect"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const FundabilityBenchmarks = lazy(() => import("./pages/FundabilityBenchmarks"));
+const PortalInquiries = lazy(() => import("./pages/portal/PortalInquiries"));
+const AdminInquiries = lazy(() => import("./pages/admin/AdminInquiries"));
+const AdminInquirySettings = lazy(() => import("./pages/admin/AdminInquirySettings"));
 const Intake = lazy(() => import("./pages/Intake"));
 const Unsubscribe = lazy(() => import("./pages/Unsubscribe"));
 const PortalLogin = lazy(() => import("./pages/portal/PortalLogin"));
@@ -141,6 +144,7 @@ const AppContent = () => {
               <Route path="events" element={<PortalEvents />} />
               <Route path="speaking" element={<PortalSpeaking />} />
               <Route path="settings" element={<PortalSettings />} />
+              <Route path="inquiries" element={<PortalInquiries />} />
             </Route>
             {/* Admin routes */}
             <Route path="/portal/admin/login" element={<AdminLogin />} />
@@ -152,6 +156,8 @@ const AppContent = () => {
               <Route path="commissions" element={<AdminCommissions />} />
               <Route path="payouts" element={<AdminPayouts />} />
               <Route path="reports" element={<AdminReports />} />
+              <Route path="inquiries" element={<AdminInquiries />} />
+              <Route path="inquiry-settings" element={<AdminInquirySettings />} />
             </Route>
             {/* Command Center moved to standalone project: github.com/oneseanlee/Command-Center */}
             {/* Vanity affiliate URLs (e.g. /brittany) — must come right before the catch-all */}

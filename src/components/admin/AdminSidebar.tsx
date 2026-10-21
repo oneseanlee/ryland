@@ -21,6 +21,8 @@ import {
   Mic2,
   UserCircle,
   Eye,
+  FileSearch,
+  Settings2,
 } from "lucide-react";
 import {
   SidebarGroup,
@@ -36,6 +38,8 @@ const adminItems = [
   { icon: DollarSign, label: "Commissions", path: "/portal/admin/commissions" },
   { icon: CreditCard, label: "Payouts", path: "/portal/admin/payouts" },
   { icon: BarChart3, label: "Reports", path: "/portal/admin/reports" },
+  { icon: FileSearch, label: "Inquiry Orders", path: "/portal/admin/inquiries" },
+  { icon: Settings2, label: "Inquiry Settings", path: "/portal/admin/inquiry-settings" },
 ];
 
 const partnerViewItems = [
