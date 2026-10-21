@@ -54,6 +54,7 @@ import {
   type InquiryClient,
   type InquiryDocument,
   type InquiryOrder,
+  type InquiryOrderUpdate,
 } from "@/hooks/useInquiryPortal";
 
 const SERVICE_STATUSES = [
@@ -188,7 +189,7 @@ export default function AdminInquiries() {
     setRequestText("");
   };
 
-  const updateOrder = async (orderId: string, patch: Partial<InquiryOrder>) => {
+  const updateOrder = async (orderId: string, patch: InquiryOrderUpdate) => {
     try {
       const { error } = await supabase.from("inquiry_orders").update(patch).eq("id", orderId);
       if (error) throw error;

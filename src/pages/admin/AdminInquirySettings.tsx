@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import type { Json } from "@/integrations/supabase/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -71,8 +72,8 @@ export default function AdminInquirySettings() {
         setExists(true);
         setServicePrice(String(data.service_price ?? 0));
         setPerBureauPrice(String(data.per_bureau_price ?? 0));
-        setAddOns((data.add_ons as AddOn[]) || []);
-        setRequiredDocs((data.required_document_categories as string[]) || []);
+        setAddOns((data.add_ons as unknown as AddOn[]) || []);
+        setRequiredDocs((data.required_document_categories as unknown as string[]) || []);
         setPaymentLink(data.ghl_payment_link || "");
         setRetentionDays(String(data.retention_days ?? 365));
       }
@@ -95,8 +96,8 @@ export default function AdminInquirySettings() {
         id: 1,
         service_price: Number(servicePrice) || 0,
         per_bureau_price: Number(perBureauPrice) || 0,
-        add_ons: addOns.filter((a) => a.name.trim()),
-        required_document_categories: requiredDocs,
+        add_ons: addOns.filter((a) => a.name.trim()) as unknown as Json,
+        required_document_categories: requiredDocs as unknown as Json,
         ghl_payment_link: paymentLink.trim(),
         retention_days: Math.max(1, Number(retentionDays) || 365),
       };

@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import type { Json } from "@/integrations/supabase/types";
 import { useAuth } from "@/hooks/useAuth";
 import { useQueryClient } from "@tanstack/react-query";
 import {
@@ -302,7 +303,7 @@ export default function PortalInquiries() {
         affiliate_id: affiliate!.id,
         client_id: clientId,
         bureaus: form.bureaus,
-        add_ons: (settings?.add_ons || []).filter((a) => form.addOns.includes(a.name)),
+        add_ons: (settings?.add_ons || []).filter((a) => form.addOns.includes(a.name)) as unknown as Json,
         instructions: form.instructions.trim() || null,
         permission_confirmed: form.permission,
       };
@@ -323,7 +324,7 @@ export default function PortalInquiries() {
         .select()
         .single();
       if (error) throw error;
-      return (data as InquiryOrder).id;
+      return (data as unknown as InquiryOrder).id;
     } catch (err) {
       console.error(err);
       toast.error("Could not save the order");
