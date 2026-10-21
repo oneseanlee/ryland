@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { Json } from "@/integrations/supabase/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,16 +9,13 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
-import { formatMoney } from "@/hooks/useInquiryPortal";
+import { formatMoney, useInquirySettings } from "@/hooks/useInquiryPortal";
 import { Save, Copy } from "lucide-react";
 
 interface AddOn {
   name: string;
   price: number;
 }
-
-const SETTING_FIELDS =
-  "service_price, per_bureau_price, add_ons, required_document_categories, ghl_payment_link, retention_days";
 
 const DOC_CATEGORY_OPTIONS: Array<{ key: string; label: string }> = [
   { key: "drivers_license_front", label: "Driver's License — Front" },
@@ -43,7 +41,9 @@ const DEFAULTS = {
 };
 
 export default function AdminInquirySettings() {
-  const [loading, setLoading] = useState(true);
+  const settingsQ = useInquirySettings();
+  const queryClient = useQueryClient();
+  const loading = settingsQ.isLoading;
   const [saving, setSaving] = useState(false);
   const [exists, setExists] = useState(false);
   const [servicePrice, setServicePrice] = useState("0");
@@ -56,18 +56,7 @@ export default function AdminInquirySettings() {
   const webhookUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ghl-payment-webhook`;
 
   useEffect(() => {
-    fetchSettings();
-  }, []);
-
-  const fetchSettings = async () => {
-    try {
-      setLoading(true);
-      const { data, error } = await supabase
-        .from("inquiry_settings")
-        .select(SETTING_FIELDS)
-        .eq("id", 1)
-        .maybeSingle();
-      if (error) throw error;
+      const data = settingsQ.data;
       if (data) {
         setExists(true);
         setServicePrice(String(data.service_price ?? 0));
@@ -77,13 +66,10 @@ export default function AdminInquirySettings() {
         setPaymentLink(data.ghl_payment_link || "");
         setRetentionDays(String(data.retention_days ?? 365));
       }
-    } catch (err) {
-      console.error(err);
-      toast.error("Could not load inquiry settings");
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [settingsQ.data]);
+  useEffect(() => {
+    if (settingsQ.error) toast.error("Could not load inquiry settings");
+  }, [settingsQ.error]);
 
   const save = async () => {
     if (!paymentLink.trim()) {
@@ -104,6 +90,7 @@ export default function AdminInquirySettings() {
       const { error } = await supabase.from("inquiry_settings").upsert(payload);
       if (error) throw error;
       setExists(true);
+      queryClient.invalidateQueries({ queryKey: ["inquiry-settings"] });
       toast.success("Inquiry settings saved");
     } catch (err) {
       console.error(err);

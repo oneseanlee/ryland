@@ -172,7 +172,17 @@ export default function PortalInquiries() {
   const submittedOrders = orders.filter((o) => o.status === "submitted");
   const settingsReady = !!settings && !!settings.ghl_payment_link && Number(settings.service_price) > 0;
 
-  const docsForOrder = (orderId: string) => docs.filter((d) => d.order_id === orderId);
+  const documentsByOrder = useMemo(() => {
+    const map = new Map<string, InquiryDocument[]>();
+    docs.forEach((doc) => {
+      const group = map.get(doc.order_id) ?? [];
+      group.push(doc);
+      map.set(doc.order_id, group);
+    });
+    return map;
+  }, [docs]);
+  const ordersById = useMemo(() => new Map(orders.map((order) => [order.id, order])), [orders]);
+  const docsForOrder = (orderId: string) => documentsByOrder.get(orderId) ?? [];
 
   const invalidateAll = () => {
     queryClient.invalidateQueries({ queryKey: ["inquiry-orders"] });
@@ -602,7 +612,7 @@ export default function PortalInquiries() {
   };
 
   const clientName = (orderId: string) => {
-    const order = orders.find((o) => o.id === orderId);
+    const order = ordersById.get(orderId);
     const client = order?.client_id ? clientsById.get(order.client_id) : null;
     return client ? `${client.first_name} ${client.last_name}` : "Unknown client";
   };
