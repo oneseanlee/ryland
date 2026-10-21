@@ -1082,6 +1082,53 @@ export type Database = {
           },
         ]
       }
+      inquiry_lead_delivery: {
+        Row: {
+          document_state: string
+          ghl_contact_id: string | null
+          ghl_note_id: string | null
+          ghl_opportunity_id: string | null
+          last_error: string | null
+          locked_until: string | null
+          order_id: string
+          slack_ts: string | null
+          state: string
+          updated_at: string
+        }
+        Insert: {
+          document_state?: string
+          ghl_contact_id?: string | null
+          ghl_note_id?: string | null
+          ghl_opportunity_id?: string | null
+          last_error?: string | null
+          locked_until?: string | null
+          order_id: string
+          slack_ts?: string | null
+          state?: string
+          updated_at?: string
+        }
+        Update: {
+          document_state?: string
+          ghl_contact_id?: string | null
+          ghl_note_id?: string | null
+          ghl_opportunity_id?: string | null
+          last_error?: string | null
+          locked_until?: string | null
+          order_id?: string
+          slack_ts?: string | null
+          state?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inquiry_lead_delivery_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: true
+            referencedRelation: "inquiry_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       inquiry_orders: {
         Row: {
           add_ons: Json
@@ -1634,6 +1681,7 @@ export type Database = {
         Args: { _name: string; _require_draft?: boolean }
         Returns: boolean
       }
+      claim_inquiry_delivery: { Args: { _order_id: string }; Returns: boolean }
       create_notification: {
         Args: {
           _link?: string

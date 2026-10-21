@@ -22,6 +22,13 @@
       "when": 1792622594563,
       "tag": "0002_inquiry_clients_email_optional",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1792626263793,
+      "tag": "0003_inquiry_lead_delivery",
+      "breakpoints": true
     }
   ]
 }
