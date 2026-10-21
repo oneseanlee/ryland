@@ -132,7 +132,7 @@ export default function AdminInquiries() {
       if (batchesRes.error) throw batchesRes.error;
       if (clientsRes.error) throw clientsRes.error;
       if (docsRes.error) throw docsRes.error;
-      setOrders((ordersRes.data ?? []) as AdminOrder[]);
+      setOrders((ordersRes.data ?? []) as unknown as AdminOrder[]);
       setBatches((batchesRes.data ?? []) as AdminBatch[]);
       setClients((clientsRes.data ?? []) as InquiryClient[]);
       setDocuments((docsRes.data ?? []) as InquiryDocument[]);
