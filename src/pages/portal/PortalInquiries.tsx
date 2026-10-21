@@ -391,6 +391,10 @@ export default function PortalInquiries() {
     if (!form || !validateOrderForm(form)) return;
     const orderId = await saveOrderDraft(form);
     if (!orderId) return;
+    // First save: keep the form open with the draft id so documents can be uploaded
+    if (orderId !== form.draftId) {
+      setOrderForm({ ...form, draftId: orderId });
+    }
     const missing = missingCategories(docsForOrder(orderId), settings);
     if (missing.length > 0) {
       toast.error(`Upload required documents first: ${missing.map((m) => DOC_CATEGORY_LABELS[m] ?? m).join(", ")}`);
@@ -473,10 +477,19 @@ export default function PortalInquiries() {
     }
   };
 
-  const openEditOrder = (order: InquiryOrder, fromCart: boolean) => {
+  const openEditOrder = async (order: InquiryOrder) => {
+    // Cart items go back to draft while being edited (remove-from-cart semantics)
+    if (order.status === "cart") {
+      try {
+        await supabase.from("inquiry_orders").update({ status: "draft" }).eq("id", order.id).eq("status", "cart");
+        queryClient.invalidateQueries({ queryKey: ["inquiry-orders"] });
+      } catch {
+        // ignore — editing continues against the row either way
+      }
+    }
     const client = order.client_id ? clientsById.get(order.client_id) : null;
     setOrderForm({
-      draftId: fromCart ? null : order.id,
+      draftId: order.id,
       clientId: order.client_id ?? "new",
       newClient: client
         ? {
