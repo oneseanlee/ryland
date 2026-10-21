@@ -13,3 +13,4 @@
 - [x] Connect #new-inquiry-removal and verify a clearly labeled Slack setup message (Lovable App).
 - [x] Verify Slack runtime credentials, read GoHighLevel pipeline stages, and pass 18 regression tests without changing real carts.
 - [ ] Verify real submitted-order delivery end-to-end: needs an authenticated admin session and permission to deliver a real order or a designated test submission. Automatic downstream GoHighLevel workflow execution remains unverified.
+- [ ] Test current inquiry delivery to both Slack and GoHighLevel, using a labeled test inquiry if needed; leave existing carts untouched.
