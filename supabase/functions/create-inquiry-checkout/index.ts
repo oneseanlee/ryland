@@ -38,6 +38,15 @@ async function ghl(path: string, init: RequestInit) {
   return text ? JSON.parse(text) : {};
 }
 
+function toE164(phone: string | null | undefined): string | undefined {
+  if (!phone) return undefined;
+  const d = phone.replace(/\D/g, "");
+  if (d.length === 10) return `+1${d}`;
+  if (d.length === 11 && d.startsWith("1")) return `+${d}`;
+  if (phone.trim().startsWith("+") && d.length >= 8 && d.length <= 15) return `+${d}`;
+  return undefined;
+}
+
 async function createGhlInvoice(args: {
   reference: string;
   affiliate: { full_name: string; email: string; phone: string | null; ghl_contact_id: string | null };
@@ -57,7 +66,7 @@ async function createGhlInvoice(args: {
         firstName,
         lastName: rest.join(" "),
         email: affiliate.email,
-        phone: affiliate.phone || undefined,
+        phone: toE164(affiliate.phone),
       }),
     });
     contactId = up?.contact?.id;
@@ -82,7 +91,7 @@ async function createGhlInvoice(args: {
         id: contactId,
         name: affiliate.full_name,
         email: affiliate.email,
-        phoneNo: affiliate.phone || undefined,
+        phoneNo: toE164(affiliate.phone),
       },
       items: args.lineItems.map((i) => ({ ...i, currency: "USD", type: "one_time" })),
       discount: { value: 0, type: "percentage" },
