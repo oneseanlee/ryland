@@ -12,5 +12,6 @@
 - [ ] Copy uploaded documents to GoHighLevel: blocked until GoHighLevel supplies a verified private contact-upload method. Originals stay private; contact notes point authorized staff to the order.
 - [x] Connect #new-inquiry-removal and verify a clearly labeled Slack setup message (Lovable App).
 - [x] Verify Slack runtime credentials, read GoHighLevel pipeline stages, and pass 18 regression tests without changing real carts.
-- [ ] Verify real submitted-order delivery end-to-end: needs an authenticated admin session and permission to deliver a real order or a designated test submission. Automatic downstream GoHighLevel workflow execution remains unverified.
-- [ ] Test current inquiry delivery to both Slack and GoHighLevel, using a labeled test inquiry if needed; leave existing carts untouched.
+- [x] Verify approved Timmy Test submitted-order delivery through the signed-in admin Send / retry button; read back the GHL contact, #1 FUNDING PIPELINE New Lead opportunity, partner note, and Slack notification.
+- [x] Test current inquiry delivery to both Slack and GoHighLevel; 10 regression tests passed and existing carts/payment statuses stayed unchanged.
+- [ ] Verify automatic delivery from a fresh checkout and downstream GoHighLevel follow-ups: requires a separately authorized checkout test; this test used manual admin delivery only.
