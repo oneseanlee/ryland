@@ -328,14 +328,14 @@ export default function AdminInquiries() {
       const path = `${detail.affiliate_id}/${detail.id}/completed_results-${Date.now()}.${ext}`;
       const { error: upErr } = await supabase.storage
         .from("inquiry-documents")
-        .upload(path, file, { contentType: file.type, upsert: false });
+        .upload(path, file, { contentType: file.type || "application/octet-stream", upsert: false });
       if (upErr) throw upErr;
       const { error: dbErr } = await supabase.from("inquiry_documents").insert({
         order_id: detail.id,
         category: "completed_results",
         filename: file.name,
         storage_path: path,
-        mime_type: file.type,
+        mime_type: file.type || null,
         size_bytes: file.size,
       });
       if (dbErr) throw dbErr;

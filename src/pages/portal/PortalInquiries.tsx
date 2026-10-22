@@ -345,14 +345,14 @@ export default function PortalInquiries() {
       const path = `${affiliate!.id}/${orderId}/${category}-${Date.now()}.${ext}`;
       const { error: upErr } = await supabase.storage
         .from("inquiry-documents")
-        .upload(path, file, { contentType: file.type, upsert: false });
+        .upload(path, file, { contentType: file.type || "application/octet-stream", upsert: false });
       if (upErr) throw upErr;
       const { error: dbErr } = await supabase.from("inquiry_documents").insert({
         order_id: orderId,
         category,
         filename: file.name,
         storage_path: path,
-        mime_type: file.type,
+        mime_type: file.type || null,
         size_bytes: file.size,
         uploaded_by: (await supabase.auth.getUser()).data.user?.id ?? null,
       });
