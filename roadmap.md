@@ -15,4 +15,5 @@
 - [x] Verify approved Timmy Test submitted-order delivery through the signed-in admin Send / retry button; read back the GHL contact, #1 FUNDING PIPELINE New Lead opportunity, partner note, and Slack notification.
 - [x] Test current inquiry delivery to both Slack and GoHighLevel; 10 regression tests passed and existing carts/payment statuses stayed unchanged.
 - [x] Partners can attach documents to submitted inquiry orders and My Leads; uploads push to the GoHighLevel contact (not yet tried with a real upload).
+- [x] Fixed document upload permission check; removed size/type limits; Lead Tracker split into Leads and Clients (paid inquiry orders) with document uploads.
 - [ ] Verify automatic delivery from a fresh checkout and downstream GoHighLevel follow-ups: requires a separately authorized checkout test; this test used manual admin delivery only.
