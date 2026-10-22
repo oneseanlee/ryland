@@ -21,13 +21,12 @@ export default function LeadDocuments({ leadId, affiliateId, kind = "lead" }: { 
   const { data: docs = [], isLoading } = useQuery({
     queryKey: key,
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from(cfg.table)
-        .select("id, filename, storage_path, ghl_uploaded_at, created_at")
-        .eq(cfg.fk, leadId)
-        .order("created_at", { ascending: false });
+      const cols = "id, filename, storage_path, ghl_uploaded_at, created_at";
+      const { data, error } = kind === "lead"
+        ? await supabase.from("affiliate_lead_documents").select(cols).eq("lead_id", leadId).order("created_at", { ascending: false })
+        : await supabase.from("inquiry_documents").select(cols).eq("order_id", leadId).order("created_at", { ascending: false });
       if (error) throw error;
-      return data;
+      return (data ?? []) as { id: string; filename: string; storage_path: string; ghl_uploaded_at: string | null; created_at: string }[];
     },
   });
 
