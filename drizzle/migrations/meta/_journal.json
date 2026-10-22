@@ -43,6 +43,13 @@
       "when": 1792628650936,
       "tag": "0005_affiliate_lead_documents",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1792629221377,
+      "tag": "0006_admins_add_inquiry_documents",
+      "breakpoints": true
     }
   ]
 }
