@@ -3,9 +3,8 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.1';
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors';
 import { z } from 'https://esm.sh/zod@3.25.76';
 import { deliverInquiry, inquiryNote, inquiryTags, normalizePhone, slackNotice, type DeliveryContext, type DeliveryOrder } from '../_shared/inquiry-delivery.ts';
+import { pushDocsToGhl } from '../_shared/ghl-files.ts';
 
-// GoHighLevel contact field "Inquiry Documents" (FILE_UPLOAD, multi-file).
-const GHL_DOCUMENTS_FIELD_ID = '0MgqkrWiZLHJIc8SaRJg';
 const schema = z.object({ orderIds: z.array(z.string().uuid()).min(1).max(100) });
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
 
@@ -113,23 +112,7 @@ serve(async req => {
           documents: async (c, contactId) => {
             const docs = await db.from('inquiry_documents').select('id, filename, storage_path, mime_type').eq('order_id', c.order.id).is('ghl_uploaded_at', null);
             if (docs.error) throw docs.error;
-            const key = Deno.env.get('GHL_API_KEY');
-            for (const d of docs.data ?? []) {
-              const file = await db.storage.from('inquiry-documents').download(d.storage_path);
-              if (file.error || !file.data) throw new Error(`Could not read ${d.filename}`);
-              const form = new FormData();
-              form.append(`${GHL_DOCUMENTS_FIELD_ID}_${crypto.randomUUID()}`, new File([file.data], d.filename, { type: d.mime_type || 'application/octet-stream' }));
-              const res = await fetch(`https://services.leadconnectorhq.com/forms/upload-custom-files?contactId=${encodeURIComponent(contactId)}&locationId=${encodeURIComponent(locationId)}`, {
-                method: 'POST', headers: { Authorization: `Bearer ${key}`, Version: '2021-07-28' }, body: form, signal: AbortSignal.timeout(60000),
-              });
-              const text = await res.text();
-              if (!res.ok) {
-                await db.from('inquiry_documents').update({ ghl_upload_error: text.slice(0, 1000) }).eq('id', d.id);
-                throw new Error(`GoHighLevel upload [${res.status}]: ${text}`);
-              }
-              const r = await db.from('inquiry_documents').update({ ghl_uploaded_at: new Date().toISOString(), ghl_upload_error: null }).eq('id', d.id);
-              if (r.error) throw r.error;
-            }
+            await pushDocsToGhl(db, { table: 'inquiry_documents', bucket: 'inquiry-documents', docs: docs.data ?? [], contactId, locationId });
           },
           slack: async (c, documentsPending) => {
             const apiKey = Deno.env.get('SLACK_API_KEY');
