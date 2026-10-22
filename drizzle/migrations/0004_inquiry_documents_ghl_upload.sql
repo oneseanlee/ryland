@@ -1,0 +1,1 @@
+ALTER TABLE public.inquiry_documents ADD COLUMN IF NOT EXISTS ghl_uploaded_at timestamptz, ADD COLUMN IF NOT EXISTS ghl_upload_error text;

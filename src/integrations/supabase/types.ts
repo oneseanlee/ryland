@@ -1043,6 +1043,8 @@ export type Database = {
           category: string
           created_at: string
           filename: string
+          ghl_upload_error: string | null
+          ghl_uploaded_at: string | null
           id: string
           mime_type: string | null
           order_id: string
@@ -1054,6 +1056,8 @@ export type Database = {
           category: string
           created_at?: string
           filename: string
+          ghl_upload_error?: string | null
+          ghl_uploaded_at?: string | null
           id?: string
           mime_type?: string | null
           order_id: string
@@ -1065,6 +1069,8 @@ export type Database = {
           category?: string
           created_at?: string
           filename?: string
+          ghl_upload_error?: string | null
+          ghl_uploaded_at?: string | null
           id?: string
           mime_type?: string | null
           order_id?: string

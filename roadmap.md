@@ -9,7 +9,7 @@
 
 # Inquiry lead delivery
 - [x] Implement and deploy submitted inquiry client delivery to GoHighLevel with partner attribution and New Lead placement; admin status and manual retries added.
-- [x] Tested GoHighLevel contact file-field upload (2026-10-22): uploaded files open without sign-in via link, so it fails the privacy check. Test contact/field removed. Documents stay private; notes link authorized staff to the order.
+- [x] Direct document upload to the GoHighLevel "Inquiry Documents" contact field (user accepted open-link risk); 11 tests pass. Real-order upload not yet run.
 - [x] Connect #new-inquiry-removal and verify a clearly labeled Slack setup message (Lovable App).
 - [x] Verify Slack runtime credentials, read GoHighLevel pipeline stages, and pass 18 regression tests without changing real carts.
 - [x] Verify approved Timmy Test submitted-order delivery through the signed-in admin Send / retry button; read back the GHL contact, #1 FUNDING PIPELINE New Lead opportunity, partner note, and Slack notification.
