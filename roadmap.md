@@ -1,8 +1,9 @@
 # Inquiry page performance
-\n+# Unpaid inquiry cleanup
-- [ ] Add safe unpaid-order removal controls to inquiry pages and Lead Tracker.
-- [ ] Remove Timmy Test's unfinished orders without changing paid orders.
-- [ ] Test paid-order protection and verify cleanup in the signed-in app.
+
+# Unpaid inquiry cleanup
+- [x] Add safe unpaid-order removal controls to inquiry pages and Lead Tracker.
+- [x] Remove Timmy Test's four unfinished orders and three empty batches without changing paid orders.
+- [x] Ten focused tests passed; signed-in Remove button completed on an authorized Timmy Test order, and both active lists were checked without runtime errors.
 
 - [x] Start affiliate inquiry reads as soon as the session is ready.
 - [x] Cache admin inquiry reads and load documents only when an order is opened.
