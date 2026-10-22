@@ -36,6 +36,13 @@
       "when": 1792628272594,
       "tag": "0004_inquiry_documents_ghl_upload",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1792628650936,
+      "tag": "0005_affiliate_lead_documents",
+      "breakpoints": true
     }
   ]
 }

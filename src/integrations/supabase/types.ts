@@ -50,6 +50,63 @@ export type Database = {
         }
         Relationships: []
       }
+      affiliate_lead_documents: {
+        Row: {
+          affiliate_id: string
+          created_at: string
+          filename: string
+          ghl_upload_error: string | null
+          ghl_uploaded_at: string | null
+          id: string
+          lead_id: string
+          mime_type: string | null
+          size_bytes: number | null
+          storage_path: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          affiliate_id: string
+          created_at?: string
+          filename: string
+          ghl_upload_error?: string | null
+          ghl_uploaded_at?: string | null
+          id?: string
+          lead_id: string
+          mime_type?: string | null
+          size_bytes?: number | null
+          storage_path: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          affiliate_id?: string
+          created_at?: string
+          filename?: string
+          ghl_upload_error?: string | null
+          ghl_uploaded_at?: string | null
+          id?: string
+          lead_id?: string
+          mime_type?: string | null
+          size_bytes?: number | null
+          storage_path?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "affiliate_lead_documents_affiliate_id_fkey"
+            columns: ["affiliate_id"]
+            isOneToOne: false
+            referencedRelation: "affiliates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "affiliate_lead_documents_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "affiliate_leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       affiliate_leads: {
         Row: {
           affiliate_id: string
@@ -1687,6 +1744,7 @@ export type Database = {
         Args: { _name: string; _require_draft?: boolean }
         Returns: boolean
       }
+      can_access_lead_document: { Args: { _name: string }; Returns: boolean }
       claim_inquiry_delivery: { Args: { _order_id: string }; Returns: boolean }
       create_notification: {
         Args: {
