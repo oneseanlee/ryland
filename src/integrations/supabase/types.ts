@@ -1803,6 +1803,10 @@ export type Database = {
           read_ct: number
         }[]
       }
+      remove_unpaid_inquiry_order: {
+        Args: { _order_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       affiliate_status: "pending" | "approved" | "suspended"

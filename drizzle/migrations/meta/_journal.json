@@ -57,6 +57,13 @@
       "when": 1792630124825,
       "tag": "0007_fix_inquiry_document_access",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1792632022186,
+      "tag": "0008_remove_unpaid_inquiry_orders",
+      "breakpoints": true
     }
   ]
 }
