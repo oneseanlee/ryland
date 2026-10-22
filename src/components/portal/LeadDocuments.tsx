@@ -7,17 +7,24 @@ import { Button } from "@/components/ui/button";
 
 
 /** Partner/admin document attachments for a referred lead; each upload is pushed to the GoHighLevel contact. */
-export default function LeadDocuments({ leadId, affiliateId }: { leadId: string; affiliateId: string }) {
+type Kind = "lead" | "inquiry";
+const CONFIG = {
+  lead: { table: "affiliate_lead_documents", bucket: "lead-documents", fk: "lead_id" },
+  inquiry: { table: "inquiry_documents", bucket: "inquiry-documents", fk: "order_id" },
+} as const;
+
+export default function LeadDocuments({ leadId, affiliateId, kind = "lead" }: { leadId: string; affiliateId: string; kind?: Kind }) {
   const qc = useQueryClient();
+  const cfg = CONFIG[kind];
   const [uploading, setUploading] = useState(false);
-  const key = ["lead-documents", leadId];
+  const key = [cfg.table, leadId];
   const { data: docs = [], isLoading } = useQuery({
     queryKey: key,
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("affiliate_lead_documents")
+        .from(cfg.table)
         .select("id, filename, storage_path, ghl_uploaded_at, created_at")
-        .eq("lead_id", leadId)
+        .eq(cfg.fk, leadId)
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data;
@@ -28,16 +35,16 @@ export default function LeadDocuments({ leadId, affiliateId }: { leadId: string;
     setUploading(true);
     try {
       const ext = (file.name.split(".").pop() || "bin").toLowerCase().replace(/[^a-z0-9]/g, "") || "bin";
-      const path = `${affiliateId}/${leadId}/${crypto.randomUUID()}.${ext}`;
-      const { error: upErr } = await supabase.storage.from("lead-documents").upload(path, file, { contentType: file.type || "application/octet-stream" });
+      const path = `${affiliateId}/${leadId}/${kind === "inquiry" ? "other-" : ""}${crypto.randomUUID()}.${ext}`;
+      const { error: upErr } = await supabase.storage.from(cfg.bucket).upload(path, file, { contentType: file.type || "application/octet-stream" });
       if (upErr) throw upErr;
       const { data: u } = await supabase.auth.getUser();
-      const { error: dbErr } = await supabase.from("affiliate_lead_documents").insert({
-        lead_id: leadId, affiliate_id: affiliateId, filename: file.name, storage_path: path,
-        mime_type: file.type, size_bytes: file.size, uploaded_by: u.user?.id ?? null,
-      });
+      const base = { filename: file.name, storage_path: path, mime_type: file.type || null, size_bytes: file.size, uploaded_by: u.user?.id ?? null };
+      const { error: dbErr } = kind === "lead"
+        ? await supabase.from("affiliate_lead_documents").insert({ ...base, lead_id: leadId, affiliate_id: affiliateId })
+        : await supabase.from("inquiry_documents").insert({ ...base, order_id: leadId, category: "other" });
       if (dbErr) throw dbErr;
-      const { data, error } = await supabase.functions.invoke("push-lead-documents", { body: { kind: "lead", id: leadId } });
+      const { data, error } = await supabase.functions.invoke("push-lead-documents", { body: { kind, id: leadId } });
       if (error) toast.error("Saved, but sending to Ryland Partners failed. Our team will retry.");
       else if (data?.state === "uploaded") toast.success("Document sent to Ryland Partners");
       else toast.success("Document saved. It will be sent once this lead is in our system.");
@@ -47,11 +54,12 @@ export default function LeadDocuments({ leadId, affiliateId }: { leadId: string;
     } finally {
       setUploading(false);
       qc.invalidateQueries({ queryKey: key });
+      if (kind === "inquiry") qc.invalidateQueries({ queryKey: ["inquiry-documents"] });
     }
   };
 
   const view = async (path: string) => {
-    const { data, error } = await supabase.storage.from("lead-documents").createSignedUrl(path, 300);
+    const { data, error } = await supabase.storage.from(cfg.bucket).createSignedUrl(path, 300);
     if (error || !data) return toast.error("Could not open document");
     window.open(data.signedUrl, "_blank", "noopener");
   };
