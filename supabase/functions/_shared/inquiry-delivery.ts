@@ -48,7 +48,7 @@ export function inquiryNote(c: DeliveryContext) {
     `Payment status: ${c.order.payment_status} (submission is not payment confirmation)`,
     c.client.notes ? `Client notes: ${c.client.notes}` : '',
     c.order.instructions ? `Order instructions: ${c.order.instructions}` : '',
-    `Uploaded documents: ${c.documentCount}. Files remain private in the portal; copies are not uploaded to public media storage.`,
+    `Uploaded documents: ${c.documentCount}. Copies are attached in the contact's Inquiry Documents field.`,
     `Authorized staff: https://rylandpartners.com/portal/admin/inquiries?order=${c.order.id}`,
   ].filter(Boolean).join('\n');
 }
@@ -60,7 +60,7 @@ export function slackNotice(c: DeliveryContext, documentsPending: boolean) {
     `Bureaus: ${c.order.bureaus.join(', ') || 'none'}`,
     `GoHighLevel: contact and New Lead opportunity created.`,
     `Payment: not verified.`,
-    documentsPending ? `${c.documentCount} document(s) remain private in the portal; GoHighLevel copies need a verified private upload method.` : 'No documents uploaded.',
+    documentsPending ? `${c.documentCount} document(s) attached to the GoHighLevel contact.` : 'No documents uploaded.',
     `Review: https://rylandpartners.com/portal/admin/inquiries?order=${c.order.id}`,
   ].join('\n');
 }
@@ -69,6 +69,8 @@ export interface DeliveryServices {
   contact(c: DeliveryContext): Promise<string>;
   opportunity(c: DeliveryContext, contactId: string): Promise<string>;
   note(c: DeliveryContext, contactId: string): Promise<string>;
+  /** Uploads only files not yet sent, marking each as it succeeds. */
+  documents(c: DeliveryContext, contactId: string): Promise<void>;
   slack(c: DeliveryContext, documentsPending: boolean): Promise<string>;
   save(patch: Partial<DeliveryRecord> & { state?: string; document_state?: string; last_error?: string | null }): Promise<void>;
 }
@@ -92,7 +94,8 @@ export async function deliverInquiry(c: DeliveryContext, record: DeliveryRecord,
     await s.save({ ghl_note_id: id });
   }
   const documentsPending = c.documentCount > 0;
-  await s.save({ document_state: documentsPending ? 'blocked_private_upload' : 'not_needed' });
+  if (documentsPending) await s.documents(c, contactId);
+  await s.save({ document_state: documentsPending ? 'uploaded' : 'not_needed' });
   if (!record.slack_ts) {
     const ts = await s.slack(c, documentsPending);
     await s.save({ slack_ts: ts });

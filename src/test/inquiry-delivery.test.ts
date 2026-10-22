@@ -9,7 +9,7 @@ const context: DeliveryContext = {
 };
 const empty: DeliveryRecord = { ghl_contact_id: null, ghl_opportunity_id: null, ghl_note_id: null, slack_ts: null };
 function services() {
-  return { contact: vi.fn().mockResolvedValue('contact'), opportunity: vi.fn().mockResolvedValue('opp'), note: vi.fn().mockResolvedValue('note'), slack: vi.fn().mockResolvedValue('timestamp'), save: vi.fn().mockResolvedValue(undefined) };
+  return { contact: vi.fn().mockResolvedValue('contact'), opportunity: vi.fn().mockResolvedValue('opp'), note: vi.fn().mockResolvedValue('note'), documents: vi.fn().mockResolvedValue(undefined), slack: vi.fn().mockResolvedValue('timestamp'), save: vi.fn().mockResolvedValue(undefined) };
 }
 describe('inquiry lead delivery', () => {
   it('attributes the lead to GRyland1 and the referring partner name', () => {
@@ -21,14 +21,21 @@ describe('inquiry lead delivery', () => {
     expect(s.contact).toHaveBeenCalledWith(context);
     expect(s.slack).toHaveBeenCalledOnce();
   });
-  it('does not upload private document copies without a verified private method', async () => {
+  it('uploads documents to the GoHighLevel contact', async () => {
     const s = services();
     await deliverInquiry(context, empty, s);
-    expect(s.save).toHaveBeenCalledWith({ document_state: 'blocked_private_upload' });
+    expect(s.documents).toHaveBeenCalledWith(context, 'contact');
+    expect(s.save).toHaveBeenCalledWith({ document_state: 'uploaded' });
+  });
+  it('never notifies Slack when a document upload failed', async () => {
+    const s = services(); s.documents.mockRejectedValue(new Error('upload failed'));
+    await expect(deliverInquiry(context, empty, s)).rejects.toThrow('upload failed');
+    expect(s.slack).not.toHaveBeenCalled();
   });
   it('allows orders with no uploads', async () => {
     const s = services();
     await deliverInquiry({ ...context, documentCount: 0 }, empty, s);
+    expect(s.documents).not.toHaveBeenCalled();
     expect(s.save).toHaveBeenCalledWith({ document_state: 'not_needed' });
   });
   it('resumes after partial success without recreating completed steps', async () => {
