@@ -78,9 +78,6 @@ const PAYMENT_STATUSES = [
   "refunded",
 ] as const;
 
-const ALLOWED_TYPES = ["application/pdf", "image/jpeg", "image/jpg", "image/png"];
-const ALLOWED_EXTS = ["pdf", "jpg", "jpeg", "png"];
-const MAX_FILE_SIZE = 25 * 1024 * 1024;
 
 interface AdminOrder extends InquiryOrder {
   affiliates: { full_name: string; email: string } | null;
@@ -325,15 +322,7 @@ export default function AdminInquiries() {
 
   const uploadResult = async (file: File) => {
     if (!detail) return;
-    const ext = (file.name.split(".").pop() || "").toLowerCase();
-    if (!ALLOWED_TYPES.includes(file.type) || !ALLOWED_EXTS.includes(ext)) {
-      toast.error("Only PDF, JPG, and PNG files are accepted");
-      return;
-    }
-    if (file.size > MAX_FILE_SIZE) {
-      toast.error("File is larger than 25 MB");
-      return;
-    }
+    const ext = (file.name.split(".").pop() || "bin").toLowerCase().replace(/[^a-z0-9]/g, "") || "bin";
     setUploadingResult(true);
     try {
       const path = `${detail.affiliate_id}/${detail.id}/completed_results-${Date.now()}.${ext}`;
@@ -354,7 +343,7 @@ export default function AdminInquiries() {
       refresh();
     } catch (err) {
       console.error(err);
-      toast.error("Upload failed");
+      toast.error(`Upload failed: ${err instanceof Error ? err.message : "please try again"}`);
     } finally {
       setUploadingResult(false);
     }
@@ -776,7 +765,7 @@ export default function AdminInquiries() {
                 <label className="mt-2 inline-block cursor-pointer">
                   <input
                     type="file"
-                    accept=".pdf,.jpg,.jpeg,.png"
+                   
                     className="hidden"
                     onChange={(e) => {
                       const f = e.target.files?.[0];

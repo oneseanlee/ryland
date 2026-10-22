@@ -72,9 +72,6 @@ import {
   ShieldAlert,
 } from "lucide-react";
 
-const ALLOWED_TYPES = ["application/pdf", "image/jpeg", "image/jpg", "image/png"];
-const ALLOWED_EXTS = ["pdf", "jpg", "jpeg", "png"];
-const MAX_FILE_SIZE = 25 * 1024 * 1024;
 
 interface ClientFormValues {
   first_name: string;
@@ -342,15 +339,7 @@ export default function PortalInquiries() {
   };
 
   const uploadDoc = async (orderId: string, category: string, file: File) => {
-    const ext = (file.name.split(".").pop() || "").toLowerCase();
-    if (!ALLOWED_TYPES.includes(file.type) || !ALLOWED_EXTS.includes(ext)) {
-      toast.error("Only PDF, JPG, and PNG files are accepted");
-      return;
-    }
-    if (file.size > MAX_FILE_SIZE) {
-      toast.error("File is larger than 25 MB");
-      return;
-    }
+    const ext = (file.name.split(".").pop() || "bin").toLowerCase().replace(/[^a-z0-9]/g, "") || "bin";
     setUploadingCategory(category);
     try {
       const path = `${affiliate!.id}/${orderId}/${category}-${Date.now()}.${ext}`;
@@ -377,7 +366,7 @@ export default function PortalInquiries() {
       }
     } catch (err) {
       console.error(err);
-      toast.error("Upload failed. Please try again.");
+      toast.error(`Upload failed: ${err instanceof Error ? err.message : "please try again"}`);
     } finally {
       setUploadingCategory(null);
     }
@@ -570,12 +559,12 @@ export default function PortalInquiries() {
                       <span className="text-destructive ml-1">*</span>
                     )}
                   </p>
-                  <p className="text-xs text-muted-foreground">PDF, JPG, or PNG · up to 25 MB</p>
+                  <p className="text-xs text-muted-foreground">Any file type</p>
                 </div>
                 <label className="cursor-pointer">
                   <input
                     type="file"
-                    accept=".pdf,.jpg,.jpeg,.png"
+                   
                     className="hidden"
                     onChange={(e) => {
                       const f = e.target.files?.[0];
