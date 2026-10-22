@@ -370,6 +370,11 @@ export default function PortalInquiries() {
       if (dbErr) throw dbErr;
       toast.success(`${DOC_CATEGORY_LABELS[category] ?? "Document"} uploaded`);
       queryClient.invalidateQueries({ queryKey: ["inquiry-documents"] });
+      if (ordersById.get(orderId)?.status === "submitted") {
+        const { data, error } = await supabase.functions.invoke("push-lead-documents", { body: { kind: "inquiry", id: orderId } });
+        if (error) toast.error("Saved, but sending to Ryland Partners failed. We'll retry from the admin side.");
+        else if (data?.state === "uploaded") toast.success("Document sent to Ryland Partners");
+      }
     } catch (err) {
       console.error(err);
       toast.error("Upload failed. Please try again.");
