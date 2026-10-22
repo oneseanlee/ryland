@@ -37,6 +37,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
+import RemoveInquiryOrderButton from "@/components/portal/RemoveInquiryOrderButton";
 import { format } from "date-fns";
 import {
   Eye,
@@ -162,7 +163,7 @@ export default function AdminInquiries() {
     },
   });
   const orders = inquiryQ.data?.orders ?? [];
-  const batches = inquiryQ.data?.batches ?? [];
+  const batches = (inquiryQ.data?.batches ?? []).filter(batch => batch.status !== "cancelled");
   const clients = inquiryQ.data?.clients ?? [];
   useEffect(() => {
     if (!linkedOrderId || !inquiryQ.data) return;
@@ -200,6 +201,8 @@ export default function AdminInquiries() {
   const filteredOrders = useMemo(() => {
     const q = search.trim().toLowerCase();
     return orders.filter((o) => {
+      if (o.status === "cancelled") return false;
+      if (tab === "unpaid" && o.payment_status === "paid") return false;
       const client = o.client_id ? clientsById.get(o.client_id) : null;
       const clientName = client ? `${client.first_name} ${client.last_name}`.toLowerCase() : "";
       const affName = (o.affiliates?.full_name ?? "").toLowerCase();
@@ -216,7 +219,7 @@ export default function AdminInquiries() {
       if (fromDate && o.created_at < fromDate) return false;
       return true;
     });
-  }, [orders, clientsById, search, affiliateFilter, serviceFilter, paymentFilter, fromDate]);
+  }, [orders, clientsById, search, affiliateFilter, serviceFilter, paymentFilter, fromDate, tab]);
 
   const refresh = () => {
     queryClient.invalidateQueries({ queryKey });
@@ -409,11 +412,12 @@ export default function AdminInquiries() {
       <Tabs value={tab} onValueChange={setTab}>
         <TabsList>
           <TabsTrigger value="orders">Orders ({filteredOrders.length})</TabsTrigger>
+          <TabsTrigger value="unpaid">Unpaid orders</TabsTrigger>
           <TabsTrigger value="batches">Checkout Batches ({batches.length})</TabsTrigger>
         </TabsList>
 
         {/* ---------- ORDERS ---------- */}
-        <TabsContent value="orders" className="space-y-4">
+        <TabsContent value={tab === "unpaid" ? "unpaid" : "orders"} className="space-y-4">
           <Card>
             <CardContent className="pt-4">
               <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-3">
@@ -523,6 +527,7 @@ export default function AdminInquiries() {
                               <Eye className="h-3.5 w-3.5 mr-1" />
                               View
                             </Button>
+                            <RemoveInquiryOrderButton order={o} onRemoved={() => setDetail(null)} />
                           </TableCell>
                         </TableRow>
                       );

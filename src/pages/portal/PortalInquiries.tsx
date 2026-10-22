@@ -57,6 +57,7 @@ import {
 } from "@/components/ui/select";
 import PageMeta from "@/components/PageMeta";
 import InquiryProfileFallback from "@/components/portal/InquiryProfileFallback";
+import RemoveInquiryOrderButton from "@/components/portal/RemoveInquiryOrderButton";
 import { toast } from "sonner";
 import {
   FilePlus2,
@@ -765,6 +766,7 @@ export default function PortalInquiries() {
                             <Button variant="outline" size="sm" onClick={() => setDetailOrder(o)}>
                               View
                             </Button>
+                            <RemoveInquiryOrderButton order={o} onRemoved={() => setDetailOrder(null)} />
                           </TableCell>
                         </TableRow>
                       );
