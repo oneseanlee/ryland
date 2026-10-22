@@ -50,6 +50,13 @@
       "when": 1792629221377,
       "tag": "0006_admins_add_inquiry_documents",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1792630124825,
+      "tag": "0007_fix_inquiry_document_access",
+      "breakpoints": true
     }
   ]
 }

@@ -14,6 +14,8 @@ import LeadDetailDrawer from "@/components/portal/LeadDetailDrawer";
 import SubmitLeadDrawer from "@/components/portal/SubmitLeadDrawer";
 import type { Lead } from "@/types/leads";
 import { toast } from "sonner";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import InquiryClientsTable from "@/components/portal/InquiryClientsTable";
 
 export default function PortalLeads() {
   const { leads, isLoading, refetch } = useAffiliateLeads();
@@ -48,6 +50,12 @@ export default function PortalLeads() {
         </div>
       </div>
 
+      <Tabs defaultValue="leads">
+        <TabsList>
+          <TabsTrigger value="leads">Leads</TabsTrigger>
+          <TabsTrigger value="clients">Clients</TabsTrigger>
+        </TabsList>
+        <TabsContent value="leads">
       <Card className="border-slate-200 bg-white shadow-sm">
         <CardHeader className="pb-3">
           <CardTitle className="text-base font-semibold text-slate-900 flex items-center gap-2">
@@ -62,6 +70,20 @@ export default function PortalLeads() {
           <LeadsTable leads={leads} isLoading={isLoading} onSelectLead={setSelectedLead} onDeleteLead={setDeleteTarget} onRefresh={refetch} />
         </CardContent>
       </Card>
+
+        </TabsContent>
+        <TabsContent value="clients">
+          <Card className="border-slate-200 bg-white shadow-sm">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base font-semibold text-slate-900">Clients</CardTitle>
+              <p className="text-sm text-slate-500">Paid credit inquiry removal orders. Open one to attach documents.</p>
+            </CardHeader>
+            <CardContent className="p-0">
+              <InquiryClientsTable />
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
 
       <LeadDetailDrawer
         lead={selectedLead}

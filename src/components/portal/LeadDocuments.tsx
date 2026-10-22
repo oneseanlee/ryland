@@ -5,57 +5,60 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 
-const ALLOWED_TYPES = ["application/pdf", "image/jpeg", "image/png"];
-const MAX_FILE_SIZE = 25 * 1024 * 1024;
 
 /** Partner/admin document attachments for a referred lead; each upload is pushed to the GoHighLevel contact. */
-export default function LeadDocuments({ leadId, affiliateId }: { leadId: string; affiliateId: string }) {
+type Kind = "lead" | "inquiry";
+const CONFIG = {
+  lead: { table: "affiliate_lead_documents", bucket: "lead-documents", fk: "lead_id" },
+  inquiry: { table: "inquiry_documents", bucket: "inquiry-documents", fk: "order_id" },
+} as const;
+
+export default function LeadDocuments({ leadId, affiliateId, kind = "lead" }: { leadId: string; affiliateId: string; kind?: Kind }) {
   const qc = useQueryClient();
+  const cfg = CONFIG[kind];
   const [uploading, setUploading] = useState(false);
-  const key = ["lead-documents", leadId];
+  const key = [cfg.table, leadId];
   const { data: docs = [], isLoading } = useQuery({
     queryKey: key,
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("affiliate_lead_documents")
-        .select("id, filename, storage_path, ghl_uploaded_at, created_at")
-        .eq("lead_id", leadId)
-        .order("created_at", { ascending: false });
+      const cols = "id, filename, storage_path, ghl_uploaded_at, created_at";
+      const { data, error } = kind === "lead"
+        ? await supabase.from("affiliate_lead_documents").select(cols).eq("lead_id", leadId).order("created_at", { ascending: false })
+        : await supabase.from("inquiry_documents").select(cols).eq("order_id", leadId).order("created_at", { ascending: false });
       if (error) throw error;
-      return data;
+      return (data ?? []) as { id: string; filename: string; storage_path: string; ghl_uploaded_at: string | null; created_at: string }[];
     },
   });
 
   const upload = async (file: File) => {
-    if (!ALLOWED_TYPES.includes(file.type)) return toast.error("Only PDF, JPG, and PNG files are accepted");
-    if (file.size > MAX_FILE_SIZE) return toast.error("File is larger than 25 MB");
     setUploading(true);
     try {
-      const ext = (file.name.split(".").pop() || "pdf").toLowerCase();
-      const path = `${affiliateId}/${leadId}/${crypto.randomUUID()}.${ext}`;
-      const { error: upErr } = await supabase.storage.from("lead-documents").upload(path, file, { contentType: file.type });
+      const ext = (file.name.split(".").pop() || "bin").toLowerCase().replace(/[^a-z0-9]/g, "") || "bin";
+      const path = `${affiliateId}/${leadId}/${kind === "inquiry" ? "other-" : ""}${crypto.randomUUID()}.${ext}`;
+      const { error: upErr } = await supabase.storage.from(cfg.bucket).upload(path, file, { contentType: file.type || "application/octet-stream" });
       if (upErr) throw upErr;
       const { data: u } = await supabase.auth.getUser();
-      const { error: dbErr } = await supabase.from("affiliate_lead_documents").insert({
-        lead_id: leadId, affiliate_id: affiliateId, filename: file.name, storage_path: path,
-        mime_type: file.type, size_bytes: file.size, uploaded_by: u.user?.id ?? null,
-      });
+      const base = { filename: file.name, storage_path: path, mime_type: file.type || null, size_bytes: file.size, uploaded_by: u.user?.id ?? null };
+      const { error: dbErr } = kind === "lead"
+        ? await supabase.from("affiliate_lead_documents").insert({ ...base, lead_id: leadId, affiliate_id: affiliateId })
+        : await supabase.from("inquiry_documents").insert({ ...base, order_id: leadId, category: "other" });
       if (dbErr) throw dbErr;
-      const { data, error } = await supabase.functions.invoke("push-lead-documents", { body: { kind: "lead", id: leadId } });
+      const { data, error } = await supabase.functions.invoke("push-lead-documents", { body: { kind, id: leadId } });
       if (error) toast.error("Saved, but sending to Ryland Partners failed. Our team will retry.");
       else if (data?.state === "uploaded") toast.success("Document sent to Ryland Partners");
       else toast.success("Document saved. It will be sent once this lead is in our system.");
     } catch (e) {
       console.error(e);
-      toast.error("Upload failed. Please try again.");
+      toast.error(`Upload failed: ${e instanceof Error ? e.message : "please try again"}`);
     } finally {
       setUploading(false);
       qc.invalidateQueries({ queryKey: key });
+      if (kind === "inquiry") qc.invalidateQueries({ queryKey: ["inquiry-documents"] });
     }
   };
 
   const view = async (path: string) => {
-    const { data, error } = await supabase.storage.from("lead-documents").createSignedUrl(path, 300);
+    const { data, error } = await supabase.storage.from(cfg.bucket).createSignedUrl(path, 300);
     if (error || !data) return toast.error("Could not open document");
     window.open(data.signedUrl, "_blank", "noopener");
   };
@@ -63,14 +66,14 @@ export default function LeadDocuments({ leadId, affiliateId }: { leadId: string;
   return (
     <div className="space-y-2 py-2">
       <label className="block">
-        <input type="file" accept=".pdf,.jpg,.jpeg,.png" className="sr-only" disabled={uploading}
+        <input type="file" className="sr-only" disabled={uploading}
           onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ""; if (f) upload(f); }} />
         <span className="inline-flex min-h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-md border px-3 py-2 text-sm hover:bg-accent transition-colors">
           {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
           Attach document
         </span>
       </label>
-      <p className="text-xs text-muted-foreground">PDF, JPG, or PNG · up to 25 MB</p>
+      <p className="text-xs text-muted-foreground">Any file type</p>
       {isLoading ? null : docs.length === 0 ? (
         <p className="text-sm text-muted-foreground">No documents yet.</p>
       ) : docs.map((d) => (
