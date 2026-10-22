@@ -76,7 +76,7 @@ export default function PortalLeads() {
           <Card className="border-slate-200 bg-white shadow-sm">
             <CardHeader className="pb-3">
               <CardTitle className="text-base font-semibold text-slate-900">Clients</CardTitle>
-              <p className="text-sm text-slate-500">Paid credit inquiry removal orders. Open one to attach documents.</p>
+              <p className="text-sm text-muted-foreground">Credit Inquiry Orders</p>
             </CardHeader>
             <CardContent className="p-0">
               <InquiryClientsTable />
