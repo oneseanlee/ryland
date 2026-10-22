@@ -1,0 +1,2 @@
+CREATE POLICY "Admins add inquiry documents" ON public.inquiry_documents FOR INSERT TO authenticated WITH CHECK (public.is_admin());
+CREATE POLICY "Admins update inquiry documents" ON storage.objects FOR UPDATE TO authenticated USING (bucket_id IN ('inquiry-documents','lead-documents') AND public.is_admin());
