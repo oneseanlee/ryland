@@ -1,6 +1,7 @@
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Card, CardContent } from "@/components/ui/card";
-import { User, Briefcase, CalendarClock, FileText } from "lucide-react";
+import { User, Briefcase, CalendarClock, FileText, Paperclip } from "lucide-react";
+import LeadDocuments from "@/components/portal/LeadDocuments";
 import type { Lead } from "@/types/leads";
 import { stageColors, statusColors } from "@/types/leads";
 import { formatCurrency, formatDateTime, formatDateTimeWithTime } from "@/utils/formatters";
@@ -96,6 +97,10 @@ export default function LeadDetailDrawer({ lead, open, onClose }: LeadDetailDraw
             </div>
             <DetailRow label="Referred" value={formatDateTime(lead.referred_at)} />
             <DetailRow label="Last Updated" value={formatDateTimeWithTime(lead.updated_at)} />
+          </SectionCard>
+
+          <SectionCard icon={Paperclip} title="Documents">
+            <LeadDocuments leadId={lead.id} affiliateId={lead.affiliate_id} />
           </SectionCard>
         </div>
       </SheetContent>
