@@ -1,6 +1,9 @@
-// @vitest-environment node
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { GHL_DOCUMENTS_FIELD_ID, pushDocsToGhl } from '../../supabase/functions/_shared/ghl-files';
+
+declare global {
+  var Deno: { env: { get(name: string): string | undefined } };
+}
 
 function setup(timestamps: (string | null)[], value: unknown) {
   const rows = timestamps.map((ghl_uploaded_at, i) => ({ id: `doc-${i}`, filename: `${i}.pdf`, storage_path: `order/${i}.pdf`, mime_type: 'application/pdf', ghl_uploaded_at, ghl_upload_error: 'old error' as string | null }));
@@ -43,14 +46,14 @@ describe('full-set GoHighLevel document upload', () => {
     expect(s.rows.every(row => row.ghl_upload_error === null)).toBe(true);
   });
 
-  it.each([[], ['previous', 'previous']])('skips upload when no new files exist: %j', async timestamps => {
+  it.each([{ timestamps: [] }, { timestamps: ['previous', 'previous'] }])('skips upload when no new files exist: %j', async ({ timestamps }) => {
     const s = setup(timestamps, {});
     expect(await pushDocsToGhl(s.db, s.opts)).toBe(0);
     expect(s.fetchMock).not.toHaveBeenCalled();
     expect(s.download).not.toHaveBeenCalled();
   });
 
-  it.each([{ a: {} }, [], undefined])('records a count mismatch without marking new files: %j', async value => {
+  it.each([{ value: { a: {} } }, { value: [] }, { value: undefined }])('records a count mismatch without marking new files: %j', async ({ value }) => {
     const s = setup(['previous', null, null, null], value);
     const count = value && !Array.isArray(value) ? 1 : 0;
     const message = `GoHighLevel holds ${count} of 4 files after upload`;
