@@ -59,6 +59,7 @@ import PageMeta from "@/components/PageMeta";
 import InquiryProfileFallback from "@/components/portal/InquiryProfileFallback";
 import RemoveInquiryOrderButton from "@/components/portal/RemoveInquiryOrderButton";
 import { toast } from "sonner";
+import { GHL_FILE_ACCEPT, ghlFileProblem, ghlFileProblemMessage } from "../../../supabase/functions/_shared/ghl-file-rules";
 import {
   FilePlus2,
   FileText,
@@ -340,6 +341,11 @@ export default function PortalInquiries() {
   };
 
   const uploadDoc = async (orderId: string, category: string, file: File) => {
+    const problem = ghlFileProblem({ name: file.name, size: file.size });
+    if (problem) {
+      toast.error(ghlFileProblemMessage(problem));
+      return;
+    }
     const ext = (file.name.split(".").pop() || "bin").toLowerCase().replace(/[^a-z0-9]/g, "") || "bin";
     setUploadingCategory(category);
     try {
@@ -364,6 +370,7 @@ export default function PortalInquiries() {
         const { data, error } = await supabase.functions.invoke("push-lead-documents", { body: { kind: "inquiry", id: orderId } });
         if (error) toast.error("Saved, but sending to Ryland Partners failed. We'll retry from the admin side.");
         else if (data?.state === "uploaded") toast.success("Document sent to Ryland Partners");
+        else if (data?.state === "queued") toast.success("Document saved. It will be sent to Ryland Partners in a moment.");
       }
     } catch (err) {
       console.error(err);
@@ -560,12 +567,12 @@ export default function PortalInquiries() {
                       <span className="text-destructive ml-1">*</span>
                     )}
                   </p>
-                  <p className="text-xs text-muted-foreground">Any file type</p>
+                  <p className="text-xs text-muted-foreground">PDF, Word, Excel, JPG, PNG, GIF, CSV, TXT or ZIP, up to 50 MB</p>
                 </div>
                 <label className="cursor-pointer">
                   <input
                     type="file"
-                   
+                    accept={GHL_FILE_ACCEPT}
                     className="hidden"
                     onChange={(e) => {
                       const f = e.target.files?.[0];
