@@ -18,17 +18,25 @@ serve(async req => {
     if (!locationId) return json({ error: 'GoHighLevel location not configured' }, 503);
     const token = req.headers.get('Authorization')?.replace(/^Bearer /, '');
     if (!token) return json({ error: 'Unauthorized' }, 401);
-    const auth = createClient(url, anon, { global: { headers: { Authorization: `Bearer ${token}` } }, auth: { persistSession: false } });
-    const { data: u, error: ue } = await auth.auth.getUser();
-    if (ue || !u.user) return json({ error: 'Unauthorized' }, 401);
+    let isAdmin = token === key;
+    let userId: string | null = null;
+    if (!isAdmin) {
+      const auth = createClient(url, anon, { global: { headers: { Authorization: `Bearer ${token}` } }, auth: { persistSession: false } });
+      const { data: u, error: ue } = await auth.auth.getUser();
+      if (ue || !u.user) return json({ error: 'Unauthorized' }, 401);
+      userId = u.user.id;
+    }
     const parsed = schema.safeParse(await req.json().catch(() => null));
     if (!parsed.success) return json({ error: 'Invalid request' }, 400);
     const { kind, id } = parsed.data;
     const db = createClient(url, key, { auth: { persistSession: false } });
 
-    const role = await db.rpc('has_role', { _user_id: u.user.id, _role: 'admin' });
-    const isAdmin = role.data === true;
-    const own = await db.from('affiliates').select('id').eq('user_id', u.user.id).maybeSingle();
+    let own: { data: { id: string } | null } = { data: null };
+    if (!isAdmin) {
+      const role = await db.rpc('has_role', { _user_id: userId, _role: 'admin' });
+      isAdmin = role.data === true;
+      own = await db.from('affiliates').select('id').eq('user_id', userId).maybeSingle();
+    }
 
     let contactId: string | null = null;
     let table: string, bucket: string, filterCol: string;
