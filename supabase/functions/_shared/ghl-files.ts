@@ -196,33 +196,38 @@ export async function enrollInMissionControlWorkflow(db: any, opts: { orderId: s
   let message: string;
   try {
     const key = Deno.env.get('GHL_API_KEY');
-    if (!key) throw new Error('GHL_API_KEY is not configured');
-    const doFetch = opts.fetch ?? fetch;
-    let res: Response;
-    try {
-      res = await doFetch(`https://services.leadconnectorhq.com/contacts/${encodeURIComponent(opts.contactId)}/workflow/${GHL_MC_WORKFLOW_ID}`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${key}`, Version: '2021-07-28', 'Content-Type': 'application/json' },
-        body: '{}',
-        signal: AbortSignal.timeout(20000),
-      });
-    } catch (e) {
-      throw Object.assign(new Error(e instanceof Error ? e.message : String(e)), { network: true });
-    }
-    if (res.ok) {
+    if (!key) {
+      message = `${MC_ERROR_PREFIX} [config]: GHL_API_KEY is not configured`;
+    } else {
+      const doFetch = opts.fetch ?? fetch;
+      let res: Response;
       try {
-        await db.from('inquiry_lead_delivery').update({ last_error: null }).eq('order_id', opts.orderId).like('last_error', `${MC_ERROR_PREFIX}%`);
-      } catch (e) { console.error('Mission Control enrollment error clear failed:', e instanceof Error ? e.message : String(e)); }
-      return true;
+        res = await doFetch(`https://services.leadconnectorhq.com/contacts/${encodeURIComponent(opts.contactId)}/workflow/${GHL_MC_WORKFLOW_ID}`, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${key}`, Version: '2021-07-28', 'Content-Type': 'application/json' },
+          body: '{}',
+          signal: AbortSignal.timeout(20000),
+        });
+      } catch (e) {
+        throw Object.assign(new Error(e instanceof Error ? e.message : String(e)), { network: true });
+      }
+      if (res.ok) {
+        try {
+          const { error } = await db.from('inquiry_lead_delivery').update({ last_error: null }).eq('order_id', opts.orderId).like('last_error', `${MC_ERROR_PREFIX}%`);
+          if (error) console.error('Mission Control enrollment error clear failed:', error instanceof Error ? error.message : String(error));
+        } catch (e) { console.error('Mission Control enrollment error clear failed:', e instanceof Error ? e.message : String(e)); }
+        return true;
+      }
+      const body = await res.text().catch(() => '');
+      message = `${MC_ERROR_PREFIX} [${res.status}]: ${body.slice(0, 200)}`;
     }
-    const body = await res.text().catch(() => '');
-    message = `${MC_ERROR_PREFIX} [${res.status}]: ${body.slice(0, 200)}`;
   } catch (e: any) {
     message = `${MC_ERROR_PREFIX} [network]: ${String(e?.message ?? e).slice(0, 200)}`;
   }
   console.error(`order ${opts.orderId}: ${message}`);
   try {
-    await db.from('inquiry_lead_delivery').update({ last_error: message }).eq('order_id', opts.orderId);
+    const { error } = await db.from('inquiry_lead_delivery').update({ last_error: message }).eq('order_id', opts.orderId);
+    if (error) console.error('Mission Control enrollment error write failed:', error instanceof Error ? error.message : String(error));
   } catch (e) { console.error('Mission Control enrollment error write failed:', e instanceof Error ? e.message : String(e)); }
   return false;
 }
