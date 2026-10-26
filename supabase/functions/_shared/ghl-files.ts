@@ -9,12 +9,14 @@ interface OwnerDoc { id: string; filename: string; storage_path: string; mime_ty
  * When new documents exist, uploads the owner's full document set in one request.
  * Checks the contact's file count by reading it back before marking new rows sent;
  * already-sent rows retain their timestamps, and sets without new files are skipped.
+ * Reports both the full set sent and the rows newly sent in this push.
  */
 export async function pushDocsToGhl(db: any, opts: { table: string; bucket: string; ownerColumn: string; ownerId: string; contactId: string; locationId: string }) {
   const result = await db.from(opts.table).select('id, filename, storage_path, mime_type, ghl_uploaded_at').eq(opts.ownerColumn, opts.ownerId);
   if (result.error) throw result.error;
   const docs = (result.data ?? []) as OwnerDoc[];
-  if (!docs.some(d => d.ghl_uploaded_at === null)) return 0;
+  const added = docs.filter(d => d.ghl_uploaded_at === null).length;
+  if (added === 0) return { sent: 0, added: 0 };
   const key = Deno.env.get('GHL_API_KEY');
   if (!key) throw new Error('GoHighLevel credentials missing');
   const ids = docs.map(d => d.id);
@@ -57,5 +59,5 @@ export async function pushDocsToGhl(db: any, opts: { table: string; bucket: stri
   if (marked.error) throw marked.error;
   const cleared = await db.from(opts.table).update({ ghl_upload_error: null }).in('id', ids);
   if (cleared.error) throw cleared.error;
-  return docs.length;
+  return { sent: docs.length, added };
 }

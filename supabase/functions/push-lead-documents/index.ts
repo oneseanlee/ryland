@@ -3,6 +3,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.1';
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors';
 import { z } from 'https://esm.sh/zod@3.25.76';
 import { pushDocsToGhl } from '../_shared/ghl-files.ts';
+import { slackDocsAddedReply } from '../_shared/inquiry-delivery.ts';
 
 const schema = z.object({ kind: z.enum(['inquiry', 'lead']), id: z.string().uuid() });
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
@@ -60,7 +61,39 @@ serve(async req => {
       table = 'affiliate_lead_documents'; bucket = 'lead-documents'; filterCol = 'lead_id';
     }
     if (!contactId) return json({ error: 'GoHighLevel contact missing' }, 502);
-    const uploaded = await pushDocsToGhl(db, { table, bucket, ownerColumn: filterCol, ownerId: id, contactId, locationId });
+    const { sent: uploaded, added } = await pushDocsToGhl(db, { table, bucket, ownerColumn: filterCol, ownerId: id, contactId, locationId });
+    if (kind === 'inquiry' && added > 0) {
+      try {
+        const delivery = await db.from('inquiry_lead_delivery').select('slack_ts').eq('order_id', id).maybeSingle();
+        if (delivery.error) throw delivery.error;
+        const threadTs = delivery.data?.slack_ts?.trim();
+        if (!threadTs) {
+          console.log(`push-lead-documents: no slack_ts for order ${id}, thread reply skipped`);
+        } else {
+          const order = await db.from('inquiry_orders').select('client_id').eq('id', id).maybeSingle();
+          if (order.error) throw order.error;
+          if (!order.data?.client_id) throw new Error('Client record missing for document thread reply');
+          const client = await db.from('inquiry_clients').select('first_name, last_name').eq('id', order.data.client_id).maybeSingle();
+          if (client.error) throw client.error;
+          if (!client.data) throw new Error('Client record missing for document thread reply');
+          const apiKey = Deno.env.get('SLACK_API_KEY');
+          const lovableKey = Deno.env.get('LOVABLE_API_KEY');
+          if (!apiKey || !lovableKey) throw new Error('Slack connection is missing');
+          const res = await fetch('https://connector-gateway.lovable.dev/slack/api/chat.postMessage', {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${lovableKey}`, 'X-Connection-Api-Key': apiKey, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ channel: 'C0CAZUKCYSZ', thread_ts: threadTs, text: slackDocsAddedReply(added, client.data.first_name, client.data.last_name), unfurl_links: false, unfurl_media: false }),
+            signal: AbortSignal.timeout(20000),
+          });
+          const text = await res.text();
+          if (res.status !== 200) throw new Error(`Slack [${res.status}]: ${text}`);
+          const data = JSON.parse(text);
+          if (!data.ok) throw new Error(`Slack [${res.status}]: ${text}`);
+        }
+      } catch (e) {
+        console.error('push-lead-documents: Slack thread reply failed:', e instanceof Error ? e.message : String(e));
+      }
+    }
     return json({ state: 'uploaded', uploaded });
   } catch (e) {
     const error = e instanceof Error ? e.message : String(e);

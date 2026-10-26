@@ -1,5 +1,9 @@
 # Inquiry page performance
 
+# Inquiry Slack notice update
+- [x] Update names-only escaped notices and late-upload thread replies without changing UI or schema.
+- [x] Run the entire test suite (38 tests passed) and deploy both delivery functions without live invocations or messages.
+
 # Unpaid inquiry cleanup
 - [x] Add safe unpaid-order removal controls to inquiry pages and Lead Tracker.
 - [x] Remove Timmy Test's four unfinished orders and three empty batches without changing paid orders.
