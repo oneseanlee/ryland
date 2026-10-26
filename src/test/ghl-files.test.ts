@@ -86,6 +86,7 @@ const drainOpts = (ghl: ReturnType<typeof fakeGhl>, onAdded = vi.fn(async (_n: n
 
 beforeEach(() => {
   vi.stubGlobal('Deno', { env: { get: () => 'mock-key' } });
+  vi.stubGlobal('AbortSignal', { timeout: () => new AbortController().signal });
   sleep.mockClear();
 });
 afterEach(() => vi.unstubAllGlobals());
