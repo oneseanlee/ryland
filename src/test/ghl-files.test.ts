@@ -92,7 +92,7 @@ function fakeGhl() {
 
 const sleep = vi.fn(async (_ms: number) => {});
 const pushOpts = (ghl: ReturnType<typeof fakeGhl>) => ({ table: 'inquiry_documents', bucket: 'inquiry-documents', ownerColumn: 'order_id', ownerId: 'order', contactId: 'contact', locationId: 'location', fetch: ghl.fetch, sleep });
-const drainOpts = (ghl: ReturnType<typeof fakeGhl>, onAdded = vi.fn(async (_n: number) => {})) => ({ orderId: 'order', contactId: 'contact', locationId: 'location', onAdded, fetch: ghl.fetch, sleep });
+const drainOpts = (ghl: ReturnType<typeof fakeGhl>, onAdded: (n: number) => Promise<void> = vi.fn(async (_n: number) => {})) => ({ orderId: 'order', contactId: 'contact', locationId: 'location', onAdded, fetch: ghl.fetch, sleep });
 
 beforeEach(() => {
   vi.stubGlobal('Deno', { env: { get: () => 'mock-key' } });
