@@ -3,6 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Eye, FileText, Loader2, Upload, CheckCircle2, Clock } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { GHL_FILE_ACCEPT, ghlFileProblem, ghlFileProblemMessage } from "../../../supabase/functions/_shared/ghl-file-rules";
 import { Button } from "@/components/ui/button";
 
 
@@ -31,6 +32,8 @@ export default function LeadDocuments({ leadId, affiliateId, kind = "lead" }: { 
   });
 
   const upload = async (file: File) => {
+    const problem = ghlFileProblem({ name: file.name, size: file.size });
+    if (problem) { toast.error(ghlFileProblemMessage(problem)); return; }
     setUploading(true);
     try {
       const ext = (file.name.split(".").pop() || "bin").toLowerCase().replace(/[^a-z0-9]/g, "") || "bin";
@@ -46,6 +49,7 @@ export default function LeadDocuments({ leadId, affiliateId, kind = "lead" }: { 
       const { data, error } = await supabase.functions.invoke("push-lead-documents", { body: { kind, id: leadId } });
       if (error) toast.error("Saved, but sending to Ryland Partners failed. Our team will retry.");
       else if (data?.state === "uploaded") toast.success("Document sent to Ryland Partners");
+      else if (data?.state === "queued") toast.success("Document saved. It will be sent to Ryland Partners in a moment.");
       else toast.success("Document saved. It will be sent once this lead is in our system.");
     } catch (e) {
       console.error(e);
@@ -66,14 +70,14 @@ export default function LeadDocuments({ leadId, affiliateId, kind = "lead" }: { 
   return (
     <div className="space-y-2 py-2">
       <label className="block">
-        <input type="file" className="sr-only" disabled={uploading}
+        <input type="file" accept={GHL_FILE_ACCEPT} className="sr-only" disabled={uploading}
           onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ""; if (f) upload(f); }} />
         <span className="inline-flex min-h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-md border px-3 py-2 text-sm hover:bg-accent transition-colors">
           {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
           Attach document
         </span>
       </label>
-      <p className="text-xs text-muted-foreground">Any file type</p>
+      <p className="text-xs text-muted-foreground">PDF, Word, Excel, JPG, PNG, GIF, CSV, TXT or ZIP, up to 50 MB</p>
       {isLoading ? null : docs.length === 0 ? (
         <p className="text-sm text-muted-foreground">No documents yet.</p>
       ) : docs.map((d) => (
