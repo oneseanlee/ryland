@@ -110,9 +110,7 @@ serve(async req => {
             return id;
           },
           documents: async (c, contactId) => {
-            const docs = await db.from('inquiry_documents').select('id, filename, storage_path, mime_type').eq('order_id', c.order.id).is('ghl_uploaded_at', null);
-            if (docs.error) throw docs.error;
-            await pushDocsToGhl(db, { table: 'inquiry_documents', bucket: 'inquiry-documents', docs: docs.data ?? [], contactId, locationId });
+            await pushDocsToGhl(db, { table: 'inquiry_documents', bucket: 'inquiry-documents', ownerColumn: 'order_id', ownerId: c.order.id, contactId, locationId });
           },
           slack: async (c, documentsPending) => {
             const apiKey = Deno.env.get('SLACK_API_KEY');

@@ -51,9 +51,8 @@ serve(async req => {
       contactId = l.data.ghl_contact_id;
       table = 'affiliate_lead_documents'; bucket = 'lead-documents'; filterCol = 'lead_id';
     }
-    const docs = await db.from(table).select('id, filename, storage_path, mime_type').eq(filterCol, id).is('ghl_uploaded_at', null);
-    if (docs.error) throw docs.error;
-    const uploaded = await pushDocsToGhl(db, { table, bucket, docs: docs.data ?? [], contactId: contactId!, locationId });
+    if (!contactId) return json({ error: 'GoHighLevel contact missing' }, 502);
+    const uploaded = await pushDocsToGhl(db, { table, bucket, ownerColumn: filterCol, ownerId: id, contactId, locationId });
     return json({ state: 'uploaded', uploaded });
   } catch (e) {
     const error = e instanceof Error ? e.message : String(e);
