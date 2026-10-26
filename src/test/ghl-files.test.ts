@@ -22,6 +22,7 @@ function setup(timestamps: (string | null)[], value: unknown) {
   const fetchMock = vi.fn().mockResolvedValueOnce(new Response('{}')).mockResolvedValueOnce(new Response(JSON.stringify({ contact: { customFields: [{ id: GHL_DOCUMENTS_FIELD_ID, value }] } })));
   vi.stubGlobal('fetch', fetchMock);
   vi.stubGlobal('Deno', { env: { get: () => 'mock-key' } });
+  vi.stubGlobal('AbortSignal', { timeout: vi.fn(() => new AbortController().signal) });
   const opts = { table: 'inquiry_documents', bucket: 'inquiry-documents', ownerColumn: 'order_id', ownerId: 'order', contactId: 'contact', locationId: 'location' };
   return { rows, db, opts, fetchMock, download, update };
 }
