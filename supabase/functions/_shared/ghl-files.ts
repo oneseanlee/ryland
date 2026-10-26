@@ -1,4 +1,5 @@
 // deno-lint-ignore-file no-explicit-any
+declare const Deno: { env: { get(name: string): string | undefined } };
 /** GoHighLevel contact field "Inquiry Documents" (FILE_UPLOAD, multi-file). */
 export const GHL_DOCUMENTS_FIELD_ID = '0MgqkrWiZLHJIc8SaRJg';
 
