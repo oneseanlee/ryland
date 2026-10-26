@@ -1,5 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { readFileSync } from 'node:fs';
 import { GHL_DOCUMENTS_FIELD_ID, drainInquiryDocuments, pushDocsToGhl } from '../../supabase/functions/_shared/ghl-files';
+import { lateInquiryDocsAdded } from '../../supabase/functions/_shared/late-inquiry-docs';
 import { GHL_FILE_ACCEPT, ghlFileProblem, ghlFileProblemMessage, ghlMimeFor } from '../../supabase/functions/_shared/ghl-file-rules';
 
 declare global {
@@ -22,6 +24,7 @@ function fakeDb() {
       eq: (c: string, v: unknown) => (filters.push(r => r[c] === v), q),
       is: (c: string, v: unknown) => (filters.push(r => r[c] === v), q),
       in: (c: string, v: unknown[]) => (filters.push(r => v.includes(r[c])), q),
+      like: (c: string, v: string) => (filters.push(r => typeof r[c] === 'string' && r[c].startsWith(v.replace(/%$/, ''))), q),
       or: (expr: string) => {
         const parts = expr.split(',').map(p => p.split('.'));
         filters.push(r => parts.some(([c, o, ...rest]) => {
@@ -62,8 +65,15 @@ function fakeDb() {
 
 /** Fake GHL: field holds whatever the LAST POST contained. */
 function fakeGhl() {
-  const state = { field: [] as string[], posts: [] as string[][], gets: 0, getCounts: [] as (number | 'error')[], onPost: undefined as undefined | ((i: number) => Promise<void>), postStatus: 200 };
-  const fetch = vi.fn(async (_url: string, init: { method: string; body?: FormData }) => {
+  const state = { field: [] as string[], posts: [] as string[][], gets: 0, getCounts: [] as (number | 'error')[], onPost: undefined as undefined | ((i: number) => Promise<void>), postStatus: 200,
+    log: [] as string[], enrolls: [] as string[], enrollStatus: 200 as number | 'throw' };
+  const fetch = vi.fn(async (url: string, init: { method: string; body?: FormData }) => {
+    if (url.includes('/workflow/')) {
+      state.log.push('enroll'); state.enrolls.push(url);
+      if (state.enrollStatus === 'throw') throw new Error('socket hang up');
+      return new Response(state.enrollStatus === 200 ? '{}' : 'boom', { status: state.enrollStatus });
+    }
+    state.log.push(init.method);
     if (init.method === 'POST') {
       const names = [...init.body!.values()].map(v => (v as File).name);
       const i = state.posts.push(names) - 1;
@@ -258,5 +268,76 @@ describe('drainInquiryDocuments lease', () => {
     f.addDoc(); f.delivery().state = 'processing';
     expect(await drainInquiryDocuments(f.db, drainOpts(g))).toEqual({ state: 'queued' });
     expect(g.mock).not.toHaveBeenCalled();
+  });
+});
+
+describe('Mission Control re-enrollment after late documents', () => {
+  const WF = '/contacts/contact/workflow/d4b879b2-1e07-4d5b-b192-9a2a85dad025';
+  const reply = vi.fn(async () => {});
+  const late = (f: ReturnType<typeof fakeDb>, g: ReturnType<typeof fakeGhl>) => lateInquiryDocsAdded(f.db, { orderId: 'order', contactId: 'contact', fetch: g.fetch, postReply: reply });
+
+  it('a. one new row: one enrollment after upload and read-back', async () => {
+    const f = fakeDb(); const g = fakeGhl(); f.addDoc();
+    expect(await drainInquiryDocuments(f.db, drainOpts(g, late(f, g)))).toEqual({ state: 'uploaded', uploaded: 1 });
+    expect(g.state.enrolls).toHaveLength(1);
+    expect(g.state.enrolls[0].endsWith(WF)).toBe(true);
+    expect(g.state.log).toEqual(['POST', 'GET', 'enroll']);
+  });
+
+  it('b. two successful rounds: two enrollments', async () => {
+    const f = fakeDb(); const g = fakeGhl(); f.addDoc({ id: 'r1' });
+    g.state.onPost = async i => { if (i === 0) f.addDoc({ id: 'r2' }); };
+    expect(await drainInquiryDocuments(f.db, drainOpts(g, late(f, g)))).toEqual({ state: 'uploaded', uploaded: 2 });
+    expect(g.state.enrolls).toHaveLength(2);
+  });
+
+  it('c. no new rows: no enrollment', async () => {
+    const f = fakeDb(); const g = fakeGhl(); f.addDoc({ ghl_uploaded_at: 'previous' });
+    await drainInquiryDocuments(f.db, drainOpts(g, late(f, g)));
+    expect(g.state.enrolls).toHaveLength(0);
+  });
+
+  it('d. read-back never matches: errors, no enrollment', async () => {
+    const f = fakeDb(); const g = fakeGhl(); g.state.getCounts = [0, 0, 0]; f.addDoc();
+    await expect(drainInquiryDocuments(f.db, drainOpts(g, late(f, g)))).rejects.toThrow('GoHighLevel holds 0 of 1 files after upload');
+    expect(g.state.enrolls).toHaveLength(0);
+  });
+
+  it('e. lease lost before marking: no enrollment', async () => {
+    const f = fakeDb(); const g = fakeGhl(); f.addDoc();
+    g.state.onPost = async () => { f.delivery().locked_until = '9999-01-01T00:00:00.000Z'; };
+    expect(await drainInquiryDocuments(f.db, drainOpts(g, late(f, g)))).toEqual({ state: 'queued' });
+    expect(g.state.enrolls).toHaveLength(0);
+  });
+
+  it('f. affiliate lead push makes no workflow request', async () => {
+    const f = fakeDb(); const g = fakeGhl();
+    f.tables.affiliate_lead_documents.push({ id: 'l1', lead_id: 'lead', filename: 'a.pdf', storage_path: 'l/a.pdf', mime_type: 'application/pdf', size_bytes: 10, ghl_uploaded_at: null });
+    await pushDocsToGhl(f.db, { ...pushOpts(g), table: 'affiliate_lead_documents', bucket: 'lead-documents', ownerColumn: 'lead_id', ownerId: 'lead' });
+    expect(g.mock.mock.calls.some(c => String(c[0]).includes('/workflow/'))).toBe(false);
+  });
+
+  it.each([[500, '[500]'], ['throw', '[network]']] as const)('g. enrollment %s does not fail the push', async (status, tag) => {
+    const f = fakeDb(); const g = fakeGhl(); g.state.enrollStatus = status; f.addDoc();
+    expect(await drainInquiryDocuments(f.db, drainOpts(g, late(f, g)))).toEqual({ state: 'uploaded', uploaded: 1 });
+    expect(f.docs().every(d => d.ghl_uploaded_at !== null)).toBe(true);
+    expect(f.delivery().last_error).toContain(`Mission Control workflow enrollment failed ${tag}:`);
+    expect(f.delivery().last_error).not.toContain('mock-key');
+  });
+
+  it('h. 2xx clears only a stale enrollment error', async () => {
+    const f = fakeDb(); const g = fakeGhl(); f.addDoc();
+    f.delivery().last_error = 'Mission Control workflow enrollment failed [500]: boom';
+    await drainInquiryDocuments(f.db, drainOpts(g, late(f, g)));
+    expect(f.delivery().last_error).toBeNull();
+    const f2 = fakeDb(); const g2 = fakeGhl(); f2.addDoc();
+    f2.delivery().last_error = 'Something unrelated';
+    await drainInquiryDocuments(f2.db, drainOpts(g2, late(f2, g2)));
+    expect(f2.delivery().last_error).toBe('Something unrelated');
+  });
+
+  it('i. deliver-inquiry-lead never enrolls', () => {
+    const src = readFileSync('supabase/functions/deliver-inquiry-lead/index.ts', 'utf8');
+    for (const s of ['enrollInMissionControlWorkflow', 'lateInquiryDocsAdded', 'GHL_MC_WORKFLOW_ID']) expect(src).not.toContain(s);
   });
 });

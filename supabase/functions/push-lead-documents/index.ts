@@ -3,7 +3,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.1';
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors';
 import { z } from 'https://esm.sh/zod@3.25.76';
 import { drainInquiryDocuments, pushDocsToGhl } from '../_shared/ghl-files.ts';
-import { postDocsAddedThreadReply } from '../_shared/slack-docs-reply.ts';
+import { lateInquiryDocsAdded } from '../_shared/late-inquiry-docs.ts';
 
 const schema = z.object({ kind: z.enum(['inquiry', 'lead']), id: z.string().uuid() });
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
@@ -50,7 +50,7 @@ serve(async req => {
       if (!d.data?.ghl_contact_id || d.data.state !== 'complete') {
         return json({ state: 'pending', message: 'Documents will be sent with the lead.' });
       }
-      const result = await drainInquiryDocuments(db, { orderId: id, contactId: d.data.ghl_contact_id, locationId, onAdded: n => postDocsAddedThreadReply(db, id, n) });
+      const result = await drainInquiryDocuments(db, { orderId: id, contactId: d.data.ghl_contact_id, locationId, onAdded: lateInquiryDocsAdded(db, { orderId: id, contactId: d.data.ghl_contact_id }) });
       if (result.state === 'queued') return json({ state: 'queued', message: 'Documents are being sent; yours will be included.' });
       return json(result);
     } else {

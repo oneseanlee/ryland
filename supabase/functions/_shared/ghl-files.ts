@@ -3,6 +3,7 @@ import { GHL_MAX_FILE_BYTES, ghlFileProblem, ghlMimeFor } from './ghl-file-rules
 declare const Deno: { env: { get(name: string): string | undefined } };
 /** GoHighLevel contact field "Inquiry Documents" (FILE_UPLOAD, multi-file). */
 export const GHL_DOCUMENTS_FIELD_ID = '0MgqkrWiZLHJIc8SaRJg';
+export const GHL_MC_WORKFLOW_ID = 'd4b879b2-1e07-4d5b-b192-9a2a85dad025'; // GHL workflow "Inquiry Removal -> Mission Control"
 
 const TYPE_ERROR = 'Not sent to GoHighLevel: file type not accepted (PDF, Word, Excel, JPG, PNG, GIF, CSV, TXT, ZIP, MP4, SVG up to 50 MB)';
 const SIZE_ERROR = 'Not sent to GoHighLevel: file is larger than 50 MB (PDF, Word, Excel, JPG, PNG, GIF, CSV, TXT, ZIP, MP4, SVG up to 50 MB)';
@@ -182,4 +183,46 @@ export async function drainInquiryDocuments(db: any, opts: {
     }
   }
   return { state: 'queued' };
+}
+
+const MC_ERROR_PREFIX = 'Mission Control workflow enrollment failed';
+
+/**
+ * Best-effort, single request (no retry): re-adds the contact to the Mission Control workflow so it
+ * re-sends the full file set. Never throws. Failures go to inquiry_lead_delivery.last_error (informational
+ * on complete rows); a 2xx clears only a stale enrollment error.
+ */
+export async function enrollInMissionControlWorkflow(db: any, opts: { orderId: string; contactId: string; fetch?: typeof fetch }): Promise<boolean> {
+  let message: string;
+  try {
+    const key = Deno.env.get('GHL_API_KEY');
+    if (!key) throw new Error('GHL_API_KEY is not configured');
+    const doFetch = opts.fetch ?? fetch;
+    let res: Response;
+    try {
+      res = await doFetch(`https://services.leadconnectorhq.com/contacts/${encodeURIComponent(opts.contactId)}/workflow/${GHL_MC_WORKFLOW_ID}`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${key}`, Version: '2021-07-28', 'Content-Type': 'application/json' },
+        body: '{}',
+        signal: AbortSignal.timeout(20000),
+      });
+    } catch (e) {
+      throw Object.assign(new Error(e instanceof Error ? e.message : String(e)), { network: true });
+    }
+    if (res.ok) {
+      try {
+        await db.from('inquiry_lead_delivery').update({ last_error: null }).eq('order_id', opts.orderId).like('last_error', `${MC_ERROR_PREFIX}%`);
+      } catch (e) { console.error('Mission Control enrollment error clear failed:', e instanceof Error ? e.message : String(e)); }
+      return true;
+    }
+    const body = await res.text().catch(() => '');
+    message = `${MC_ERROR_PREFIX} [${res.status}]: ${body.slice(0, 200)}`;
+  } catch (e: any) {
+    message = `${MC_ERROR_PREFIX} [network]: ${String(e?.message ?? e).slice(0, 200)}`;
+  }
+  console.error(`order ${opts.orderId}: ${message}`);
+  try {
+    await db.from('inquiry_lead_delivery').update({ last_error: message }).eq('order_id', opts.orderId);
+  } catch (e) { console.error('Mission Control enrollment error write failed:', e instanceof Error ? e.message : String(e)); }
+  return false;
 }
