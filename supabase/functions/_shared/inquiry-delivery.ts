@@ -53,14 +53,26 @@ export function inquiryNote(c: DeliveryContext) {
   ].filter(Boolean).join('\n');
 }
 
-export function slackNotice(c: DeliveryContext, documentsPending: boolean) {
+export function slackEscape(value: string): string {
+  return value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+export function slackDocsAddedReply(count: number, firstName: string, lastName: string): string {
+  const name = [firstName.trim(), lastName.trim()].filter(Boolean).join(' ');
+  return `${count} document(s) added for ${slackEscape(name)}`;
+}
+
+export function slackNotice(c: DeliveryContext, _documentsPending: boolean) {
+  const name = [c.client.first_name.trim(), c.client.last_name.trim()].filter(Boolean).join(' ');
   return [
-    `New inquiry-removal lead — ${c.reference}`,
-    `Partner: ${c.affiliate.full_name}`,
-    `Bureaus: ${c.order.bureaus.join(', ') || 'none'}`,
+    `New inquiry-removal lead — ${slackEscape(c.reference)}`,
+    `Client: ${slackEscape(name)}`,
+    `Partner: ${slackEscape(c.affiliate.full_name)}`,
+    `Bureaus: ${slackEscape(c.order.bureaus.join(', ') || 'none')}`,
     `GoHighLevel: contact and New Lead opportunity created.`,
+    `Mission Control: task assigned to the credit repair specialist.`,
     `Payment: not verified.`,
-    documentsPending ? `${c.documentCount} document(s) attached to the GoHighLevel contact.` : 'No documents uploaded.',
+    c.documentCount > 0 ? `Documents: ${c.documentCount} attached to the GoHighLevel contact.` : 'Documents: none yet. Later uploads will be added in this thread.',
     `Review: https://rylandpartners.com/portal/admin/inquiries?order=${c.order.id}`,
   ].join('\n');
 }
@@ -69,7 +81,7 @@ export interface DeliveryServices {
   contact(c: DeliveryContext): Promise<string>;
   opportunity(c: DeliveryContext, contactId: string): Promise<string>;
   note(c: DeliveryContext, contactId: string): Promise<string>;
-  /** Uploads only files not yet sent, marking each as it succeeds. */
+  /** Uploads the full file set when new files exist and verifies the contact's count. */
   documents(c: DeliveryContext, contactId: string): Promise<void>;
   slack(c: DeliveryContext, documentsPending: boolean): Promise<string>;
   save(patch: Partial<DeliveryRecord> & { state?: string; document_state?: string; last_error?: string | null }): Promise<void>;

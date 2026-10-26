@@ -32,7 +32,7 @@ afterEach(() => vi.unstubAllGlobals());
 describe('full-set GoHighLevel document upload', () => {
   it('sends all four files in one POST, verifies them, and preserves previous timestamps', async () => {
     const s = setup(['previous', null, null, null], { a: {}, b: {}, c: {}, d: {} });
-    expect(await pushDocsToGhl(s.db, s.opts)).toBe(4);
+    expect(await pushDocsToGhl(s.db, s.opts)).toEqual({ sent: 4, added: 3 });
     expect(s.download).toHaveBeenCalledTimes(4);
     expect(s.fetchMock).toHaveBeenCalledTimes(2);
     const request = s.fetchMock.mock.calls[0][1];
@@ -49,7 +49,7 @@ describe('full-set GoHighLevel document upload', () => {
 
   it.each([{ timestamps: [] }, { timestamps: ['previous', 'previous'] }])('skips upload when no new files exist: %j', async ({ timestamps }) => {
     const s = setup(timestamps, {});
-    expect(await pushDocsToGhl(s.db, s.opts)).toBe(0);
+    expect(await pushDocsToGhl(s.db, s.opts)).toEqual({ sent: 0, added: 0 });
     expect(s.fetchMock).not.toHaveBeenCalled();
     expect(s.download).not.toHaveBeenCalled();
   });
@@ -65,7 +65,13 @@ describe('full-set GoHighLevel document upload', () => {
 
   it('accepts a matching array read-back', async () => {
     const s = setup([null, null], ['a', 'b']);
-    expect(await pushDocsToGhl(s.db, s.opts)).toBe(2);
+    expect(await pushDocsToGhl(s.db, s.opts)).toEqual({ sent: 2, added: 2 });
+  });
+
+  it('reports four newly added rows when all four files are new', async () => {
+    const s = setup([null, null, null, null], { a: {}, b: {}, c: {}, d: {} });
+    expect(await pushDocsToGhl(s.db, s.opts)).toEqual({ sent: 4, added: 4 });
+    expect(s.fetchMock).toHaveBeenCalledTimes(2);
   });
 
   it('records the first 1000 response characters on every row when the POST fails', async () => {
