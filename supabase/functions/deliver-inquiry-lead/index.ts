@@ -3,7 +3,8 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.1';
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors';
 import { z } from 'https://esm.sh/zod@3.25.76';
 import { deliverInquiry, inquiryNote, inquiryTags, normalizePhone, slackNotice, type DeliveryContext, type DeliveryOrder } from '../_shared/inquiry-delivery.ts';
-import { pushDocsToGhl } from '../_shared/ghl-files.ts';
+import { drainInquiryDocuments, pushDocsToGhl } from '../_shared/ghl-files.ts';
+import { postDocsAddedThreadReply } from '../_shared/slack-docs-reply.ts';
 
 const schema = z.object({ orderIds: z.array(z.string().uuid()).min(1).max(100) });
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
@@ -129,6 +130,14 @@ serve(async req => {
           },
         });
         await db.from('inquiry_lead_delivery').update({ locked_until: null }).eq('order_id', order.id);
+        // Pick up files uploaded while delivery ran (those callers were told 'pending'); never fails the delivery.
+        try {
+          const after = await db.from('inquiry_lead_delivery').select('ghl_contact_id').eq('order_id', order.id).maybeSingle();
+          if (after.error) throw after.error;
+          if (after.data?.ghl_contact_id) await drainInquiryDocuments(db, { orderId: order.id, contactId: after.data.ghl_contact_id, locationId, onAdded: n => postDocsAddedThreadReply(db, order.id, n) });
+        } catch (e) {
+          console.error('Post-delivery document drain failed:', order.id, e instanceof Error ? e.message : String(e));
+        }
         results.push({ orderId: order.id, state: 'complete' });
       } catch (e) {
         const error = e instanceof Error ? e.message : String(e);
