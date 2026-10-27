@@ -40,7 +40,7 @@ const FundabilityBenchmarks = () => (
     <PageMeta
       title="The 12 Fundability Benchmarks | Ryland Partners"
       description="Review six personal credit checks and six business structure checks, identify your next steps, and download the free 12 Fundability Benchmarks scorecard."
-      canonical="/fundability"
+      canonical="/fundability/benchmarks"
     />
     <Navbar />
     <main className="min-h-screen bg-background pt-28 pb-20">

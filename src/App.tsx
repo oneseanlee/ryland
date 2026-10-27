@@ -41,6 +41,8 @@ const MyOrders = lazy(() => import("./pages/MyOrders"));
 const DownloadRedirect = lazy(() => import("./pages/DownloadRedirect"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const FundabilityBenchmarks = lazy(() => import("./pages/FundabilityBenchmarks"));
+const FundabilityScore = lazy(() => import("./pages/FundabilityScore"));
+const FundabilityQuiz = lazy(() => import("./pages/FundabilityQuiz"));
 const PortalInquiries = lazy(() => import("./pages/portal/PortalInquiries"));
 const AdminInquiries = lazy(() => import("./pages/admin/AdminInquiries"));
 const AdminInquirySettings = lazy(() => import("./pages/admin/AdminInquirySettings"));
@@ -130,7 +132,9 @@ const AppContent = () => {
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/credit-intake" element={<Intake />} />
             <Route path="/intake" element={<Intake />} />
-            <Route path="/fundability" element={<FundabilityBenchmarks />} />
+            <Route path="/fundability" element={<FundabilityScore />} />
+            <Route path="/fundability/score" element={<FundabilityQuiz />} />
+            <Route path="/fundability/benchmarks" element={<FundabilityBenchmarks />} />
             <Route path="/unsubscribe" element={<Unsubscribe />} />
             <Route path="/r/:ref" element={<ReferralRedirect />} />
             <Route path="/affiliate-referral" element={<AffiliateReferral />} />

@@ -14,6 +14,8 @@ export default {
     },
     extend: {
       colors: {
+        brand: { DEFAULT: "hsl(var(--brand))", navy: "hsl(var(--brand-navy))", foreground: "hsl(var(--brand-foreground))" },
+        status: { pass: "hsl(var(--status-pass))", fail: "hsl(var(--status-fail))", unverified: "hsl(var(--status-unverified))" },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
