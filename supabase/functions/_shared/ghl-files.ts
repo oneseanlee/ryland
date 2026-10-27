@@ -1,5 +1,5 @@
 // deno-lint-ignore-file no-explicit-any
-import { GHL_MAX_FILE_BYTES, ghlFileProblem, ghlMimeFor } from './ghl-file-rules.ts';
+import { GHL_MAX_FILE_BYTES, INQUIRY_PUSH_LEASE_MS, ghlFileProblem, ghlMimeFor } from './ghl-file-rules.ts';
 declare const Deno: { env: { get(name: string): string | undefined } };
 /** GoHighLevel contact field "Inquiry Documents" (FILE_UPLOAD, multi-file). */
 export const GHL_DOCUMENTS_FIELD_ID = '0MgqkrWiZLHJIc8SaRJg';
@@ -126,10 +126,10 @@ export type DrainResult = { state: 'queued' } | { state: 'uploaded'; uploaded: n
 export async function drainInquiryDocuments(db: any, opts: {
   orderId: string; contactId: string; locationId: string;
   onAdded?: (n: number) => Promise<void>;
+  recordWaitingOnQueued?: boolean;
   fetch?: typeof fetch; sleep?: (ms: number) => Promise<void>;
 }): Promise<DrainResult> {
-  const LEASE_MS = 300_000;
-  const lease = () => new Date(Date.now() + LEASE_MS).toISOString();
+  const lease = () => new Date(Date.now() + INQUIRY_PUSH_LEASE_MS).toISOString();
   const claim = async (): Promise<string | null> => {
     const now = new Date().toISOString();
     const r = await db.from('inquiry_lead_delivery').update({ locked_until: lease() })
@@ -156,17 +156,35 @@ export async function drainInquiryDocuments(db: any, opts: {
   let total = 0;
   for (let round = 1; round <= 5; round++) {
     let token: string | null = await claim();
-    if (!token) return round === 1 ? { state: 'queued' } : { state: 'uploaded', uploaded: total };
+    if (!token) {
+      if (round === 1 && opts.recordWaitingOnQueued) {
+        try {
+          const pending = await pendingRows(skipped);
+          if (pending.length > 0) {
+            const r = await db.from('inquiry_documents').update({ ghl_upload_error: WAITING_ERROR }).in('id', pending.map(d => d.id)).is('ghl_uploaded_at', null);
+            if (r.error) throw r.error;
+          }
+        } catch (e) { console.error('drainInquiryDocuments: waiting error write failed:', opts.orderId, e instanceof Error ? e.message : String(e)); }
+      }
+      return round === 1 ? { state: 'queued' } : { state: 'uploaded', uploaded: total };
+    }
     let result: PushResult;
     try {
       result = await pushDocsToGhl(db, {
         table: 'inquiry_documents', bucket: 'inquiry-documents', ownerColumn: 'order_id', ownerId: opts.orderId,
         contactId: opts.contactId, locationId: opts.locationId, excludeIds: new Set(skipped),
-        beforeMark: async () => (token = await renew(token!)) !== null,
+        beforeMark: async () => {
+          if (!token) return false;
+          token = await renew(token);
+          return token !== null;
+        },
         fetch: opts.fetch, sleep: opts.sleep,
       });
     } finally {
-      if (token) await release(token);
+      if (token) {
+        try { await release(token); }
+        catch (e) { console.error('drainInquiryDocuments: lease release failed (lease TTL will free it):', opts.orderId, e instanceof Error ? e.message : String(e)); }
+      }
     }
     result.skippedIds.forEach(id => skipped.add(id));
     if (result.leaseLost) return { state: 'queued' };

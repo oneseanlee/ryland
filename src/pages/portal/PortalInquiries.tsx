@@ -59,6 +59,7 @@ import PageMeta from "@/components/PageMeta";
 import InquiryProfileFallback from "@/components/portal/InquiryProfileFallback";
 import RemoveInquiryOrderButton from "@/components/portal/RemoveInquiryOrderButton";
 import { toast } from "sonner";
+import { retryQueuedPush } from "@/lib/push-retry";
 import { GHL_FILE_ACCEPT, ghlFileProblem, ghlFileProblemMessage } from "../../../supabase/functions/_shared/ghl-file-rules";
 import {
   FilePlus2,
@@ -371,6 +372,19 @@ export default function PortalInquiries() {
         if (error) toast.error("Saved, but sending to Ryland Partners failed. We'll retry from the admin side.");
         else if (data?.state === "uploaded") toast.success("Document sent to Ryland Partners");
         else if (data?.state === "queued") toast.success("Document saved. It will be sent to Ryland Partners in a moment.");
+        if (!error && (data?.state === "queued" || data?.state === "pending")) {
+          const refreshDocuments = () => { queryClient.invalidateQueries({ queryKey: ["inquiry-documents"] }); };
+          void retryQueuedPush({
+            key: `inquiry:${orderId}`,
+            invoke: final => supabase.functions.invoke("push-lead-documents", { body: { kind: "inquiry", id: orderId, ...(final ? { final: true } : {}) } }),
+            retryPending: true,
+            onSent: refreshDocuments,
+            onGaveUp: () => {
+              toast("Your documents are saved. They will be sent to our team shortly.");
+              refreshDocuments();
+            },
+          });
+        }
       }
     } catch (err) {
       console.error(err);

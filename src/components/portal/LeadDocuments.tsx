@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { GHL_FILE_ACCEPT, ghlFileProblem, ghlFileProblemMessage } from "../../../supabase/functions/_shared/ghl-file-rules";
 import { Button } from "@/components/ui/button";
+import { retryQueuedPush } from "@/lib/push-retry";
 
 
 /** Partner/admin document attachments for a referred lead; each upload is pushed to the GoHighLevel contact. */
@@ -51,6 +52,22 @@ export default function LeadDocuments({ leadId, affiliateId, kind = "lead" }: { 
       else if (data?.state === "uploaded") toast.success("Document sent to Ryland Partners");
       else if (data?.state === "queued") toast.success("Document saved. It will be sent to Ryland Partners in a moment.");
       else toast.success("Document saved. It will be sent once this lead is in our system.");
+      if (!error && (data?.state === "queued" || (kind === "inquiry" && data?.state === "pending"))) {
+        const refreshDocuments = () => {
+          qc.invalidateQueries({ queryKey: key });
+          if (kind === "inquiry") qc.invalidateQueries({ queryKey: ["inquiry-documents"] });
+        };
+        void retryQueuedPush({
+          key: `${kind}:${leadId}`,
+          invoke: final => supabase.functions.invoke("push-lead-documents", { body: { kind, id: leadId, ...(final ? { final: true } : {}) } }),
+          retryPending: kind === "inquiry",
+          onSent: refreshDocuments,
+          onGaveUp: () => {
+            toast("Your documents are saved. They will be sent to our team shortly.");
+            refreshDocuments();
+          },
+        });
+      }
     } catch (e) {
       console.error(e);
       toast.error(`Upload failed: ${e instanceof Error ? e.message : "please try again"}`);
