@@ -823,6 +823,87 @@ export type Database = {
         }
         Relationships: []
       }
+      fundability_assessments: {
+        Row: {
+          answers: Json
+          booking_status: string
+          business_score: number
+          completed_at: string | null
+          created_at: string
+          crm_error: string | null
+          crm_status: string
+          email: string
+          failed: string[]
+          first_name: string
+          ghl_contact_id: string | null
+          id: string
+          landing_url: string | null
+          marketing_consent: boolean
+          personal_score: number
+          phone: string | null
+          priorities: string[]
+          provisional: boolean
+          sms_consent: boolean
+          started_at: string | null
+          total_score: number
+          track: string
+          unverified: string[]
+          utm: Json
+        }
+        Insert: {
+          answers: Json
+          booking_status?: string
+          business_score: number
+          completed_at?: string | null
+          created_at?: string
+          crm_error?: string | null
+          crm_status?: string
+          email: string
+          failed?: string[]
+          first_name: string
+          ghl_contact_id?: string | null
+          id?: string
+          landing_url?: string | null
+          marketing_consent?: boolean
+          personal_score: number
+          phone?: string | null
+          priorities?: string[]
+          provisional?: boolean
+          sms_consent?: boolean
+          started_at?: string | null
+          total_score: number
+          track: string
+          unverified?: string[]
+          utm?: Json
+        }
+        Update: {
+          answers?: Json
+          booking_status?: string
+          business_score?: number
+          completed_at?: string | null
+          created_at?: string
+          crm_error?: string | null
+          crm_status?: string
+          email?: string
+          failed?: string[]
+          first_name?: string
+          ghl_contact_id?: string | null
+          id?: string
+          landing_url?: string | null
+          marketing_consent?: boolean
+          personal_score?: number
+          phone?: string | null
+          priorities?: string[]
+          provisional?: boolean
+          sms_consent?: boolean
+          started_at?: string | null
+          total_score?: number
+          track?: string
+          unverified?: string[]
+          utm?: Json
+        }
+        Relationships: []
+      }
       funding_applications: {
         Row: {
           application_url: string | null
