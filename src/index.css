@@ -8,6 +8,12 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
+    --brand: 206 100% 33%;
+    --brand-navy: 209 100% 22%;
+    --brand-foreground: 0 0% 100%;
+    --status-pass: 162 58% 33%;
+    --status-fail: 2 49% 52%;
+    --status-unverified: 40 80% 38%;
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
 
