@@ -136,7 +136,7 @@ export default function FundabilityQuiz() {
         </section>
 
         <p className="mt-4 text-sm text-muted-foreground" role="status">
-          {crm === "synced" ? `Thanks, ${firstName}. Your results are saved and our team has your scorecard. Follow-up resources are on their way to your email.`
+          {crm === "synced" ? `Thanks, ${firstName}. Your results are saved and our team has your scorecard.`
             : crm === "failed" ? "Your results are shown below, but we couldn't send them to our team just now. Download your scorecard to keep a copy."
             : "Your results are shown below."}
         </p>
