@@ -166,7 +166,10 @@ export async function drainInquiryDocuments(db: any, opts: {
         fetch: opts.fetch, sleep: opts.sleep,
       });
     } finally {
-      if (token) await release(token);
+      if (token) {
+        try { await release(token); }
+        catch (e) { console.error('drainInquiryDocuments: lease release failed (lease TTL will free it):', opts.orderId, e instanceof Error ? e.message : String(e)); }
+      }
     }
     result.skippedIds.forEach(id => skipped.add(id));
     if (result.leaseLost) return { state: 'queued' };

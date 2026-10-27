@@ -1,5 +1,10 @@
 # Inquiry page performance
 
+# Round-two late document push fixes
+- [ ] Make lease release non-throwing and add bounded browser retries with final waiting-row errors.
+- [ ] Add regression tests, verify the full suite and TypeScript, and check the npm lockfile constraints.
+- [ ] Redeploy both document delivery functions without live invocations or messages.
+
 # Inquiry Slack notice update
 - [x] Update names-only escaped notices and late-upload thread replies without changing UI or schema.
 - [x] Run the entire test suite (38 tests passed) and deploy both delivery functions without live invocations or messages.
