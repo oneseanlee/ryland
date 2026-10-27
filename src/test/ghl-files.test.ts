@@ -16,7 +16,7 @@ function fakeDb() {
   const tables: Record<string, Row[]> = { inquiry_documents: [], inquiry_lead_delivery: [], affiliate_lead_documents: [] };
   const missing = new Set<string>();
   const blobSizes: Record<string, number> = {};
-  const hooks: { afterRelease?: () => Promise<void> } = {};
+  const hooks: { afterRelease?: () => Promise<void>; failNextRelease?: boolean } = {};
   function query(table: string, op: 'select' | 'update', patch?: Row) {
     const filters: ((r: Row) => boolean)[] = [];
     let returning = false;
@@ -38,6 +38,10 @@ function fakeDb() {
         try {
           const rows = (tables[table] ??= []).filter(r => filters.every(f => f(r)));
           if (op === 'select') return resolve({ data: rows.map(r => ({ ...r })), error: null });
+          if (table === 'inquiry_lead_delivery' && patch?.locked_until === null && hooks.failNextRelease) {
+            hooks.failNextRelease = false;
+            return resolve({ data: null, error: new Error('release failed') });
+          }
           rows.forEach(r => Object.assign(r, patch));
           if (table === 'inquiry_lead_delivery' && patch && 'locked_until' in patch && patch.locked_until === null && hooks.afterRelease) {
             const h = hooks.afterRelease; hooks.afterRelease = undefined; await h();
@@ -198,6 +202,46 @@ describe('single-pass pushDocsToGhl', () => {
 });
 
 describe('drainInquiryDocuments lease', () => {
+  it('release error after marking still runs onAdded exactly once', async () => {
+    const f = fakeDb(); const g = fakeGhl(); const row = f.addDoc();
+    f.hooks.failNextRelease = true;
+    const late = lateInquiryDocsAdded(f.db, { orderId: 'order', contactId: 'contact', fetch: g.fetch, postReply: vi.fn(async () => {}) });
+    const onAdded = vi.fn(late);
+    const log = vi.spyOn(console, 'error').mockImplementation(() => {});
+    try {
+      await expect(drainInquiryDocuments(f.db, drainOpts(g, onAdded))).resolves.toEqual({ state: 'uploaded', uploaded: 1 });
+      expect(row.ghl_uploaded_at).not.toBeNull();
+      expect(onAdded.mock.calls).toEqual([[1]]);
+      expect(g.state.enrolls).toHaveLength(1);
+      expect(f.delivery().locked_until).not.toBeNull();
+      expect(log).toHaveBeenCalledWith('drainInquiryDocuments: lease release failed (lease TTL will free it):', 'order', 'release failed');
+    } finally { log.mockRestore(); }
+  });
+
+  it('recordWaitingOnQueued writes the waiting error only when asked', async () => {
+    const waiting = 'Still waiting to send after 5 attempts; will retry on the next upload or admin retry';
+    const f = fakeDb(); const g = fakeGhl(); const row = f.addDoc();
+    const unsupported = f.addDoc({ filename: 'photo.heic' });
+    f.delivery().locked_until = '9999-01-01T00:00:00.000Z';
+    expect(await drainInquiryDocuments(f.db, { ...drainOpts(g), recordWaitingOnQueued: true })).toEqual({ state: 'queued' });
+    expect(row.ghl_upload_error).toBe(waiting);
+    expect(unsupported.ghl_upload_error).toBeNull();
+    const f2 = fakeDb(); const row2 = f2.addDoc();
+    f2.delivery().locked_until = '9999-01-01T00:00:00.000Z';
+    expect(await drainInquiryDocuments(f2.db, drainOpts(g))).toEqual({ state: 'queued' });
+    expect(row2.ghl_upload_error).toBeNull();
+    expect(g.mock).not.toHaveBeenCalled();
+  });
+
+  it('a stranded row is picked up by the next successful drain from any caller', async () => {
+    const f = fakeDb(); const g = fakeGhl();
+    f.addDoc({ id: 'stranded', ghl_upload_error: 'Still waiting to send after 5 attempts; will retry on the next upload or admin retry' });
+    f.addDoc({ id: 'new' });
+    expect(await drainInquiryDocuments(f.db, drainOpts(g))).toEqual({ state: 'uploaded', uploaded: 2 });
+    expect(g.state.posts).toEqual([['stranded.pdf', 'new.pdf']]);
+    expect(f.docs().every(d => d.ghl_uploaded_at !== null && d.ghl_upload_error === null)).toBe(true);
+  });
+
   it('race regression: B queues during A\'s POST, A re-pushes the full set', async () => {
     const f = fakeDb(); const g = fakeGhl();
     f.addDoc({ id: 'r1' });
