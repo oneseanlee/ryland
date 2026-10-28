@@ -6,7 +6,7 @@ const NAVY: [number, number, number] = [0, 58, 112];
 const BLUE: [number, number, number] = [0, 96, 169];
 const GREEN: [number, number, number] = [35, 132, 103];
 const RED: [number, number, number] = [192, 77, 72];
-const AMBER: [number, number, number] = [145, 98, 12];
+const UNVERIFIED: [number, number, number] = [55, 93, 149];
 
 async function loadImage(src: string): Promise<{ data: string; w: number; h: number } | null> {
   try {
@@ -60,7 +60,7 @@ export async function downloadScorecard(firstName: string, answers: Record<strin
   y += 4;
   for (const b of BENCHMARKS) {
     const a = answers[b.id];
-    const [label, color] = a === "yes" ? ["PASS", GREEN] : a === "no" ? ["NEEDS ATTENTION", RED] : ["NOT VERIFIED", AMBER];
+    const [label, color] = a === "yes" ? ["PASS", GREEN] : a === "no" ? ["NEEDS ATTENTION", RED] : ["NOT VERIFIED", UNVERIFIED];
     const c = color as [number, number, number];
     ensure(42);
     doc.setFillColor(...c); doc.circle(M + 5, y + 9, 4, "F");
