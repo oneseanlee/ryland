@@ -83,7 +83,7 @@ export default function FundabilityResults({ answers, result, firstName, crm, bo
       <p className="mt-2 text-sm text-muted-foreground">Tap any line to see where you stand and what to do next.</p>
       <div className="mt-4 flex flex-wrap gap-2" role="group" aria-label="Filter benchmarks">
         {([['no', `Fix · ${result.failed.length}`], ['unsure', `Not sure · ${result.unverified.length}`], ['yes', `You passed · ${result.total}`]] as const).map(([k, label]) =>
-          <Button key={k} size="sm" variant={filter === k ? "default" : "outline"} aria-pressed={filter === k} className="rounded-full min-h-[44px]" onClick={() => setFilter(filter === k ? null : k)}>{label}</Button>)}
+          <Button key={k} size="sm" variant={filter === k ? "default" : "outline"} aria-pressed={filter === k} className="rounded-full min-h-[44px]" onClick={() => setFilter(filter === k ? null : k)}><span className={`h-2.5 w-2.5 rounded-full shrink-0 ${statusOf(k).cls}`} aria-hidden="true" />{label}</Button>)}
       </div>
       {(['personal', 'business'] as const).map((section) => {
         const items = BENCHMARKS.filter((b) => b.section === section && (!filter || answers[b.id] === filter));
