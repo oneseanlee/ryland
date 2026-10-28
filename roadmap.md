@@ -45,3 +45,4 @@
 - [x] Partners can attach documents to submitted inquiry orders and My Leads; uploads push to the GoHighLevel contact (not yet tried with a real upload).
 - [x] Fixed document upload permission check; removed size/type limits; Lead Tracker split into Leads and Clients (paid inquiry orders) with document uploads.
 - [ ] Verify automatic delivery from a fresh checkout and downstream GoHighLevel follow-ups: requires a separately authorized checkout test; this test used manual admin delivery only.
+- 2026-10-28: Fundability landing page — replaced the story headline and body with Gene's own copy, spaced into five paragraphs (verified on phone and desktop).
