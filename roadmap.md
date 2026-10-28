@@ -2,6 +2,7 @@
 - [x] Give Yes / No / Not sure each its own icon and color on the landing card, in the quiz (with a clearly selected state), and as filled pills on the downloaded scorecard.
 - [x] Keep the sticky bottom bar hidden while the landing answer card is on screen so it never covers an answer.
 - [x] Verify on phone and desktop plus a real PDF download: 81 tests passed, type check exit 0, build OK, no submission or lead created.
+- [x] Replace the brown/amber "Not sure" color with a steel blue across the landing card, quiz, results filter labels and the scorecard PDF; 81 tests passed, type check exit 0, build OK.
 
 # Personal benchmark results pass
 - [x] Say "You passed" on any benchmark they met and give each of the 12 a personal line in the expanded row ("What you've got"), including the clean-payments note to keep it up; "Not sure" rows read "How to check it".
