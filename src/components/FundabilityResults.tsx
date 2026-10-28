@@ -26,7 +26,7 @@ export default function FundabilityResults({ answers, result, firstName, crm, bo
     const io = new IntersectionObserver(([e]) => { above = !e.isIntersecting && e.boundingClientRect.top < 0; sync(); });
     io.observe(first);
     const last = finalCtaRef.current;
-    const io2 = last ? new IntersectionObserver(([e]) => { finalVisible = e.isIntersecting; sync(); }) : null;
+    const io2 = last ? new IntersectionObserver(([e]) => { finalVisible = e.intersectionRatio >= 0.25; sync(); }, { threshold: [0, 0.25, 0.5] }) : null;
     if (last) io2?.observe(last);
     return () => { io.disconnect(); io2?.disconnect(); };
   }, []);
