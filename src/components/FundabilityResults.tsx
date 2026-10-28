@@ -100,7 +100,7 @@ export default function FundabilityResults({ answers, result, firstName, crm, bo
               <div><p className="text-xs font-bold text-muted-foreground">WHY IT MATTERS</p><p className="mt-1">{b.why}</p></div>
               {answers[b.id] === 'yes'
                 ? <div className={`rounded-lg p-3 ${s.pill}`}><p className="text-xs font-bold">WHAT YOU'VE GOT</p><p className="mt-1">{passLine(b.id)}</p></div>
-                : <div><p className="text-xs font-bold text-muted-foreground">{answers[b.id] === 'unsure' ? 'HOW TO CHECK IT' : 'HOW TO FIX'}</p><p className="mt-1">{b.fix}</p></div>}
+                : <div className="rounded-lg p-3 bg-muted"><p className="text-xs font-bold text-muted-foreground">{answers[b.id] === 'unsure' ? 'HOW TO CHECK IT' : 'HOW TO FIX'}</p><p className="mt-1">{b.fix}</p></div>}
             </div>}
           </div>;
         })}</div> : <p className="mt-3 text-sm text-muted-foreground">Nothing in this filter.</p>}
