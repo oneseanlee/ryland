@@ -16,3 +16,12 @@ describe("PDF results score ranges", () => {
     expect(resultBand(11)).not.toBe("ready");
   });
 });
+import { attentionItems } from "@/lib/fundabilityResults";
+describe("attention order", () => {
+  it("puts score under 700, negatives, then business compliance first", () => {
+    expect(attentionItems({})).toEqual(["01", "02", "07"]);
+  });
+  it("falls through to the next most important when the majors pass", () => {
+    expect(attentionItems({ "01": "yes", "02": "yes", "07": "yes" })).toEqual(["05", "11", "03"]);
+  });
+});
