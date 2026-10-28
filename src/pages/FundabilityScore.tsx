@@ -102,19 +102,26 @@ const FundabilityScore = () => {
         </section>
 
         {/* What you'll find out */}
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 py-14 text-center">
-          <p className={`text-sm font-bold tracking-[0.2em] text-fs-gold`}>IN 3 MINUTES, YOU'LL FIND OUT:</p>
-          <div className="mt-8 flex flex-col gap-5 md:grid md:grid-cols-5 md:gap-8">
-            {LEARN.map(([I, t]) => (
-              <div key={t} className="flex items-start gap-3 text-left md:flex-col md:items-center md:text-center">
-                <I className="h-6 w-6 shrink-0 mt-1 text-fs-gold md:h-9 md:w-9 md:mt-0" aria-hidden="true" />
-                <p className="text-base">{t}</p>
-              </div>
-            ))}
+        <section aria-labelledby="learn-heading" className="max-w-7xl mx-auto px-5 sm:px-6 py-12 sm:py-16 grid gap-7 lg:grid-cols-[0.9fr_1.1fr] lg:gap-x-16 lg:gap-y-6">
+          <div className="lg:col-start-1 lg:row-start-1 lg:self-end">
+            <p className="text-xs font-bold tracking-widest text-fs-navy">YOUR NEXT 3 MINUTES</p>
+            <h2 id="learn-heading" className="mt-3 max-w-md text-3xl sm:text-4xl font-bold font-heading leading-tight text-fs-navy [text-wrap:balance]">Know where you stand before you apply.</h2>
+            <div className="mt-5 h-1 w-12 bg-fs-gold" aria-hidden="true" />
           </div>
-
-          <div className="mt-10"><Cta place="learn" className="w-full sm:w-auto sm:px-16" /></div>
-          <p className="mt-3 text-sm text-muted-foreground">Free. About 3 minutes. Nothing is pulled.</p>
+          <ul className="divide-y divide-fs-navy/10 lg:col-start-2 lg:row-start-1 lg:row-span-2">
+            {LEARN.map(([I, t]) => (
+              <li key={t} className="flex items-center gap-4 py-4 first:pt-0 last:pb-0 lg:first:pt-4 lg:last:pb-4">
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-fs-navy">
+                  <I className="h-5 w-5 text-fs-gold" strokeWidth={1.75} aria-hidden="true" />
+                </span>
+                <p className="text-base font-medium leading-relaxed text-fs-navy">{t}</p>
+              </li>
+            ))}
+          </ul>
+          <div className="text-center lg:col-start-1 lg:row-start-2 lg:self-start lg:text-left">
+            <Cta place="learn" className="w-full sm:w-auto px-5" />
+            <p className="mt-3 text-sm text-muted-foreground">Free. About 3 minutes. Nothing is pulled.</p>
+          </div>
         </section>
 
         {/* Walk away with */}
