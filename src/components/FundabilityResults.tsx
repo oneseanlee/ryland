@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ChevronDown, Download, RotateCcw, CheckCircle2, XCircle, HelpCircle } from "lucide-react";
+import { ChevronDown, Download, RotateCcw, CheckCircle2, XCircle, HelpCircle, SearchCheck, ListChecks, Compass } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BENCHMARKS, benchmarkById, track, type Answer, type ScoreResult } from "@/lib/fundability";
 import { RESULT_HEADLINE, resultBand, resultPlan } from "@/lib/fundabilityResults";
@@ -10,6 +10,21 @@ const statusOf = (answer: Answer) => answer === "yes"
   : { label: "Not sure", cls: "bg-status-unverified", Icon: HelpCircle };
 
 const CTA_DISCLOSURE = "Terms apply. We provide financial education; specific funding amounts are not guaranteed.";
+
+const PRIORITY_COPY: Record<string, { title: string; impact: string }> = {
+  "01": { title: "Your credit score is too low", impact: "At least one score is below the 700 benchmark. That can limit your options even when another bureau shows a stronger score." },
+  "02": { title: "Negative items need attention", impact: "Late payments, collections or other negative history can be a serious obstacle to approval. We need to understand what's on your reports before you apply." },
+  "03": { title: "You have too many credit inquiries", impact: "Repeated applications can make your file look riskier. Applying again without a plan can add to the problem." },
+  "04": { title: "Your credit profile needs more depth", impact: "Your answers indicate fewer than four open primary accounts. A strong score alone may not demonstrate the credit history a lender wants to see." },
+  "05": { title: "Your credit card utilization is too high", impact: "At least one card is at or above the 28% benchmark. High balances can weigh on your scores and make lenders hesitate—even if your total utilization looks better." },
+  "06": { title: "Your credit history needs more time", impact: "Your average account age is below the two-year benchmark. Newer accounts can make a lender view your profile as less established." },
+  "07": { title: "Your business isn't set up correctly yet", impact: "Your entity's active status or age doesn't meet the benchmark. These basics can stop a funding application before your credit is even reviewed." },
+  "08": { title: "Your business credit file isn't ready", impact: "A missing D-U-N-S number or inconsistent business details can make it harder for a lender to verify your business." },
+  "09": { title: "Your online presence isn't funding-ready", impact: "A missing website or business-domain email can undermine your business's credibility. Lenders need to be able to verify a consistent, established presence." },
+  "10": { title: "Your business contact setup needs work", impact: "Your phone or address doesn't meet the benchmark. Inconsistent or personal contact details can raise questions during business verification." },
+  "11": { title: "Your business negatives need attention", impact: "Liens, judgments or unpaid business debts can create serious barriers. Review the records and understand what needs resolution before applying." },
+  "12": { title: "Your industry classification needs review", impact: "An inaccurate or higher-risk industry code can restrict your lender options. We need to verify your classification before building an application plan." },
+};
 
 export default function FundabilityResults({ answers, result, firstName, crm, bookUrl, restart }: {
   answers: Record<string, Answer>; result: ScoreResult; firstName: string; crm?: string; bookUrl: string; restart: () => void;
@@ -44,17 +59,38 @@ export default function FundabilityResults({ answers, result, firstName, crm, bo
 
     <section className="mt-8">
       <h2 className="text-sm font-bold text-brand">{result.priorities.length ? "START WITH THESE PRIORITIES" : "YOUR NEXT STEP"}</h2>
-      {result.priorities.length ? <ol className="mt-4 space-y-3">{result.priorities.map((id, i) => { const b = benchmarkById(id); return <li key={id} className="rounded-lg border p-4 flex items-start gap-4">
-        <span className="text-2xl font-bold text-brand shrink-0">{i + 1}</span><div><h3 className="font-bold">{b.title}{answers[id] === "unsure" && <span className="block mt-1 text-xs text-muted-foreground">Verify together during your review</span>}</h3><p className="mt-1 text-sm text-muted-foreground">{b.fix}</p></div>
-      </li>; })}</ol> : <p className="mt-3 text-muted-foreground">All 12 self-reported benchmarks pass. Let's verify your actual credit and business files, review lender-specific requirements, and map your next steps.</p>}
+      {result.priorities.length ? <>
+        <p className="mt-2 text-2xl font-bold font-heading">These gaps matter. Let's address them.</p>
+        <p className="mt-2 text-sm text-muted-foreground">Based on your answers, these are the first items to review before another funding application.</p>
+        <ol className="mt-4 space-y-3">{result.priorities.map((id, i) => {
+          const b = benchmarkById(id); const copy = PRIORITY_COPY[id]; const unverified = answers[id] === "unsure";
+          return <li key={id} className="rounded-lg border border-l-4 border-l-brand p-5 flex items-start gap-4">
+            <span className="text-2xl font-bold text-brand shrink-0">{i + 1}</span>
+            <div className="min-w-0"><p className="text-xs font-semibold text-brand mb-1">{unverified ? "NEEDS VERIFICATION" : "NEEDS ATTENTION"}</p>
+              <h3 className="font-bold text-lg leading-snug">{unverified ? `${b.title}: you need to know where you stand` : copy?.title ?? b.title}</h3>
+              <p className="mt-2 text-sm text-muted-foreground">{unverified ? "This isn't a confirmed problem yet. Not knowing whether you meet this benchmark leaves a gap in your funding plan. We'll help you verify it during your review." : copy?.impact ?? b.why}</p>
+              <p className="mt-3 text-sm font-semibold">{unverified ? "Get clarity before you apply." : "It's a gap to address—not a reason to give up."}</p>
+            </div>
+          </li>;
+        })}</ol>
+      </> : <p className="mt-3 text-muted-foreground">All 12 self-reported benchmarks pass. Let's verify your actual credit and business files, review lender-specific requirements, and map your next steps.</p>}
     </section>
 
-    <section className="mt-8 border-y border-brand py-7">
-      <h2 className="text-2xl font-bold font-heading">Let's review your results together.</h2>
-      <p className="mt-3 text-muted-foreground">Book a funding assessment review. A funding manager will read your real file with you, help you understand the benchmarks you aren't meeting, and build a plan for what to address first.</p>
-      {bookingButton}
-      <p className="mt-3 text-sm text-center text-muted-foreground">Free review · no pressure</p>
-      <p className="mt-3 text-xs text-muted-foreground">{CTA_DISCLOSURE}</p>
+    <section className="mt-8 bg-brand-navy text-brand-foreground p-6 sm:p-9">
+      <p className="text-xs font-bold">YOUR FREE FUNDING ASSESSMENT REVIEW</p>
+      <h2 className="mt-3 text-3xl sm:text-4xl leading-tight font-bold font-heading">{result.priorities.length ? "The gaps are real. So is a path forward." : "A strong score is the start. Let's verify your next move."}</h2>
+      <p className="mt-4 leading-relaxed">{result.priorities.length ? "Don't keep applying without understanding what's holding you back. Your answers point to issues that may limit approval—but many can be addressed with the right plan." : "Before you apply, let's confirm your actual credit and business files meet the benchmarks and understand the lender-specific requirements."}</p>
+      <p className="mt-4 leading-relaxed">You don't have to figure out the next steps alone. In your free review, a Ryland funding manager will:</p>
+      <div className="mt-6 divide-y divide-brand-foreground/20 border-y border-brand-foreground/20">
+        {[
+          { Icon: SearchCheck, title: "Read your real file with you", text: "Go beyond the quiz and understand your credit and business profile." },
+          { Icon: ListChecks, title: "Identify what needs attention", text: "Separate confirmed gaps from items we still need to verify." },
+          { Icon: Compass, title: "Map a plan to address the gaps", text: "Set priorities and explain how our credit optimization and business education services may help." },
+        ].map(({ Icon, title, text }) => <div key={title} className="flex items-start gap-4 py-5"><Icon className="h-6 w-6 shrink-0 mt-0.5" aria-hidden="true" /><div><h3 className="font-bold">{title}</h3><p className="mt-1 text-sm leading-relaxed">{text}</p></div></div>)}
+      </div>
+      <div className="mt-2">{bookingButton}</div>
+      <p className="mt-4 text-sm text-center">Free review · clear next steps · no pressure</p>
+      <p className="mt-4 text-xs leading-relaxed">{CTA_DISCLOSURE}</p>
     </section>
 
     <Button variant="ghost" className="mt-4 w-full min-h-[52px] h-auto whitespace-normal" aria-expanded={showBenchmarks} aria-controls="results-benchmarks" onClick={() => setShowBenchmarks(!showBenchmarks)}>
