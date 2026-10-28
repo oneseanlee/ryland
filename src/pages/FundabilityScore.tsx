@@ -151,8 +151,15 @@ const FundabilityScore = () => {
         <section className="max-w-7xl mx-auto px-4 sm:px-6 py-14 grid md:grid-cols-[260px_1fr] gap-8 items-center">
           <img src={gene.url} alt="Gene Ryland, Founder of Ryland Partners" className="w-full max-w-[260px] aspect-[4/5] rounded-2xl object-cover object-top mx-auto" loading="lazy" />
           <div>
-            <h2 className="text-2xl sm:text-3xl font-bold font-heading">I got told no three times before I figured this out.</h2>
-            <p className="mt-4 text-foreground/80 leading-relaxed">I needed capital for my business, so I did what everybody does. I applied. Three banks. Three letters. Nobody told me why. Then it clicked. The banks weren't rejecting me. They were rejecting my file. And my file was saying things I didn't even know about. So I fixed the file and went back in the right order. Same guy. Same business. Different answer. Today my business holds $803,000 in approved credit limits. The Fundability Score runs the same 12 checks I wish someone had shown me before application number one.</p>
+            <h2 className="text-2xl sm:text-3xl font-bold font-heading">I got denied again and again before I finally figured this out.</h2>
+            <div className="mt-5 space-y-5 text-foreground/80 leading-relaxed">
+              <p>I needed money for my business, so I walked into the big banks and applied. Denial after denial.</p>
+              <p>I didn't have huge revenue yet. I didn't qualify for traditional business loans, and I had zero strategy. I was just applying blind and hoping for the best.</p>
+              <p>Then it hit me: the banks weren't rejecting me. They were rejecting my file.</p>
+              <p>My profile had red flags I didn't even know existed. Once I learned the rules, fixed my file, and applied the right way, everything changed. Same guy. Same business. But this time, approved.</p>
+              <p>Today, my business holds over $800,000 in credit limits. This 3-minute quiz runs the exact checks I wish I had before my first application.</p>
+            </div>
+
             <div className="mt-6 flex flex-wrap items-end justify-between gap-4">
               <div><p className="font-bold">Gene Ryland</p><p className="text-sm text-muted-foreground">Founder</p></div>
               <Cta label="Score my file now" place="story" />
