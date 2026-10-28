@@ -20,15 +20,18 @@ export default function FundabilityResults({ answers, result, firstName, crm, bo
   const finalCtaRef = useRef<HTMLElement>(null);
   const [showSticky, setShowSticky] = useState(false);
   useEffect(() => {
-    const first = firstCtaRef.current; if (!first) return;
-    let above = false; let finalVisible = false;
-    const sync = () => setShowSticky(above && !finalVisible);
-    const io = new IntersectionObserver(([e]) => { above = !e.isIntersecting && e.boundingClientRect.top < 0; sync(); });
-    io.observe(first);
-    const last = finalCtaRef.current;
-    const io2 = last ? new IntersectionObserver(([e]) => { finalVisible = e.intersectionRatio >= 0.25; sync(); }, { threshold: [0, 0.25, 0.5] }) : null;
-    if (last) io2?.observe(last);
-    return () => { io.disconnect(); io2?.disconnect(); };
+    const update = () => {
+      const first = firstCtaRef.current; if (!first) return;
+      const above = first.getBoundingClientRect().bottom < 0;
+      const last = finalCtaRef.current;
+      const lr = last ? last.getBoundingClientRect() : null;
+      const finalVisible = !!lr && lr.bottom > 0 && lr.top < window.innerHeight * 0.75;
+      setShowSticky(above && !finalVisible);
+    };
+    update();
+    window.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update);
+    return () => { window.removeEventListener("scroll", update); window.removeEventListener("resize", update); };
   }, []);
   const [openTile, setOpenTile] = useState<string | null>(null);
   const bookingButton = (
