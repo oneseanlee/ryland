@@ -11,22 +11,28 @@ const statusOf = (answer: Answer) => answer === "yes"
 
 const CTA_DISCLOSURE = "Terms apply. We provide financial education; specific funding amounts are not guaranteed.";
 
-
 export default function FundabilityResults({ answers, result, firstName, crm, bookUrl, restart }: {
   answers: Record<string, Answer>; result: ScoreResult; firstName: string; crm?: string; bookUrl: string; restart: () => void;
 }) {
   const [filter, setFilter] = useState<Answer | null>(null);
   const attention = attentionItems(answers);
   const firstCtaRef = useRef<HTMLDivElement>(null);
+  const finalCtaRef = useRef<HTMLElement>(null);
   const [showSticky, setShowSticky] = useState(false);
   useEffect(() => {
-    const el = firstCtaRef.current; if (!el) return;
-    const io = new IntersectionObserver(([e]) => setShowSticky(!e.isIntersecting && e.boundingClientRect.top < 0));
-    io.observe(el); return () => io.disconnect();
+    const first = firstCtaRef.current; if (!first) return;
+    let above = false; let finalVisible = false;
+    const sync = () => setShowSticky(above && !finalVisible);
+    const io = new IntersectionObserver(([e]) => { above = !e.isIntersecting && e.boundingClientRect.top < 0; sync(); });
+    io.observe(first);
+    const last = finalCtaRef.current;
+    const io2 = last ? new IntersectionObserver(([e]) => { finalVisible = e.isIntersecting; sync(); }) : null;
+    if (last) io2?.observe(last);
+    return () => { io.disconnect(); io2?.disconnect(); };
   }, []);
   const [openTile, setOpenTile] = useState<string | null>(null);
   const bookingButton = (
-    <Button asChild size="lg" className="shiny-cta mt-5 w-full h-auto min-h-[52px] px-4 py-3 whitespace-normal text-base font-bold bg-brand text-brand-foreground hover:bg-brand/90">
+    <Button asChild size="lg" className="shiny-cta mt-5 w-full h-auto min-h-[52px] !px-4 sm:!px-10 !py-3.5 !text-base sm:!text-lg text-center whitespace-normal [text-wrap:balance] font-bold bg-brand text-brand-foreground hover:bg-brand/90">
       <a href={bookUrl} onClick={() => track("funding_review_clicked", { track: result.track, score: result.total })}>Book my free Funding Review</a>
     </Button>
   );
@@ -97,7 +103,7 @@ export default function FundabilityResults({ answers, result, firstName, crm, bo
       <p className="mt-4 text-sm text-muted-foreground">“Not sure” counts as not passed. We check it for real on your review.</p>
     </section>
 
-    <section className="mt-10 rounded-2xl bg-brand-navy text-brand-foreground p-6 sm:p-9 shadow-xl">
+    <section ref={finalCtaRef} className="mt-10 rounded-2xl bg-brand-navy text-brand-foreground p-6 sm:p-9 shadow-xl">
       <p className="text-xs font-bold tracking-widest opacity-80">YOUR FREE FUNDING REVIEW</p>
       <h2 className="mt-3 text-3xl sm:text-4xl leading-tight font-bold font-heading">Let's read your real file together.</h2>
       <p className="mt-3 opacity-90">Your quiz shows where to look. The review shows exactly what to fix, and in what order.</p>
@@ -113,8 +119,9 @@ export default function FundabilityResults({ answers, result, firstName, crm, bo
     <p className="mt-6 text-xs text-muted-foreground leading-relaxed">This score is an estimate based on your answers. It is not a credit decision or an offer of funding. {CTA_DISCLOSURE}</p>
 
     {showSticky && <div className="fixed inset-x-0 bottom-0 z-40 border-t bg-background/95 backdrop-blur p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]"><div className="max-w-xl mx-auto">
-      <Button asChild size="lg" className="w-full min-h-[52px] font-bold bg-brand text-brand-foreground hover:bg-brand/90"><a href={bookUrl} onClick={() => track("funding_review_clicked", { track: result.track, score: result.total, sticky: true })}>Book my free Funding Review</a></Button>
+      <Button asChild size="lg" className="w-full min-h-[52px] rounded-full !px-5 !text-base font-bold bg-brand text-brand-foreground hover:bg-brand/90"><a href={bookUrl} onClick={() => track("funding_review_clicked", { track: result.track, score: result.total, sticky: true })}>Book my free Funding Review</a></Button>
     </div></div>}
     <Button variant="ghost" onClick={restart} className="mt-6 min-h-[44px] text-sm text-muted-foreground"><RotateCcw className="h-4 w-4" aria-hidden="true" />Retake the assessment</Button>
+    <div className="h-20" aria-hidden="true" />
   </>;
 }
