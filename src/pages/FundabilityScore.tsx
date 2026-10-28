@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowRight, Gauge, FileText, Eye, AlertTriangle, ListChecks, CircleCheck, TrendingUp, Lock, Download, CheckCircle2, XCircle, HelpCircle } from "lucide-react";
 import logo from "@/assets/logo-dark.png";
@@ -37,7 +37,7 @@ const FirstQuestion = () => {
     nav("/fundability/score");
   };
   return (
-    <div className="rounded-2xl bg-background text-foreground p-6 sm:p-7 shadow-2xl">
+    <div id="first-question-card" className="rounded-2xl bg-background text-foreground p-6 sm:p-7 shadow-2xl">
       <p className="text-[11px] font-bold tracking-[0.2em] text-muted-foreground border-b pb-2">FUNDING FILE</p>
       <p className="mt-3 text-sm text-muted-foreground">Check 1 of 12</p>
       <h2 className="mt-1 text-xl sm:text-2xl font-bold font-heading leading-snug">{q.question}</h2>
@@ -79,6 +79,19 @@ const FAQ = [
 ];
 
 const FundabilityScore = () => {
+  const [showSticky, setShowSticky] = useState(true);
+  useEffect(() => {
+    const onScroll = () => {
+      const card = document.getElementById("first-question-card");
+      if (!card) return setShowSticky(true);
+      const r = card.getBoundingClientRect();
+      setShowSticky(!(r.bottom > 0 && r.top < window.innerHeight));
+    };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => { window.removeEventListener("scroll", onScroll); window.removeEventListener("resize", onScroll); };
+  }, []);
   useEffect(() => { captureUtm(); track("landing_viewed"); }, []);
   return (
     <>
@@ -247,7 +260,7 @@ const FundabilityScore = () => {
         </section>
       </main>
       <footer className="max-w-7xl mx-auto px-4 sm:px-6 py-6 pb-24 flex flex-wrap items-center justify-between gap-4"><img src={logo} alt="Ryland Partners" className="h-7 w-auto" /><p className="text-xs text-muted-foreground">Not a lender. We do not make credit decisions.</p></footer>
-      <Link to="/fundability/score" onClick={() => track("cta_clicked", { place: "sticky" })} className="fixed bottom-0 inset-x-0 z-40 bg-fs-gold text-fs-navy font-bold text-center py-4 min-h-[52px] flex items-center justify-center gap-2">Get my Fundability Score <ArrowRight className="h-5 w-5" aria-hidden="true" /></Link>
+      {showSticky && <Link to="/fundability/score" onClick={() => track("cta_clicked", { place: "sticky" })} className="fixed bottom-0 inset-x-0 z-40 bg-fs-gold text-fs-navy font-bold text-center py-4 min-h-[52px] flex items-center justify-center gap-2">Get my Fundability Score <ArrowRight className="h-5 w-5" aria-hidden="true" /></Link>}
     </>
   );
 };
