@@ -10,6 +10,7 @@ All colors MUST be HSL.
   :root {
     --brand: 206 100% 33%;
     --brand-navy: 209 100% 22%;
+    --brand-accent: 204 90% 68%;
     --brand-foreground: 0 0% 100%;
     --status-pass: 162 58% 33%;
     --status-fail: 2 49% 52%;
