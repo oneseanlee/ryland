@@ -80,9 +80,9 @@ export default function FundabilityResults({ answers, result, firstName, crm, bo
     <section id="results-benchmarks" className="mt-10">
       <p className="text-xs font-bold text-brand">YOUR 12 BENCHMARKS</p>
       <h2 className="mt-2 text-2xl sm:text-3xl font-bold font-heading">What banks check, and where you stand</h2>
-      <p className="mt-2 text-sm text-muted-foreground">Tap any line to see the goal and how to fix it.</p>
+      <p className="mt-2 text-sm text-muted-foreground">Tap any line to see where you stand and what to do next.</p>
       <div className="mt-4 flex flex-wrap gap-2" role="group" aria-label="Filter benchmarks">
-        {([['no', `Fix · ${result.failed.length}`], ['unsure', `Not sure · ${result.unverified.length}`], ['yes', `Pass · ${result.total}`]] as const).map(([k, label]) =>
+        {([['no', `Fix · ${result.failed.length}`], ['unsure', `Not sure · ${result.unverified.length}`], ['yes', `You passed · ${result.total}`]] as const).map(([k, label]) =>
           <Button key={k} size="sm" variant={filter === k ? "default" : "outline"} aria-pressed={filter === k} className="rounded-full min-h-[44px]" onClick={() => setFilter(filter === k ? null : k)}>{label}</Button>)}
       </div>
       {(['personal', 'business'] as const).map((section) => {
@@ -98,7 +98,9 @@ export default function FundabilityResults({ answers, result, firstName, crm, bo
             {open && <div id={`benchmark-${b.id}`} className="px-4 pb-5 text-sm space-y-4">
               <div className="grid grid-cols-2 gap-3"><div className={`rounded-lg p-3 ${s.pill}`}><p className="text-xs font-bold">YOUR ANSWER</p><p className="mt-1 font-semibold">{answers[b.id] === 'yes' ? 'Yes' : answers[b.id] === 'no' ? 'No' : 'Not sure'}</p></div><div className="rounded-lg p-3 bg-status-pass/15"><p className="text-xs font-bold">GOAL</p><p className="mt-1 font-semibold">{b.target}</p></div></div>
               <div><p className="text-xs font-bold text-muted-foreground">WHY IT MATTERS</p><p className="mt-1">{b.why}</p></div>
-              <div><p className="text-xs font-bold text-muted-foreground">HOW TO FIX</p><p className="mt-1">{b.fix}</p></div>
+              {answers[b.id] === 'yes'
+                ? <div className={`rounded-lg p-3 ${s.pill}`}><p className="text-xs font-bold">WHAT YOU'VE GOT</p><p className="mt-1">{passLine(b.id)}</p></div>
+                : <div><p className="text-xs font-bold text-muted-foreground">{answers[b.id] === 'unsure' ? 'HOW TO CHECK IT' : 'HOW TO FIX'}</p><p className="mt-1">{b.fix}</p></div>}
             </div>}
           </div>;
         })}</div> : <p className="mt-3 text-sm text-muted-foreground">Nothing in this filter.</p>}
