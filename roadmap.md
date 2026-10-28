@@ -1,5 +1,10 @@
 # Inquiry page performance
 
+# Fundability results mobile and booking button pass
+- [x] Make the booking button label sit on one centered line on a phone by overriding the animated-border button's 18px text and 40px side padding at small widths.
+- [x] Drive the sticky booking bar from a scroll-position check so a fast flick cannot skip it, keep it hidden while the first button or the final review card is on screen, and add trailing space so it never covers the disclaimer.
+- [x] Verify at 393px and on desktop: 13 tests passed, type check exit 0, build OK, no horizontal scroll. No appointment or lead created.
+
 # Fundability results review
 - [x] Apply the uploaded results framework without changing assessment questions or scoring; remove decoder promises.
 - [x] Make booking a collaborative funding assessment review primary; 11 tests passed, phone/desktop results and benchmark expansion verified, booking link opens the calendar with available times. No appointment or lead created.
