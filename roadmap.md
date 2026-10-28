@@ -1,5 +1,9 @@
 # Inquiry page performance
 
+# Fundability results review
+- [ ] Apply the uploaded results framework without changing assessment questions or scoring; remove decoder promises.
+- [ ] Make booking a collaborative funding assessment review primary and verify the results and booking flow.
+
 # Round-two late document push fixes
 - [x] Make lease release non-throwing and add bounded browser retries with final waiting-row errors.
 - [x] Add regression tests: 65 passed across 7 files; TypeScript check exit 0. Preserve all existing npm lock entries; clean-install dry run exit 0.
