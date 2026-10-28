@@ -22,6 +22,12 @@ const Cta = ({ label = "Get my Fundability Score", place, className = "" }: { la
   </Button>
 );
 
+const FIRST_ANSWER: { v: Answer; label: string; Icon: typeof CheckCircle2; cls: string }[] = [
+  { v: "yes", label: "Yes", Icon: CheckCircle2, cls: "border-status-pass/45 bg-status-pass/10 text-foreground hover:bg-status-pass/20 hover:border-status-pass" },
+  { v: "no", label: "No", Icon: XCircle, cls: "border-status-fail/45 bg-status-fail/10 text-foreground hover:bg-status-fail/20 hover:border-status-fail" },
+  { v: "unsure", label: "Not sure", Icon: HelpCircle, cls: "border-status-unverified/45 bg-status-unverified/15 text-foreground hover:bg-status-unverified/25 hover:border-status-unverified" },
+];
+
 const FirstQuestion = () => {
   const nav = useNavigate();
   const q = BENCHMARKS[0];

@@ -6,7 +6,7 @@ const NAVY: [number, number, number] = [0, 58, 112];
 const BLUE: [number, number, number] = [0, 96, 169];
 const GREEN: [number, number, number] = [35, 132, 103];
 const RED: [number, number, number] = [192, 77, 72];
-const AMBER: [number, number, number] = [176, 125, 20];
+const AMBER: [number, number, number] = [145, 98, 12];
 
 async function loadImage(src: string): Promise<{ data: string; w: number; h: number } | null> {
   try {
@@ -61,12 +61,16 @@ export async function downloadScorecard(firstName: string, answers: Record<strin
   for (const b of BENCHMARKS) {
     const a = answers[b.id];
     const [label, color] = a === "yes" ? ["PASS", GREEN] : a === "no" ? ["NEEDS ATTENTION", RED] : ["NOT VERIFIED", AMBER];
-    ensure(40);
-    doc.setFillColor(...(color as [number, number, number])); doc.circle(M + 5, y + 8, 4, "F");
+    const c = color as [number, number, number];
+    ensure(42);
+    doc.setFillColor(...c); doc.circle(M + 5, y + 9, 4, "F");
     doc.setFont("helvetica", "bold"); doc.setFontSize(11); doc.setTextColor(30, 30, 30);
-    doc.text(`${b.id}  ${b.title}`, M + 16, y + 12);
-    doc.setTextColor(...(color as [number, number, number])); doc.text(label as string, W - M, y + 12, { align: "right" });
-    y += 18;
+    doc.text(`${b.id}  ${b.title}`, M + 16, y + 13);
+    doc.setFontSize(8);
+    const pw = doc.getTextWidth(label as string) + 18;
+    doc.setFillColor(...c); doc.roundedRect(W - M - pw, y, pw, 17, 4, 4, "F");
+    doc.setTextColor(255, 255, 255); doc.text(label as string, W - M - pw / 2, y + 11.5, { align: "center" });
+    y += 21;
     text(`Target: ${b.target}`, 9, { color: [90, 90, 90], x: M + 16, width: W - M * 2 - 16 });
     y += 6;
   }
