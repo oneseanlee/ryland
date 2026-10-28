@@ -25,3 +25,18 @@ describe("attention order", () => {
     expect(attentionItems({ "01": "yes", "02": "yes", "07": "yes" })).toEqual(["05", "11", "03"]);
   });
 });
+import { BENCHMARKS } from "@/lib/fundability";
+import { PASS_COPY, passLine } from "@/lib/fundabilityResults";
+describe("personal pass lines", () => {
+  it("every benchmark has its own line", () => {
+    for (const b of BENCHMARKS) expect(passLine(b.id)).toBe(PASS_COPY[b.id]);
+  });
+  it("tells a clean-payment person they passed and to keep it up", () => {
+    const line = passLine("02");
+    expect(line).toMatch(/no late payments/i);
+    expect(line).toMatch(/keep every payment on time/i);
+  });
+  it("falls back for an unknown benchmark", () => {
+    expect(passLine("13")).toMatch(/you meet this benchmark/i);
+  });
+});

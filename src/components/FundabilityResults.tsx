@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { ChevronDown, Download, RotateCcw, CheckCircle2, XCircle, HelpCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BENCHMARKS, benchmarkById, track, type Answer, type ScoreResult } from "@/lib/fundability";
-import { ATTENTION_COPY, RESULT_HEADLINE, attentionItems, resultBand, resultPlan } from "@/lib/fundabilityResults";
+import { ATTENTION_COPY, RESULT_HEADLINE, attentionItems, passLine, resultBand, resultPlan } from "@/lib/fundabilityResults";
 
 const statusOf = (answer: Answer) => answer === "yes"
   ? { label: "You passed", cls: "bg-status-pass", pill: "bg-status-pass/15", Icon: CheckCircle2 }
