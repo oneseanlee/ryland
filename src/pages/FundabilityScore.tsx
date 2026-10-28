@@ -1,21 +1,21 @@
 import { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowRight, Gauge, FileText, Eye, AlertTriangle, ListChecks, CircleCheck, TrendingUp, Lock, Download } from "lucide-react";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
+import logo from "@/assets/logo-dark.png";
+
 import PageMeta from "@/components/PageMeta";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import gene from "@/assets/gene-ryland-fundability.png.asset.json";
+import gene from "@/assets/gene-ryland-fundability-clean.png.asset.json";
 import guide from "@/assets/fundability-12-benchmarks.pdf.asset.json";
 import { CLIENT_WINS } from "@/data/clientWins";
 import { BENCHMARKS, DISCLOSURE, captureUtm, track, type Answer } from "@/lib/fundability";
 
 const STORE = "fundability_progress_v1";
-const accent = "text-brand-accent";
+const accent = "text-fs-gold";
 
 const Cta = ({ label = "Get my Fundability Score", place, className = "" }: { label?: string; place: string; className?: string }) => (
-  <Button asChild size="lg" className={`min-h-[52px] px-8 text-base font-bold bg-brand text-brand-foreground hover:bg-brand/90 ${className}`}>
+  <Button asChild size="lg" className={`min-h-[52px] px-8 text-base font-bold bg-fs-gold text-fs-navy hover:bg-fs-gold/90 ${className}`}>
     <Link to="/fundability/score" onClick={() => track("cta_clicked", { place })}>
       {label} <ArrowRight className="ml-2 h-5 w-5" aria-hidden="true" />
     </Link>
@@ -61,7 +61,7 @@ const WALK = [
   [FileText, "Your 12-Benchmark Scorecard", "The target for every check, yours to keep."],
 ] as const;
 
-const STORIES = ["win-26", "win-80", "win-1"].map((id) => CLIENT_WINS.find((w) => w.id === id)!).filter(Boolean);
+const STORIES = ["win-26", "win-80", "win-3"].map((id) => CLIENT_WINS.find((w) => w.id === id)!).filter(Boolean);
 
 const FAQ = [
   ["Does this check my credit?", "No. It's 12 yes-or-no questions you answer yourself. Nothing is pulled and nothing touches your credit."],
@@ -78,10 +78,10 @@ const FundabilityScore = () => {
         description="Banks run 12 checks before they fund you. Find out how many you pass in 3 minutes. Free, and nothing touches your credit."
         canonical="/fundability"
       />
-      <Navbar />
+      <header className="bg-background border-b"><div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center"><img src={logo} alt="Ryland Partners" className="h-8 w-auto" /></div></header>
       <main className="bg-background text-foreground">
         {/* Hero */}
-        <section className="bg-brand-navy text-brand-foreground pt-28 pb-12">
+        <section className="bg-fs-navy text-fs-gold-foreground pt-10 sm:pt-14 pb-12">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 grid lg:grid-cols-[1.15fr_1fr] gap-10 items-center">
             <div>
               <p className={`text-xs sm:text-sm font-bold tracking-wider ${accent}`}>BUSINESS OWNERS: READ THIS BEFORE YOU APPLY FOR FUNDING</p>
@@ -103,11 +103,11 @@ const FundabilityScore = () => {
 
         {/* What you'll find out */}
         <section className="max-w-7xl mx-auto px-4 sm:px-6 py-14 text-center">
-          <p className={`text-sm font-bold tracking-[0.2em] text-brand`}>IN 3 MINUTES, YOU'LL FIND OUT:</p>
+          <p className={`text-sm font-bold tracking-[0.2em] text-fs-gold`}>IN 3 MINUTES, YOU'LL FIND OUT:</p>
           <div className="mt-8 grid grid-cols-2 md:grid-cols-5 gap-8">
             {LEARN.map(([I, t]) => (
               <div key={t} className="flex flex-col items-center">
-                <I className="h-9 w-9 text-brand" aria-hidden="true" />
+                <I className="h-9 w-9 text-fs-gold" aria-hidden="true" />
                 <p className="mt-3 text-base">{t}</p>
               </div>
             ))}
@@ -117,7 +117,7 @@ const FundabilityScore = () => {
         </section>
 
         {/* Walk away with */}
-        <section className="bg-brand-navy text-brand-foreground py-14">
+        <section className="bg-fs-navy text-fs-gold-foreground py-14">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 grid lg:grid-cols-[1.3fr_1fr] gap-10 items-center">
             <div>
               <h2 className="text-3xl sm:text-4xl font-bold font-heading">Here's what you'll walk away with.</h2>
@@ -131,7 +131,7 @@ const FundabilityScore = () => {
               </ul>
             </div>
             <div className="rounded-2xl bg-background text-foreground p-6 shadow-2xl text-center" aria-label="Preview of your results">
-              <p className="text-xs font-bold tracking-[0.2em] text-brand">YOUR FUNDABILITY SCORE</p>
+              <p className="text-xs font-bold tracking-[0.2em] text-fs-gold">YOUR FUNDABILITY SCORE</p>
               <svg viewBox="0 0 120 66" className="mx-auto mt-3 w-40" aria-hidden="true">
                 <path d="M10 60 A50 50 0 0 1 110 60" fill="none" className="stroke-muted" strokeWidth="10" strokeLinecap="round" />
                 <path d="M10 60 A50 50 0 0 1 85 17" fill="none" className="stroke-brand" strokeWidth="10" strokeLinecap="round" />
@@ -192,12 +192,12 @@ const FundabilityScore = () => {
         </section>
 
         {/* Two ways */}
-        <section className="bg-brand-navy text-brand-foreground py-14">
+        <section className="bg-fs-navy text-fs-gold-foreground py-14">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
             <h2 className="text-3xl sm:text-4xl font-bold font-heading">You've got two ways to do this.</h2>
             <div className="mt-8 grid sm:grid-cols-2 gap-4">
               <div className="rounded-xl bg-brand-foreground/10 p-5"><p className="font-bold">Apply and hope.</p><p className="mt-1 text-sm opacity-80">Find out what's wrong from the denial letter, with one more inquiry on your report.</p></div>
-              <div className="rounded-xl border-2 border-brand p-5 bg-brand/15"><p className={`font-bold ${accent}`}>Take 3 minutes and know.</p><p className="mt-1 text-sm opacity-90">See what the bank sees, fix what needs fixing, then apply.</p></div>
+              <div className="rounded-xl border-2 border-fs-gold p-5 bg-fs-gold/10"><p className={`font-bold ${accent}`}>Take 3 minutes and know.</p><p className="mt-1 text-sm opacity-90">See what the bank sees, fix what needs fixing, then apply.</p></div>
             </div>
             <div className="mt-8"><Cta place="final" className="w-full sm:w-auto sm:px-16" /></div>
             <p className="mt-6 text-sm">
@@ -209,10 +209,11 @@ const FundabilityScore = () => {
         </section>
 
         <section className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
-          <p className="text-xs text-muted-foreground">Not a lender. We do not make credit decisions. {DISCLOSURE} This is a self-reported assessment, not a credit report, credit pull, or lending decision.</p>
+          <p className="text-xs text-muted-foreground">{DISCLOSURE} This is a self-reported assessment, not a credit report, credit pull, or lending decision.</p>
         </section>
       </main>
-      <Footer />
+      <footer className="max-w-7xl mx-auto px-4 sm:px-6 py-6 pb-24 flex flex-wrap items-center justify-between gap-4"><img src={logo} alt="Ryland Partners" className="h-7 w-auto" /><p className="text-xs text-muted-foreground">Not a lender. We do not make credit decisions.</p></footer>
+      <Link to="/fundability/score" onClick={() => track("cta_clicked", { place: "sticky" })} className="fixed bottom-0 inset-x-0 z-40 bg-fs-gold text-fs-navy font-bold text-center py-4 min-h-[52px] flex items-center justify-center gap-2">Get my Fundability Score <ArrowRight className="h-5 w-5" aria-hidden="true" /></Link>
     </>
   );
 };

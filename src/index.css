@@ -11,6 +11,8 @@ All colors MUST be HSL.
     --brand: 206 100% 33%;
     --brand-navy: 209 100% 22%;
     --brand-accent: 204 90% 68%;
+    --fs-navy: 218 58% 13%;
+    --fs-gold: 42 76% 58%;
     --brand-foreground: 0 0% 100%;
     --status-pass: 162 58% 33%;
     --status-fail: 2 49% 52%;
