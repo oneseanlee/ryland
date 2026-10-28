@@ -1,8 +1,8 @@
 # Inquiry page performance
 
 # Fundability results review
-- [ ] Apply the uploaded results framework without changing assessment questions or scoring; remove decoder promises.
-- [ ] Make booking a collaborative funding assessment review primary and verify the results and booking flow.
+- [x] Apply the uploaded results framework without changing assessment questions or scoring; remove decoder promises.
+- [x] Make booking a collaborative funding assessment review primary; 11 tests passed, phone/desktop results and benchmark expansion verified, booking link opens the calendar with available times. No appointment or lead created.
 
 # Round-two late document push fixes
 - [x] Make lease release non-throwing and add bounded browser retries with final waiting-row errors.
