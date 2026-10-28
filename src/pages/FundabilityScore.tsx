@@ -1,6 +1,6 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowRight, Gauge, FileText, Eye, AlertTriangle, ListChecks, CircleCheck, TrendingUp, Lock, Download } from "lucide-react";
+import { ArrowRight, Gauge, FileText, Eye, AlertTriangle, ListChecks, CircleCheck, TrendingUp, Lock, Download, CheckCircle2, XCircle, HelpCircle } from "lucide-react";
 import logo from "@/assets/logo-dark.png";
 
 import PageMeta from "@/components/PageMeta";
@@ -22,6 +22,12 @@ const Cta = ({ label = "Get my Fundability Score", place, className = "" }: { la
   </Button>
 );
 
+const FIRST_ANSWER: { v: Answer; label: string; Icon: typeof CheckCircle2; cls: string }[] = [
+  { v: "yes", label: "Yes", Icon: CheckCircle2, cls: "border-status-pass/45 bg-status-pass/10 text-foreground hover:bg-status-pass/20 hover:border-status-pass" },
+  { v: "no", label: "No", Icon: XCircle, cls: "border-status-fail/45 bg-status-fail/10 text-foreground hover:bg-status-fail/20 hover:border-status-fail" },
+  { v: "unsure", label: "Not sure", Icon: HelpCircle, cls: "border-status-unverified/45 bg-status-unverified/15 text-foreground hover:bg-status-unverified/25 hover:border-status-unverified" },
+];
+
 const FirstQuestion = () => {
   const nav = useNavigate();
   const q = BENCHMARKS[0];
@@ -31,15 +37,18 @@ const FirstQuestion = () => {
     nav("/fundability/score");
   };
   return (
-    <div className="rounded-2xl bg-background text-foreground p-6 sm:p-7 shadow-2xl">
+    <div id="first-question-card" className="rounded-2xl bg-background text-foreground p-6 sm:p-7 shadow-2xl">
       <p className="text-[11px] font-bold tracking-[0.2em] text-muted-foreground border-b pb-2">FUNDING FILE</p>
       <p className="mt-3 text-sm text-muted-foreground">Check 1 of 12</p>
       <h2 className="mt-1 text-xl sm:text-2xl font-bold font-heading leading-snug">{q.question}</h2>
       {q.helper && <p className="mt-2 text-sm text-muted-foreground">{q.helper}</p>}
       <div className="mt-5 grid grid-cols-2 gap-3">
-        <Button variant="outline" className="min-h-[48px] text-base font-semibold" onClick={() => answer("yes")}>Yes</Button>
-        <Button variant="outline" className="min-h-[48px] text-base font-semibold" onClick={() => answer("no")}>No</Button>
-        <Button variant="outline" className="col-span-2 min-h-[48px] text-base font-semibold" onClick={() => answer("unsure")}>Not sure</Button>
+        {FIRST_ANSWER.map((o) => (
+          <button key={o.v} onClick={() => answer(o.v)}
+            className={`min-h-[54px] rounded-xl border-2 px-4 text-base font-bold inline-flex items-center justify-center gap-2.5 transition-colors motion-reduce:transition-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${o.cls} ${o.v === "unsure" ? "col-span-2" : ""}`}>
+            <o.Icon className="h-5 w-5 shrink-0" aria-hidden="true" />{o.label}
+          </button>
+        ))}
       </div>
       <p className="mt-4 text-sm text-muted-foreground">Tap an answer to start. 11 more after this. Nothing is pulled, and we don't ask for contact details until you finish.</p>
     </div>
@@ -70,6 +79,19 @@ const FAQ = [
 ];
 
 const FundabilityScore = () => {
+  const [showSticky, setShowSticky] = useState(true);
+  useEffect(() => {
+    const onScroll = () => {
+      const card = document.getElementById("first-question-card");
+      if (!card) return setShowSticky(true);
+      const r = card.getBoundingClientRect();
+      setShowSticky(!(r.bottom > 0 && r.top < window.innerHeight));
+    };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => { window.removeEventListener("scroll", onScroll); window.removeEventListener("resize", onScroll); };
+  }, []);
   useEffect(() => { captureUtm(); track("landing_viewed"); }, []);
   return (
     <>
@@ -238,7 +260,7 @@ const FundabilityScore = () => {
         </section>
       </main>
       <footer className="max-w-7xl mx-auto px-4 sm:px-6 py-6 pb-24 flex flex-wrap items-center justify-between gap-4"><img src={logo} alt="Ryland Partners" className="h-7 w-auto" /><p className="text-xs text-muted-foreground">Not a lender. We do not make credit decisions.</p></footer>
-      <Link to="/fundability/score" onClick={() => track("cta_clicked", { place: "sticky" })} className="fixed bottom-0 inset-x-0 z-40 bg-fs-gold text-fs-navy font-bold text-center py-4 min-h-[52px] flex items-center justify-center gap-2">Get my Fundability Score <ArrowRight className="h-5 w-5" aria-hidden="true" /></Link>
+      {showSticky && <Link to="/fundability/score" onClick={() => track("cta_clicked", { place: "sticky" })} className="fixed bottom-0 inset-x-0 z-40 bg-fs-gold text-fs-navy font-bold text-center py-4 min-h-[52px] flex items-center justify-center gap-2">Get my Fundability Score <ArrowRight className="h-5 w-5" aria-hidden="true" /></Link>}
     </>
   );
 };
