@@ -81,7 +81,7 @@ const FundabilityScore = () => {
       <header className="bg-background border-b"><div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center"><img src={logo} alt="Ryland Partners" className="h-8 w-auto" /></div></header>
       <main className="bg-background text-foreground">
         {/* Hero */}
-        <section className="bg-fs-navy text-fs-gold-foreground pt-10 sm:pt-14 pb-12">
+        <section className="bg-fs-navy text-brand-foreground pt-10 sm:pt-14 pb-12">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 grid lg:grid-cols-[1.15fr_1fr] gap-10 items-center">
             <div>
               <p className={`text-xs sm:text-sm font-bold tracking-wider ${accent}`}>BUSINESS OWNERS: READ THIS BEFORE YOU APPLY FOR FUNDING</p>
@@ -117,7 +117,7 @@ const FundabilityScore = () => {
         </section>
 
         {/* Walk away with */}
-        <section className="bg-fs-navy text-fs-gold-foreground py-14">
+        <section className="bg-fs-navy text-brand-foreground py-14">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 grid lg:grid-cols-[1.3fr_1fr] gap-10 items-center">
             <div>
               <h2 className="text-3xl sm:text-4xl font-bold font-heading">Here's what you'll walk away with.</h2>
@@ -192,7 +192,7 @@ const FundabilityScore = () => {
         </section>
 
         {/* Two ways */}
-        <section className="bg-fs-navy text-fs-gold-foreground py-14">
+        <section className="bg-fs-navy text-brand-foreground py-14">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
             <h2 className="text-3xl sm:text-4xl font-bold font-heading">You've got two ways to do this.</h2>
             <div className="mt-8 grid sm:grid-cols-2 gap-4">
