@@ -44,3 +44,28 @@ export const ATTENTION_COPY: Record<string, { title: string; hint: string }> = {
   "04": { title: "Your credit profile is too thin", hint: "You need 4+ accounts in your own name." },
   "06": { title: "Your credit history is too new", hint: "Keep old accounts open." },
 };
+
+/**
+ * Personal "you passed" lines shown when a benchmark is met. Display only —
+ * never used for scoring, tracks or CRM tags. Each line names what they have
+ * and how to keep it.
+ */
+export const PASS_COPY: Record<string, string> = {
+  "01": "All three of your scores are 700 or higher. That's the first number a bank screens — keep it there by not opening new credit before you apply.",
+  "02": "You have no late payments, collections or bankruptcies on your report. That's the hardest habit to hold, and it's worth real money to a lender. Keep every payment on time and this one stays in your column.",
+  "03": "You've kept your credit checks to 2 or fewer a year. Don't apply for anything new while we build your file — this one only moves one way.",
+  "04": "You have 4 or more open accounts in your own name. That's real depth a lender can verify. Keep them open and active, even the ones you rarely use.",
+  "05": "Every card is under 28% of its limit. Keep it that way through your statement dates — this is the benchmark that moves fastest, both ways.",
+  "06": "Your accounts average 2 years or older. Keep your oldest accounts open; age is the one thing you can't buy.",
+  "07": "Your business is active with the state and past 2 months old. File your annual report on time so nothing stalls the application.",
+  "08": "You have a D-U-N-S number and your business details match everywhere. Keep them identical on every form you fill out.",
+  "09": "You have a live website and an email on your own domain. Most owners don't have this yet — keep both live and current.",
+  "10": "Your business has its own phone number and address. Use that same pair on every application so verification matches.",
+  "11": "Your business shows no liens, judgments or unpaid debts. Keep it clean — close out any old vendor or merchant cash advance account properly.",
+  "12": "You know your industry code and it isn't flagged high-risk. Keep that same code on every record so your files match.",
+};
+
+/** Personalized line for a passed benchmark, with a safe fallback. */
+export function passLine(id: string): string {
+  return PASS_COPY[id] ?? "You meet this benchmark. Keep it the way it is and we'll confirm it on your review.";
+}
