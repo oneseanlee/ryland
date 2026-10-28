@@ -5,7 +5,7 @@ import { BENCHMARKS, benchmarkById, track, type Answer, type ScoreResult } from 
 import { ATTENTION_COPY, RESULT_HEADLINE, attentionItems, resultBand, resultPlan } from "@/lib/fundabilityResults";
 
 const statusOf = (answer: Answer) => answer === "yes"
-  ? { label: "Pass", cls: "bg-status-pass", pill: "bg-status-pass/15", Icon: CheckCircle2 }
+  ? { label: "You passed", cls: "bg-status-pass", pill: "bg-status-pass/15", Icon: CheckCircle2 }
   : answer === "no" ? { label: "Fix", cls: "bg-status-fail", pill: "bg-status-fail/15", Icon: XCircle }
   : { label: "Not sure", cls: "bg-status-unverified", pill: "bg-status-unverified/20", Icon: HelpCircle };
 
