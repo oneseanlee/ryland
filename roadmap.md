@@ -46,3 +46,4 @@
 - [x] Fixed document upload permission check; removed size/type limits; Lead Tracker split into Leads and Clients (paid inquiry orders) with document uploads.
 - [ ] Verify automatic delivery from a fresh checkout and downstream GoHighLevel follow-ups: requires a separately authorized checkout test; this test used manual admin delivery only.
 - 2026-10-28: Fundability landing page — replaced the story headline and body with Gene's own copy, spaced into five paragraphs (verified on phone and desktop).
+- 2026-10-28: Fundability landing — new hero eyebrow ("BUSINESS OWNERS: CHECK IF YOU QUALIFY BEFORE YOU APPLY"), two men added to the client result cards (Ethan K., Kevin B.), and mobile layout fixes (single-column 3-minutes list, full-width story button, unbroken bank names, stacked closer links).

@@ -61,7 +61,7 @@ const WALK = [
   [FileText, "Your 12-Benchmark Scorecard", "The target for every check, yours to keep."],
 ] as const;
 
-const STORIES = ["win-26", "win-80", "win-3"].map((id) => CLIENT_WINS.find((w) => w.id === id)!).filter(Boolean);
+const STORIES = ["win-26", "win-4", "win-80", "win-13", "win-3"].map((id) => CLIENT_WINS.find((w) => w.id === id)!).filter(Boolean);
 
 const FAQ = [
   ["Does this check my credit?", "No. It's 12 yes-or-no questions you answer yourself. Nothing is pulled and nothing touches your credit."],
@@ -84,7 +84,7 @@ const FundabilityScore = () => {
         <section className="bg-fs-navy text-brand-foreground pt-10 sm:pt-14 pb-12">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 grid lg:grid-cols-[1.15fr_1fr] gap-10 items-center">
             <div>
-              <p className={`text-xs sm:text-sm font-bold tracking-wider ${accent}`}>BUSINESS OWNERS: READ THIS BEFORE YOU APPLY FOR FUNDING</p>
+              <p className={`text-sm sm:text-base font-bold tracking-wide ${accent} [text-wrap:balance]`}>BUSINESS OWNERS: CHECK IF YOU QUALIFY BEFORE YOU APPLY</p>
               <h1 className="mt-4 text-4xl sm:text-5xl lg:text-6xl font-extrabold font-heading leading-[1.05]">
                 Banks run 12 checks before they fund you. <span className={accent}>How many do you pass?</span>
               </h1>
@@ -104,14 +104,15 @@ const FundabilityScore = () => {
         {/* What you'll find out */}
         <section className="max-w-7xl mx-auto px-4 sm:px-6 py-14 text-center">
           <p className={`text-sm font-bold tracking-[0.2em] text-fs-gold`}>IN 3 MINUTES, YOU'LL FIND OUT:</p>
-          <div className="mt-8 grid grid-cols-2 md:grid-cols-5 gap-8">
+          <div className="mt-8 flex flex-col gap-5 md:grid md:grid-cols-5 md:gap-8">
             {LEARN.map(([I, t]) => (
-              <div key={t} className="flex flex-col items-center">
-                <I className="h-9 w-9 text-fs-gold" aria-hidden="true" />
-                <p className="mt-3 text-base">{t}</p>
+              <div key={t} className="flex items-start gap-3 text-left md:flex-col md:items-center md:text-center">
+                <I className="h-6 w-6 shrink-0 mt-1 text-fs-gold md:h-9 md:w-9 md:mt-0" aria-hidden="true" />
+                <p className="text-base">{t}</p>
               </div>
             ))}
           </div>
+
           <div className="mt-10"><Cta place="learn" className="w-full sm:w-auto sm:px-16" /></div>
           <p className="mt-3 text-sm text-muted-foreground">Free. About 3 minutes. Nothing is pulled.</p>
         </section>
@@ -160,10 +161,11 @@ const FundabilityScore = () => {
               <p>Today, my business holds over $800,000 in credit limits. This 3-minute quiz runs the exact checks I wish I had before my first application.</p>
             </div>
 
-            <div className="mt-6 flex flex-wrap items-end justify-between gap-4">
+            <div className="mt-6 flex flex-col items-stretch gap-4 sm:flex-row sm:items-end sm:justify-between">
               <div><p className="font-bold">Gene Ryland</p><p className="text-sm text-muted-foreground">Founder</p></div>
-              <Cta label="Score my file now" place="story" />
+              <Cta label="Score my file now" place="story" className="w-full sm:w-auto" />
             </div>
+
           </div>
         </section>
 
@@ -171,19 +173,25 @@ const FundabilityScore = () => {
         <section className="bg-secondary py-14">
           <div className="max-w-5xl mx-auto px-4 sm:px-6">
             <h2 className="text-2xl sm:text-3xl font-bold font-heading text-center">Same story. Different files.</h2>
-            <div className="mt-8 grid md:grid-cols-3 gap-5">
+            <div className="mt-8 flex flex-wrap justify-center gap-5">
               {STORIES.map((w) => (
-                <div key={w.id} className="rounded-xl bg-background p-5 shadow-sm flex gap-4 items-center">
+                <div key={w.id} className="w-full sm:w-[calc(50%-10px)] lg:w-[calc(33.333%-14px)] rounded-xl bg-background p-5 shadow-sm flex gap-4 items-center">
                   <img src={w.portrait} alt={w.name} className="w-16 h-16 rounded-full object-cover object-top" loading="lazy" />
-                  <div>
+                  <div className="min-w-0">
                     <p className="font-bold">{w.name}</p>
                     <p className="text-sm text-muted-foreground">{w.scoreFrom ? `Score ${w.scoreFrom} → ${w.scoreTo}` : w.industry}</p>
                     <p className="mt-1 text-2xl font-extrabold font-heading">${w.amount.toLocaleString()}</p>
-                    <p className="text-sm text-muted-foreground">via {w.banks}</p>
+                    <p className="text-sm text-muted-foreground">
+                      via{" "}
+                      {w.banks.split(" + ").map((bank, i) => (
+                        <span key={bank}>{i > 0 && " + "}<span className="whitespace-nowrap">{bank}</span></span>
+                      ))}
+                    </p>
                   </div>
                 </div>
               ))}
             </div>
+
             <p className="mt-4 text-xs text-muted-foreground text-center">Individual results, shared with permission. Not typical and not guaranteed. Funding depends on your credit profile and lender approval.</p>
 
             <h2 className="mt-14 text-2xl sm:text-3xl font-bold font-heading text-center">Common questions.</h2>
@@ -207,11 +215,14 @@ const FundabilityScore = () => {
               <div className="rounded-xl border-2 border-fs-gold p-5 bg-fs-gold/10"><p className={`font-bold ${accent}`}>Take 3 minutes and know.</p><p className="mt-1 text-sm opacity-90">See what the bank sees, fix what needs fixing, then apply.</p></div>
             </div>
             <div className="mt-8"><Cta place="final" className="w-full sm:w-auto sm:px-16" /></div>
-            <p className="mt-6 text-sm">
-              <a href={guide.url} download="Ryland_Partners_12_Fundability_Benchmarks.pdf" className="underline inline-flex items-center gap-1 min-h-[44px]" onClick={() => track("checklist_downloaded")}>
+            <div className="mt-6 text-sm flex flex-col items-center gap-1 sm:flex-row sm:justify-center sm:gap-2">
+              <a href={guide.url} download="Ryland_Partners_12_Fundability_Benchmarks.pdf" className="underline inline-flex items-center gap-1 min-h-[44px] whitespace-nowrap" onClick={() => track("checklist_downloaded")}>
                 <Download className="h-4 w-4" aria-hidden="true" /> Download the 12 Benchmarks PDF
-              </a>{" "}· <Link to="/fundability/benchmarks" className="underline">Read the benchmarks</Link>
-            </p>
+              </a>
+              <span className="hidden sm:inline text-muted-foreground">·</span>
+              <Link to="/fundability/benchmarks" className="underline inline-flex items-center min-h-[44px] whitespace-nowrap">Read the benchmarks</Link>
+            </div>
+
           </div>
         </section>
 
