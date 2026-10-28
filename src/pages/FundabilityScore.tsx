@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowRight, Gauge, FileText, Eye, AlertTriangle, ListChecks, CircleCheck, TrendingUp, Lock, Download } from "lucide-react";
+import { ArrowRight, Gauge, FileText, Eye, AlertTriangle, ListChecks, CircleCheck, TrendingUp, Lock, Download, CheckCircle2, XCircle, HelpCircle } from "lucide-react";
 import logo from "@/assets/logo-dark.png";
 
 import PageMeta from "@/components/PageMeta";
@@ -37,9 +37,12 @@ const FirstQuestion = () => {
       <h2 className="mt-1 text-xl sm:text-2xl font-bold font-heading leading-snug">{q.question}</h2>
       {q.helper && <p className="mt-2 text-sm text-muted-foreground">{q.helper}</p>}
       <div className="mt-5 grid grid-cols-2 gap-3">
-        <Button variant="outline" className="min-h-[48px] text-base font-semibold" onClick={() => answer("yes")}>Yes</Button>
-        <Button variant="outline" className="min-h-[48px] text-base font-semibold" onClick={() => answer("no")}>No</Button>
-        <Button variant="outline" className="col-span-2 min-h-[48px] text-base font-semibold" onClick={() => answer("unsure")}>Not sure</Button>
+        {FIRST_ANSWER.map((o) => (
+          <button key={o.v} onClick={() => answer(o.v)}
+            className={`min-h-[54px] rounded-xl border-2 px-4 text-base font-bold inline-flex items-center justify-center gap-2.5 transition-colors motion-reduce:transition-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${o.cls} ${o.v === "unsure" ? "col-span-2" : ""}`}>
+            <o.Icon className="h-5 w-5 shrink-0" aria-hidden="true" />{o.label}
+          </button>
+        ))}
       </div>
       <p className="mt-4 text-sm text-muted-foreground">Tap an answer to start. 11 more after this. Nothing is pulled, and we don't ask for contact details until you finish.</p>
     </div>

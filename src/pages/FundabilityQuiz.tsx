@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, ChevronDown, Lock, RotateCcw } from "lucide-react";
+import { ArrowLeft, ChevronDown, Lock, RotateCcw, CheckCircle2, XCircle, HelpCircle } from "lucide-react";
 import PageMeta from "@/components/PageMeta";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,10 +19,19 @@ type Stage = "quiz" | "transition" | "contact" | "results";
 interface Saved { answers: Record<string, Answer>; step: number; stage: Stage; startedAt: string; firstName?: string; crm?: string; id?: string | null }
 
 const load = (): Saved | null => { try { return JSON.parse(localStorage.getItem(STORE) || "null"); } catch { return null; } };
-const OPTIONS: { v: Answer; label: string; sub: string }[] = [
-  { v: "yes", label: "YES", sub: "I meet this benchmark" },
-  { v: "no", label: "NO", sub: "I don't meet this benchmark" },
-  { v: "unsure", label: "NOT SURE", sub: "I need to verify" },
+const OPTIONS: { v: Answer; label: string; sub: string; Icon: typeof CheckCircle2; idle: string; on: string; chip: string; dot: string }[] = [
+  { v: "yes", label: "YES", sub: "I meet this benchmark", Icon: CheckCircle2,
+    idle: "border-border hover:border-status-pass/60 hover:bg-status-pass/5",
+    on: "border-status-pass bg-status-pass/10 ring-2 ring-status-pass/25",
+    chip: "bg-status-pass/15 text-status-pass", dot: "border-status-pass bg-status-pass" },
+  { v: "no", label: "NO", sub: "I don't meet this benchmark", Icon: XCircle,
+    idle: "border-border hover:border-status-fail/60 hover:bg-status-fail/5",
+    on: "border-status-fail bg-status-fail/10 ring-2 ring-status-fail/25",
+    chip: "bg-status-fail/15 text-status-fail", dot: "border-status-fail bg-status-fail" },
+  { v: "unsure", label: "NOT SURE", sub: "I need to verify", Icon: HelpCircle,
+    idle: "border-border hover:border-status-unverified/60 hover:bg-status-unverified/5",
+    on: "border-status-unverified bg-status-unverified/15 ring-2 ring-status-unverified/25",
+    chip: "bg-status-unverified/20 text-status-unverified", dot: "border-status-unverified bg-status-unverified" },
 ];
 const Shell = ({ children }: { children: React.ReactNode }) => (
   <div className="min-h-screen bg-background text-foreground">
@@ -177,8 +186,10 @@ export default function FundabilityQuiz() {
           const sel = answers[b.id] === o.v;
           return (
             <button key={o.v} role="radio" aria-checked={sel} onClick={() => choose(o.v)}
-              className={`w-full min-h-[64px] rounded-xl border-2 px-5 py-3 text-left transition-colors motion-reduce:transition-none ${sel ? "border-brand bg-brand/10" : "border-border hover:border-brand/60"}`}>
-              <span className="block font-bold">{o.label}</span><span className="block text-sm text-muted-foreground">{o.sub}</span>
+              className={`w-full min-h-[72px] rounded-xl border-2 px-4 py-3 text-left flex items-center gap-3.5 transition-colors motion-reduce:transition-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${sel ? o.on : o.idle}`}>
+              <span className={`grid h-11 w-11 shrink-0 place-items-center rounded-full ${o.chip}`}><o.Icon className="h-5 w-5" aria-hidden="true" /></span>
+              <span className="min-w-0 flex-1"><span className="block text-base font-extrabold tracking-wide">{o.label}</span><span className="block text-sm text-muted-foreground">{o.sub}</span></span>
+              <span className={`h-5 w-5 shrink-0 rounded-full border-2 transition-colors motion-reduce:transition-none ${sel ? o.dot : "border-border"}`} aria-hidden="true" />
             </button>
           );
         })}
