@@ -56,7 +56,7 @@ export default function FundabilityResults({ answers, result, firstName, crm, bo
       {attention.length ? <ol className="mt-4 space-y-3">{attention.map((id, i) => {
         const c = ATTENTION_COPY[id];
         return <li key={id} className="rounded-xl border bg-card p-4 flex items-start gap-3">
-          <span className="text-xl font-extrabold text-status-fail-foreground shrink-0 leading-tight">{i + 1}</span>
+          <span className="text-xl font-extrabold text-status-fail shrink-0 leading-tight">{i + 1}</span>
           <div className="min-w-0"><h3 className="font-bold leading-snug">{c.title}</h3><p className="mt-0.5 text-sm text-muted-foreground">{c.hint}</p></div>
         </li>;
       })}</ol> : <p className="mt-3 text-muted-foreground">All 12 self-reported benchmarks pass. Let's verify your real files and map your next steps.</p>}
@@ -98,12 +98,12 @@ export default function FundabilityResults({ answers, result, firstName, crm, bo
     </section>
 
     <section className="mt-10 rounded-2xl bg-brand-navy text-brand-foreground p-6 sm:p-9 shadow-xl">
-      <p className="text-xs font-bold tracking-widest text-brand-gold">YOUR FREE FUNDING REVIEW</p>
+      <p className="text-xs font-bold tracking-widest opacity-80">YOUR FREE FUNDING REVIEW</p>
       <h2 className="mt-3 text-3xl sm:text-4xl leading-tight font-bold font-heading">Let's read your real file together.</h2>
       <p className="mt-3 opacity-90">Your quiz shows where to look. The review shows exactly what to fix, and in what order.</p>
       <ol className="mt-6 space-y-5 border-t border-brand-foreground/20 pt-6">
         {[['Book a time', 'Pick a slot that works. About 30 minutes.'], ['Pull your 3 reports', 'So we can see the real numbers, not guesses.'], ['Read it together', 'A funding manager walks your file and maps your next steps.']].map(([title, body], i) =>
-          <li key={title} className="flex gap-4"><span className="h-9 w-9 shrink-0 rounded-full bg-brand-gold text-brand-navy font-bold flex items-center justify-center">{i + 1}</span><div><h3 className="font-bold">{title}</h3><p className="mt-1 text-sm opacity-90">{body}</p></div></li>)}
+          <li key={title} className="flex gap-4"><span className="h-9 w-9 shrink-0 rounded-full bg-brand text-brand-foreground ring-2 ring-brand-foreground/30 font-bold flex items-center justify-center">{i + 1}</span><div><h3 className="font-bold">{title}</h3><p className="mt-1 text-sm opacity-90">{body}</p></div></li>)}
       </ol>
       {bookingButton}
       <p className="mt-3 text-sm text-center">Free call · no pressure</p>
