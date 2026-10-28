@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, ChevronDown, Lock, RotateCcw, CheckCircle2, XCircle, HelpCircle, Download, CalendarCheck } from "lucide-react";
+import { ArrowLeft, ChevronDown, Lock, RotateCcw } from "lucide-react";
 import PageMeta from "@/components/PageMeta";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,10 +8,10 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
 import logo from "@/assets/logo-dark.png";
-import guide from "@/assets/fundability-12-benchmarks.pdf.asset.json";
+import FundabilityResults from "@/components/FundabilityResults";
 import {
-  BENCHMARKS, DISCLOSURE, FUNDING_REVIEW_URL, DENIAL_DECODER_ENABLED, TRACK_LABEL, TRACK_MESSAGE,
-  benchmarkById, captureUtm, scoreAssessment, track, type Answer,
+  BENCHMARKS, DISCLOSURE, FUNDING_REVIEW_URL,
+  captureUtm, scoreAssessment, track, type Answer,
 } from "@/lib/fundability";
 
 const STORE = "fundability_progress_v1";
@@ -24,11 +24,6 @@ const OPTIONS: { v: Answer; label: string; sub: string }[] = [
   { v: "no", label: "NO", sub: "I don't meet this benchmark" },
   { v: "unsure", label: "NOT SURE", sub: "I need to verify" },
 ];
-const statusOf = (a: Answer) =>
-  a === "yes" ? { label: "PASS", cls: "bg-status-pass", Icon: CheckCircle2 }
-  : a === "no" ? { label: "NEEDS ATTENTION", cls: "bg-status-fail", Icon: XCircle }
-  : { label: "NOT VERIFIED", cls: "bg-status-unverified", Icon: HelpCircle };
-
 const Shell = ({ children }: { children: React.ReactNode }) => (
   <div className="min-h-screen bg-background text-foreground">
     <header className="border-b"><div className="max-w-3xl mx-auto px-4 h-16 flex items-center justify-between">
@@ -59,7 +54,6 @@ export default function FundabilityQuiz() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [openWhy, setOpenWhy] = useState(false);
-  const [openTile, setOpenTile] = useState<string | null>(null);
 
   useEffect(() => { captureUtm(); if (!saved) track("quiz_started"); }, [saved]);
   useEffect(() => {
@@ -117,93 +111,7 @@ export default function FundabilityQuiz() {
     return (
       <Shell>
         <PageMeta title="Your Fundability Score | Ryland Partners" description="Your personalized Fundability Score results." noindex />
-        <section className="rounded-2xl bg-brand-navy text-brand-foreground p-6 sm:p-10">
-          <p className="text-xs font-bold tracking-[0.2em] opacity-75">YOUR FUNDABILITY SCORE</p>
-          <h1 className="mt-2 text-6xl sm:text-7xl font-extrabold font-heading" aria-label={`${result.total} out of 12`}>{result.total} <span className="text-3xl opacity-70">/ 12</span></h1>
-          <p className="mt-3 text-xl font-bold">{TRACK_LABEL[result.track]}</p>
-          <p className="mt-2 opacity-90">{TRACK_MESSAGE[result.track]}</p>
-          {result.provisional && <p className="mt-3 text-sm rounded-md bg-brand-foreground/10 p-3">This score is provisional. {result.unverified.length} benchmark{result.unverified.length > 1 ? "s are" : " is"} not yet verified.</p>}
-          <div className="mt-6 space-y-4">
-            {([["PERSONAL CREDIT", result.personal, 0], ["BUSINESS STRUCTURE", result.business, 6]] as const).map(([label, n, off]) => (
-              <div key={label}>
-                <div className="flex justify-between text-xs font-semibold tracking-wider"><span>{label}</span><span>{n}/6</span></div>
-                <div className="mt-1.5 grid grid-cols-6 gap-1.5" aria-hidden="true">
-                  {BENCHMARKS.slice(off, off + 6).map((x) => <div key={x.id} className={`h-2.5 rounded-full ${statusOf(answers[x.id]).cls}`} />)}
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <p className="mt-4 text-sm text-muted-foreground" role="status">
-          {crm === "synced" ? `Thanks, ${firstName}. Your results are saved and our team has your scorecard.`
-            : crm === "failed" ? "Your results are shown below, but we couldn't send them to our team just now. Download your scorecard to keep a copy."
-            : "Your results are shown below."}
-        </p>
-
-        <section className="mt-8">
-          <h2 className="text-2xl font-bold font-heading">Your 12-Benchmark Board</h2>
-          <div className="mt-4 grid sm:grid-cols-2 gap-3">
-            {BENCHMARKS.map((x) => {
-              const s = statusOf(answers[x.id]); const open = openTile === x.id;
-              return (
-                <div key={x.id} className="rounded-xl border">
-                  <button className="w-full min-h-[56px] p-4 flex items-center gap-3 text-left" aria-expanded={open} onClick={() => setOpenTile(open ? null : x.id)}>
-                    <span className={`h-8 w-8 shrink-0 rounded-md ${s.cls} text-brand-foreground flex items-center justify-center`}><s.Icon className="h-5 w-5" aria-hidden="true" /></span>
-                    <span className="flex-1"><span className="block text-xs text-muted-foreground">{x.id} · {x.section === "personal" ? "Personal" : "Business"}</span><span className="font-semibold">{x.title}</span></span>
-                    <span className="text-[11px] font-bold">{s.label}</span>
-                    <ChevronDown className={`h-4 w-4 transition-transform ${open ? "rotate-180" : ""}`} aria-hidden="true" />
-                  </button>
-                  {open && (
-                    <div className="px-4 pb-4 text-sm space-y-1.5">
-                      <p><b>Your answer:</b> {OPTIONS.find((o) => o.v === answers[x.id])?.label}</p>
-                      <p><b>Target:</b> {x.target}</p>
-                      <p><b>Why it matters:</b> {x.why}</p>
-                      <p><b>Next step:</b> {x.fix}</p>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </section>
-
-        <section className="mt-8">
-          <h2 className="text-2xl font-bold font-heading">{result.priorities.length ? "Your Top Priorities" : "Your Next Steps"}</h2>
-          {result.priorities.length ? (
-            <ol className="mt-4 space-y-3">
-              {result.priorities.map((id, i) => { const x = benchmarkById(id); return (
-                <li key={id} className="rounded-xl border p-4">
-                  <p className="font-bold">{i + 1}. {x.title} {answers[id] === "unsure" && <span className="text-xs font-semibold text-status-unverified">· verify first</span>}</p>
-                  <p className="mt-1 text-sm text-muted-foreground">{x.fix}</p>
-                </li>); })}
-            </ol>
-          ) : (
-            <p className="mt-3 text-muted-foreground">All 12 self-reported benchmarks pass. Next: verify your actual three-bureau and business files, review lender-specific requirements, and plan your application sequence.</p>
-          )}
-        </section>
-
-        <section className="mt-10 rounded-2xl border-2 border-brand p-6 sm:p-8">
-          <h2 className="text-2xl sm:text-3xl font-bold font-heading">Want Someone on Your Side of the Desk?</h2>
-          <p className="mt-3 text-foreground/80">Your score shows where you stand. A Funding Review helps you understand what your actual file says and what should happen before your next application.</p>
-          <ol className="mt-5 space-y-3 text-sm">
-            <li><b>STEP 1 — Book Your Free Funding Review.</b> Choose an available appointment with a funding manager.</li>
-            <li><b>STEP 2 — Review Your Actual File.</b> For the detailed review you may be asked to set up a separate three-bureau report through MyFreeScoreNow ($1 introductory cost, soft pull). This is separate from this free quiz.</li>
-            <li><b>STEP 3 — Understand Your Next Move.</b> Review which benchmarks are met, which need attention, and the appropriate next steps.</li>
-          </ol>
-          <Button asChild size="lg" className="mt-6 w-full sm:w-auto min-h-[52px] font-bold bg-brand text-brand-foreground hover:bg-brand/90">
-            <a href={bookUrl} onClick={() => track("funding_review_clicked", { track: result.track, score: result.total })}><CalendarCheck className="mr-2 h-5 w-5" aria-hidden="true" /> BOOK MY FREE FUNDING REVIEW</a>
-          </Button>
-          <div className="mt-4 flex flex-col sm:flex-row gap-3">
-            <Button variant="outline" className="min-h-[48px]" onClick={async () => { const { downloadScorecard } = await import("@/lib/fundabilityReport"); await downloadScorecard(firstName || "You", answers, result); track("report_downloaded"); }}>
-              <Download className="mr-2 h-4 w-4" aria-hidden="true" /> DOWNLOAD MY FUNDABILITY SCORECARD
-            </Button>
-            <Button asChild variant="ghost" className="min-h-[48px]"><a href={guide.url} download="Ryland_Partners_12_Fundability_Benchmarks.pdf">Original 12 Benchmarks PDF</a></Button>
-          </div>
-          {DENIAL_DECODER_ENABLED && <p className="mt-4 text-sm">Eligible Fundability Score participants also receive The Denial Letter Decoder.</p>}
-        </section>
-
-        <button onClick={restart} className="mt-8 min-h-[44px] text-sm text-muted-foreground underline inline-flex items-center gap-1"><RotateCcw className="h-4 w-4" aria-hidden="true" /> Retake the assessment</button>
+        <FundabilityResults answers={answers} result={result} firstName={firstName} crm={crm} bookUrl={bookUrl} restart={restart} />
       </Shell>
     );
   }
