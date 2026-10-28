@@ -1,39 +1,33 @@
-import { useState } from "react";
-import { ChevronDown, Download, RotateCcw, CheckCircle2, XCircle, HelpCircle, SearchCheck, ListChecks, Compass } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { ChevronDown, Download, RotateCcw, CheckCircle2, XCircle, HelpCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BENCHMARKS, benchmarkById, track, type Answer, type ScoreResult } from "@/lib/fundability";
-import { RESULT_HEADLINE, resultBand, resultPlan } from "@/lib/fundabilityResults";
+import { ATTENTION_COPY, RESULT_HEADLINE, attentionItems, resultBand, resultPlan } from "@/lib/fundabilityResults";
 
 const statusOf = (answer: Answer) => answer === "yes"
-  ? { label: "Pass", cls: "bg-status-pass", Icon: CheckCircle2 }
-  : answer === "no" ? { label: "Fix", cls: "bg-status-fail", Icon: XCircle }
-  : { label: "Not sure", cls: "bg-status-unverified", Icon: HelpCircle };
+  ? { label: "Pass", cls: "bg-status-pass", pill: "bg-status-pass/15", Icon: CheckCircle2 }
+  : answer === "no" ? { label: "Fix", cls: "bg-status-fail", pill: "bg-status-fail/15", Icon: XCircle }
+  : { label: "Not sure", cls: "bg-status-unverified", pill: "bg-status-unverified/20", Icon: HelpCircle };
 
 const CTA_DISCLOSURE = "Terms apply. We provide financial education; specific funding amounts are not guaranteed.";
 
-const PRIORITY_COPY: Record<string, { title: string; impact: string }> = {
-  "01": { title: "Your credit score is too low", impact: "At least one score is below the 700 benchmark. That can limit your options even when another bureau shows a stronger score." },
-  "02": { title: "Negative items need attention", impact: "Late payments, collections or other negative history can be a serious obstacle to approval. We need to understand what's on your reports before you apply." },
-  "03": { title: "You have too many credit inquiries", impact: "Repeated applications can make your file look riskier. Applying again without a plan can add to the problem." },
-  "04": { title: "Your credit profile needs more depth", impact: "Your answers indicate fewer than four open primary accounts. A strong score alone may not demonstrate the credit history a lender wants to see." },
-  "05": { title: "Your credit card utilization is too high", impact: "At least one card is at or above the 28% benchmark. High balances can weigh on your scores and make lenders hesitate—even if your total utilization looks better." },
-  "06": { title: "Your credit history needs more time", impact: "Your average account age is below the two-year benchmark. Newer accounts can make a lender view your profile as less established." },
-  "07": { title: "Your business isn't set up correctly yet", impact: "Your entity's active status or age doesn't meet the benchmark. These basics can stop a funding application before your credit is even reviewed." },
-  "08": { title: "Your business credit file isn't ready", impact: "A missing D-U-N-S number or inconsistent business details can make it harder for a lender to verify your business." },
-  "09": { title: "Your online presence isn't funding-ready", impact: "A missing website or business-domain email can undermine your business's credibility. Lenders need to be able to verify a consistent, established presence." },
-  "10": { title: "Your business contact setup needs work", impact: "Your phone or address doesn't meet the benchmark. Inconsistent or personal contact details can raise questions during business verification." },
-  "11": { title: "Your business negatives need attention", impact: "Liens, judgments or unpaid business debts can create serious barriers. Review the records and understand what needs resolution before applying." },
-  "12": { title: "Your industry classification needs review", impact: "An inaccurate or higher-risk industry code can restrict your lender options. We need to verify your classification before building an application plan." },
-};
 
 export default function FundabilityResults({ answers, result, firstName, crm, bookUrl, restart }: {
   answers: Record<string, Answer>; result: ScoreResult; firstName: string; crm?: string; bookUrl: string; restart: () => void;
 }) {
-  const [showBenchmarks, setShowBenchmarks] = useState(false);
+  const [filter, setFilter] = useState<Answer | null>(null);
+  const attention = attentionItems(answers);
+  const firstCtaRef = useRef<HTMLDivElement>(null);
+  const [showSticky, setShowSticky] = useState(false);
+  useEffect(() => {
+    const el = firstCtaRef.current; if (!el) return;
+    const io = new IntersectionObserver(([e]) => setShowSticky(!e.isIntersecting && e.boundingClientRect.top < 0));
+    io.observe(el); return () => io.disconnect();
+  }, []);
   const [openTile, setOpenTile] = useState<string | null>(null);
   const bookingButton = (
     <Button asChild size="lg" className="shiny-cta mt-5 w-full h-auto min-h-[52px] px-4 py-3 whitespace-normal text-base font-bold bg-brand text-brand-foreground hover:bg-brand/90">
-      <a href={bookUrl} onClick={() => track("funding_review_clicked", { track: result.track, score: result.total })}>Book my funding assessment review</a>
+      <a href={bookUrl} onClick={() => track("funding_review_clicked", { track: result.track, score: result.total })}>Book my free Funding Review</a>
     </Button>
   );
 
@@ -58,77 +52,69 @@ export default function FundabilityResults({ answers, result, firstName, crm, bo
     <p className="mt-4 text-sm text-muted-foreground" role="status">{crm === "synced" ? `Thanks, ${firstName}. Your results are saved and our team has your scorecard.` : crm === "failed" ? "Your results are available here, but we couldn't send them to our team just now. Download your scorecard and bring it to your review." : "Your results are based on your answers. We'll verify the details together during your review."}</p>
 
     <section className="mt-8">
-      <h2 className="text-sm font-bold text-brand">{result.priorities.length ? "START WITH THESE PRIORITIES" : "YOUR NEXT STEP"}</h2>
-      {result.priorities.length ? <>
-        <p className="mt-2 text-2xl font-bold font-heading">These gaps matter. Let's address them.</p>
-        <p className="mt-2 text-sm text-muted-foreground">Based on your answers, these are the first items to review before another funding application.</p>
-        <ol className="mt-4 space-y-3">{result.priorities.map((id, i) => {
-          const b = benchmarkById(id); const copy = PRIORITY_COPY[id]; const unverified = answers[id] === "unsure";
-          return <li key={id} className="rounded-lg border border-l-4 border-l-brand p-5 flex items-start gap-4">
-            <span className="text-2xl font-bold text-brand shrink-0">{i + 1}</span>
-            <div className="min-w-0"><p className="text-xs font-semibold text-brand mb-1">{unverified ? "NEEDS VERIFICATION" : "NEEDS ATTENTION"}</p>
-              <h3 className="font-bold text-lg leading-snug">{unverified ? `${b.title}: you need to know where you stand` : copy?.title ?? b.title}</h3>
-              <p className="mt-2 text-sm text-muted-foreground">{unverified ? "This isn't a confirmed problem yet. Not knowing whether you meet this benchmark leaves a gap in your funding plan. We'll help you verify it during your review." : copy?.impact ?? b.why}</p>
-              <p className="mt-3 text-sm font-semibold">{unverified ? "Get clarity before you apply." : "It's a gap to address—not a reason to give up."}</p>
-            </div>
-          </li>;
-        })}</ol>
-      </> : <p className="mt-3 text-muted-foreground">All 12 self-reported benchmarks pass. Let's verify your actual credit and business files, review lender-specific requirements, and map your next steps.</p>}
-    </section>
-
-    <section className="mt-8 bg-brand-navy text-brand-foreground p-6 sm:p-9">
-      <p className="text-xs font-bold">YOUR FREE FUNDING ASSESSMENT REVIEW</p>
-      <h2 className="mt-3 text-3xl sm:text-4xl leading-tight font-bold font-heading">{result.priorities.length ? "The gaps are real. So is a path forward." : "A strong score is the start. Let's verify your next move."}</h2>
-      <p className="mt-4 leading-relaxed">{result.priorities.length ? "Don't keep applying without understanding what's holding you back. Your answers point to issues that may limit approval—but many can be addressed with the right plan." : "Before you apply, let's confirm your actual credit and business files meet the benchmarks and understand the lender-specific requirements."}</p>
-      <p className="mt-4 leading-relaxed">You don't have to figure out the next steps alone. In your free review, a Ryland funding manager will:</p>
-      <div className="mt-6 divide-y divide-brand-foreground/20 border-y border-brand-foreground/20">
-        {[
-          { Icon: SearchCheck, title: "Read your real file with you", text: "Go beyond the quiz and understand your credit and business profile." },
-          { Icon: ListChecks, title: "Identify what needs attention", text: "Separate confirmed gaps from items we still need to verify." },
-          { Icon: Compass, title: "Map a plan to address the gaps", text: "Set priorities and explain how our credit optimization and business education services may help." },
-        ].map(({ Icon, title, text }) => <div key={title} className="flex items-start gap-4 py-5"><Icon className="h-6 w-6 shrink-0 mt-0.5" aria-hidden="true" /><div><h3 className="font-bold">{title}</h3><p className="mt-1 text-sm leading-relaxed">{text}</p></div></div>)}
+      <h2 className="text-sm font-bold text-brand">{attention.length ? "THESE THINGS NEED YOUR ATTENTION" : "YOUR NEXT STEP"}</h2>
+      {attention.length ? <ol className="mt-4 space-y-3">{attention.map((id, i) => {
+        const c = ATTENTION_COPY[id];
+        return <li key={id} className="rounded-xl border bg-card p-4 flex items-start gap-3">
+          <span className="text-xl font-extrabold text-status-fail-foreground shrink-0 leading-tight">{i + 1}</span>
+          <div className="min-w-0"><h3 className="font-bold leading-snug">{c.title}</h3><p className="mt-0.5 text-sm text-muted-foreground">{c.hint}</p></div>
+        </li>;
+      })}</ol> : <p className="mt-3 text-muted-foreground">All 12 self-reported benchmarks pass. Let's verify your real files and map your next steps.</p>}
+      <div ref={firstCtaRef} className="mt-5 rounded-xl border-2 border-foreground bg-card p-5">
+        <h2 className="text-2xl font-bold font-heading">{attention.length ? "Want help fixing these?" : "Want to confirm you're ready?"}</h2>
+        <p className="mt-2 text-sm text-muted-foreground">A funding manager reads your real file with you and maps the order to fix it.</p>
+        {bookingButton}
+        <p className="mt-3 text-xs text-center text-muted-foreground">Free · about 30 minutes</p>
       </div>
-      <div className="mt-2">{bookingButton}</div>
-      <p className="mt-4 text-sm text-center">Free review · clear next steps · no pressure</p>
-      <p className="mt-4 text-xs leading-relaxed">{CTA_DISCLOSURE}</p>
     </section>
 
-    <Button variant="ghost" className="mt-4 w-full min-h-[52px] h-auto whitespace-normal" aria-expanded={showBenchmarks} aria-controls="results-benchmarks" onClick={() => setShowBenchmarks(!showBenchmarks)}>
-      {showBenchmarks ? "Hide all 12 benchmarks" : "See all 12 benchmarks"}<ChevronDown className={`h-4 w-4 ${showBenchmarks ? "rotate-180" : ""}`} aria-hidden="true" />
-    </Button>
-    {showBenchmarks && <section id="results-benchmarks" className="mt-6">
+    <section id="results-benchmarks" className="mt-10">
       <p className="text-xs font-bold text-brand">YOUR 12 BENCHMARKS</p>
       <h2 className="mt-2 text-2xl sm:text-3xl font-bold font-heading">What banks check, and where you stand</h2>
-      <p className="mt-4 text-sm text-muted-foreground">Fix · {result.failed.length} &nbsp; Not sure · {result.unverified.length} &nbsp; Pass · {result.total}</p>
-      {(['personal', 'business'] as const).map((section) => <div key={section} className="mt-6">
-        <h3 className="flex justify-between font-bold text-lg"><span>{section === 'personal' ? 'You' : 'Your business'}</span><span className="text-muted-foreground">{section === 'personal' ? result.personal : result.business} of 6</span></h3>
-        <div className="mt-3 divide-y border-y">{BENCHMARKS.filter((b) => b.section === section).map((b) => {
+      <p className="mt-2 text-sm text-muted-foreground">Tap any line to see the goal and how to fix it.</p>
+      <div className="mt-4 flex flex-wrap gap-2" role="group" aria-label="Filter benchmarks">
+        {([['no', `Fix · ${result.failed.length}`], ['unsure', `Not sure · ${result.unverified.length}`], ['yes', `Pass · ${result.total}`]] as const).map(([k, label]) =>
+          <Button key={k} size="sm" variant={filter === k ? "default" : "outline"} aria-pressed={filter === k} className="rounded-full min-h-[44px]" onClick={() => setFilter(filter === k ? null : k)}>{label}</Button>)}
+      </div>
+      {(['personal', 'business'] as const).map((section) => {
+        const items = BENCHMARKS.filter((b) => b.section === section && (!filter || answers[b.id] === filter));
+        return <div key={section} className="mt-6">
+        <h3 className="flex justify-between font-bold text-lg"><span>{section === 'personal' ? 'You' : 'Your business'}</span><span className="text-sm text-muted-foreground">{section === 'personal' ? result.personal : result.business} of 6</span></h3>
+        {items.length ? <div className="mt-3 rounded-xl border bg-card divide-y">{items.map((b) => {
           const s = statusOf(answers[b.id]); const open = openTile === b.id;
           return <div key={b.id}>
-            <Button variant="ghost" className="w-full h-auto min-h-[64px] rounded-none px-0 py-4 flex items-center gap-2 whitespace-normal text-left" aria-expanded={open} aria-controls={`benchmark-${b.id}`} onClick={() => setOpenTile(open ? null : b.id)}>
-              <span className="flex-1 font-semibold">{b.title}</span><s.Icon className="h-4 w-4 shrink-0" aria-hidden="true" /><span className="text-xs shrink-0">{s.label}</span><ChevronDown className={`h-4 w-4 shrink-0 ${open ? 'rotate-180' : ''}`} aria-hidden="true" />
+            <Button variant="ghost" className="w-full h-auto min-h-[52px] rounded-none px-4 py-3 flex items-center gap-2 whitespace-normal text-left" aria-expanded={open} aria-controls={`benchmark-${b.id}`} onClick={() => setOpenTile(open ? null : b.id)}>
+              <span className="flex-1 font-semibold">{b.title}</span><span className={`text-[11px] font-bold uppercase rounded px-2 py-0.5 shrink-0 ${s.pill}`}>{s.label}</span><ChevronDown className={`h-4 w-4 shrink-0 ${open ? 'rotate-180' : ''}`} aria-hidden="true" />
             </Button>
-            {open && <div id={`benchmark-${b.id}`} className="pb-5 text-sm space-y-4">
-              <div className="grid grid-cols-2 gap-4"><div><p className="text-xs font-bold text-muted-foreground">YOUR ANSWER</p><p className="mt-1 font-semibold">{answers[b.id] === 'yes' ? 'Yes' : answers[b.id] === 'no' ? 'No' : 'Not sure'}</p></div><div><p className="text-xs font-bold text-muted-foreground">GOAL</p><p className="mt-1">{b.target}</p></div></div>
+            {open && <div id={`benchmark-${b.id}`} className="px-4 pb-5 text-sm space-y-4">
+              <div className="grid grid-cols-2 gap-3"><div className={`rounded-lg p-3 ${s.pill}`}><p className="text-xs font-bold">YOUR ANSWER</p><p className="mt-1 font-semibold">{answers[b.id] === 'yes' ? 'Yes' : answers[b.id] === 'no' ? 'No' : 'Not sure'}</p></div><div className="rounded-lg p-3 bg-status-pass/15"><p className="text-xs font-bold">GOAL</p><p className="mt-1 font-semibold">{b.target}</p></div></div>
               <div><p className="text-xs font-bold text-muted-foreground">WHY IT MATTERS</p><p className="mt-1">{b.why}</p></div>
-              <div><p className="text-xs font-bold text-muted-foreground">HOW TO ADDRESS IT</p><p className="mt-1">{b.fix}</p></div>
+              <div><p className="text-xs font-bold text-muted-foreground">HOW TO FIX</p><p className="mt-1">{b.fix}</p></div>
             </div>}
           </div>;
-        })}</div>
-      </div>)}
-      <p className="mt-4 text-sm text-muted-foreground">“Not sure” counts as not passed. We'll help you verify those items during your funding assessment review.</p>
-    </section>}
+        })}</div> : <p className="mt-3 text-sm text-muted-foreground">Nothing in this filter.</p>}
+      </div>; })}
+      <p className="mt-4 text-sm text-muted-foreground">“Not sure” counts as not passed. We check it for real on your review.</p>
+    </section>
 
-    <section className="mt-10 border-t pt-8">
-      <h2 className="text-2xl sm:text-3xl font-bold font-heading">Let's read your real file together.</h2>
-      <p className="mt-3 text-muted-foreground">Your quiz shows where to look. Your review helps us understand the gaps and create a plan to address them, in the right order.</p>
-      <ol className="mt-6 space-y-5">
-        {[['Book a time', 'Choose an available appointment for your funding assessment review.'], ['Read and analyze together', 'Bring your scorecard. A funding manager will walk through your credit and business profile with you.'], ['Build your action plan', 'Identify which benchmarks need attention and agree on the steps to address them before applying.']].map(([title, body], i) => <li key={title} className="flex gap-4"><span className="text-xl text-brand font-bold">{i + 1}</span><div><h3 className="font-bold">{title}</h3><p className="mt-1 text-sm text-muted-foreground">{body}</p></div></li>)}
+    <section className="mt-10 rounded-2xl bg-brand-navy text-brand-foreground p-6 sm:p-9 shadow-xl">
+      <p className="text-xs font-bold tracking-widest text-brand-gold">YOUR FREE FUNDING REVIEW</p>
+      <h2 className="mt-3 text-3xl sm:text-4xl leading-tight font-bold font-heading">Let's read your real file together.</h2>
+      <p className="mt-3 opacity-90">Your quiz shows where to look. The review shows exactly what to fix, and in what order.</p>
+      <ol className="mt-6 space-y-5 border-t border-brand-foreground/20 pt-6">
+        {[['Book a time', 'Pick a slot that works. About 30 minutes.'], ['Pull your 3 reports', 'So we can see the real numbers, not guesses.'], ['Read it together', 'A funding manager walks your file and maps your next steps.']].map(([title, body], i) =>
+          <li key={title} className="flex gap-4"><span className="h-9 w-9 shrink-0 rounded-full bg-brand-gold text-brand-navy font-bold flex items-center justify-center">{i + 1}</span><div><h3 className="font-bold">{title}</h3><p className="mt-1 text-sm opacity-90">{body}</p></div></li>)}
       </ol>
       {bookingButton}
-      <p className="mt-3 text-xs text-muted-foreground">{CTA_DISCLOSURE}</p>
-      <Button variant="link" className="mt-4 w-full h-auto min-h-[48px] whitespace-normal" onClick={async () => { const { downloadScorecard } = await import("@/lib/fundabilityReport"); await downloadScorecard(firstName || "You", answers, result); track("report_downloaded"); }}><Download className="h-4 w-4" aria-hidden="true" />Download my scorecard</Button>
+      <p className="mt-3 text-sm text-center">Free call · no pressure</p>
     </section>
+    <Button variant="link" className="mt-4 w-full h-auto min-h-[48px] whitespace-normal" onClick={async () => { const { downloadScorecard } = await import("@/lib/fundabilityReport"); await downloadScorecard(firstName || "You", answers, result); track("report_downloaded"); }}><Download className="h-4 w-4" aria-hidden="true" />Download my scorecard</Button>
+    <div className="mt-4 rounded-xl border bg-card p-5"><p className="text-xs font-bold text-brand">NOT READY TO BOOK?</p><p className="mt-1 text-sm">Start with fix #1 on your own. Your scorecard lists every step.</p></div>
+    <p className="mt-6 text-xs text-muted-foreground leading-relaxed">This score is an estimate based on your answers. It is not a credit decision or an offer of funding. {CTA_DISCLOSURE}</p>
+
+    {showSticky && <div className="fixed inset-x-0 bottom-0 z-40 border-t bg-background/95 backdrop-blur p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]"><div className="max-w-xl mx-auto">
+      <Button asChild size="lg" className="w-full min-h-[52px] font-bold bg-brand text-brand-foreground hover:bg-brand/90"><a href={bookUrl} onClick={() => track("funding_review_clicked", { track: result.track, score: result.total, sticky: true })}>Book my free Funding Review</a></Button>
+    </div></div>}
     <Button variant="ghost" onClick={restart} className="mt-6 min-h-[44px] text-sm text-muted-foreground"><RotateCcw className="h-4 w-4" aria-hidden="true" />Retake the assessment</Button>
   </>;
 }
