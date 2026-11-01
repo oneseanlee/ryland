@@ -1447,7 +1447,7 @@ export const CLIENT_WINS: ClientWin[] = [
     id: "win-80",
     name: "Nicole G.",
     badge: "Credit-to-Funding Result",
-    amount: 34000,
+    amount: 80000,
     industry: "Cleaning Services",
     location: "Savannah, GA",
     structureLabel: "Funding structure",
