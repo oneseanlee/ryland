@@ -41,7 +41,7 @@ export const ATTENTION_COPY: Record<string, { title: string; hint: string }> = {
   "09": { title: "You don't have an online presence", hint: "Add a website and a business email." },
   "10": { title: "Your business contact info isn't set up", hint: "Use a business phone and address." },
   "12": { title: "Your industry code needs review", hint: "Confirm your NAICS code is accurate." },
-  "04": { title: "Your credit profile is too thin", hint: "You need 4+ accounts in your own name." },
+  "04": { title: "Your credit profile is too thin", hint: "You need 4+ accounts, including 2+ cards and a loan." },
   "06": { title: "Your credit history is too new", hint: "Keep old accounts open." },
 };
 
