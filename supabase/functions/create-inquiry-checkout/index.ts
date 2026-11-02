@@ -177,7 +177,7 @@ serve(async (req) => {
     // Server-side pricing is the source of truth
     const { data: settings, error: setErr } = await supabase
       .from("inquiry_settings")
-      .select("service_price, per_bureau_price, ghl_payment_link")
+      .select("service_price, per_bureau_price, ghl_payment_link, add_ons")
       .eq("id", 1)
       .maybeSingle();
     if (setErr) {
@@ -194,11 +194,21 @@ serve(async (req) => {
     const servicePrice = Number(settings.service_price) || 0;
     const perBureauPrice = Number(settings.per_bureau_price) || 0;
 
+    const VALID_BUREAUS = new Set(["equifax", "experian", "transunion"]);
+    const configuredAddOns: { id?: string; name?: string; price?: number }[] =
+      Array.isArray((settings as { add_ons?: unknown }).add_ons) ? (settings as { add_ons: any[] }).add_ons : [];
     let total = 0;
     const lineItems: { name: string; description: string; amount: number; qty: number }[] = [];
     for (const order of cartOrders) {
-      const bureaus = Array.isArray(order.bureaus) ? order.bureaus.length : 0;
-      const addOns = Array.isArray(order.add_ons) ? order.add_ons : [];
+      const bureauList = Array.isArray(order.bureaus)
+        ? [...new Set(order.bureaus.map((x: unknown) => String(x).toLowerCase()))].filter((x) => VALID_BUREAUS.has(x))
+        : [];
+      const bureaus = bureauList.length;
+      // Never trust stored add-on prices: re-price from configured settings by name/id.
+      const addOns = (Array.isArray(order.add_ons) ? order.add_ons : [])
+        .map((a: { id?: string; name?: string }) => configuredAddOns.find(
+          (c) => (a?.id && c.id && c.id === a.id) || (a?.name && c.name === a.name)))
+        .filter(Boolean) as { name?: string; price?: number }[];
       const addOnTotal = addOns.reduce(
         (sum: number, a: { name?: string; price?: number }) => sum + (Number(a?.price) || 0),
         0

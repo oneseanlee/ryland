@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "npm:@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -28,6 +29,25 @@ serve(async (req) => {
     }
 
     const { name, email, phone, businessName, tags, source, customFields, createOpportunity, opportunityName, monetaryValue, notes } = await req.json();
+
+    // Identify signed-in callers. Public (anonymous) form submissions may only
+    // create new contacts: they cannot create opportunities or write notes onto
+    // contacts that already exist in the CRM.
+    let isSignedIn = false;
+    const authHeader = req.headers.get("Authorization") || "";
+    if (authHeader.startsWith("Bearer ")) {
+      try {
+        const uc = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_ANON_KEY")!, {
+          global: { headers: { Authorization: authHeader } },
+        });
+        const { data } = await uc.auth.getUser();
+        isSignedIn = !!data?.user;
+      } catch { isSignedIn = false; }
+    }
+    if (createOpportunity && !isSignedIn) {
+      return json({ error: "Unauthorized" }, 401);
+    }
+    let existingContact = false;
 
     if (notes !== undefined && notes !== null && (typeof notes !== "string" || notes.length > 5000)) {
       return json({ error: "Invalid notes" }, 400);
@@ -116,6 +136,7 @@ serve(async (req) => {
       // Handle duplicate contact gracefully — extract existing contactId from meta
       if (ghlRes.status === 400 && ghlData?.meta?.contactId) {
         contactId = ghlData.meta.contactId;
+        existingContact = true;
         console.log("GHL duplicate contact, using existing:", contactId);
       } else {
         console.error("GHL API error:", ghlRes.status, JSON.stringify(ghlData));
@@ -127,7 +148,7 @@ serve(async (req) => {
     }
 
     // Attach a note to the contact if provided
-    if (contactId && notes && notes.trim()) {
+    if (contactId && notes && notes.trim() && (isSignedIn || !existingContact)) {
       try {
         const noteRes = await fetch(
           `https://services.leadconnectorhq.com/contacts/${contactId}/notes`,

@@ -76,7 +76,9 @@ export async function syncAssessmentToGhl(db: any, row: AssessmentRow): Promise<
     if (!contactId) throw new Error("contact create returned no id");
 
     const stale = ALL_TRACK_TAGS.filter((t) => !tags.includes(t));
-    await ghlFetch(`/contacts/${contactId}/tags`, { method: "DELETE", body: JSON.stringify({ tags: stale }) }, key).catch(() => null);
+    // Stale track tags are not removed: the contact is matched by caller-supplied
+    // email/phone, so this public flow must never delete tags on existing contacts.
+    void stale;
     const tagRes = await ghlFetch(`/contacts/${contactId}/tags`, { method: "POST", body: JSON.stringify({ tags }) }, key);
     if (!tagRes.ok) throw new Error(`tags ${tagRes.status}`);
 

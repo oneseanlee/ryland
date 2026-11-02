@@ -42,6 +42,17 @@ Deno.serve(async (req) => {
       return json({ error: "Forbidden — admin role required" }, 403);
     }
 
+    const ALLOWED_HOSTS = new Set(["www.rylandpartners.com", "rylandpartners.com", "ryland.lovable.app", "id-preview--42060ea3-49c8-4854-8e0f-9972a82971a1.lovable.app", "localhost"]);
+    const safeRedirect = (v?: string) => {
+      const fallback = "https://www.rylandpartners.com/portal";
+      if (!v || typeof v !== "string") return fallback;
+      try {
+        const u = new URL(v);
+        if (!["https:", "http:"].includes(u.protocol) || !ALLOWED_HOSTS.has(u.hostname)) return fallback;
+        if (u.protocol === "http:" && u.hostname !== "localhost") return fallback;
+        return u.toString();
+      } catch { return fallback; }
+    };
     const body = await req.json().catch(() => ({}));
     const { target_user_id, reason, redirect_to } = body as {
       target_user_id?: string;
@@ -85,7 +96,7 @@ Deno.serve(async (req) => {
         type: "magiclink",
         email: targetEmail,
         options: {
-          redirectTo: redirect_to || `${new URL(req.url).origin}/portal`,
+          redirectTo: safeRedirect(redirect_to),
         },
       });
     if (linkErr || !linkData?.properties?.action_link) {

@@ -111,7 +111,7 @@ serve(async (req) => {
     if (!valid) return json({ error: "Invalid HMAC" }, 401);
 
     const order = JSON.parse(body);
-    console.log("Shopify order received:", order.id, order.email);
+    console.log("Shopify order received:", order.id);
 
     const email = order.email || order.contact_email;
     if (!email) return json({ error: "No email in order" }, 400);
@@ -217,7 +217,7 @@ serve(async (req) => {
           console.error("Transactional email error:", emailRes.status, errText);
         } else {
           await emailRes.text();
-          console.log("Download email queued for:", email);
+          console.log("Download email queued for order:", order.id);
         }
       } catch (emailErr) {
         console.error("Download email invocation error:", emailErr);
@@ -236,7 +236,7 @@ serve(async (req) => {
           downloadLinks,
           libraryUrl: `${siteUrl}/my-orders`,
         });
-        console.log("GHL contact updated for:", email);
+        console.log("GHL contact updated for order:", order.id);
       } catch (ghlErr) {
         console.error("GHL contact update error:", ghlErr);
       }

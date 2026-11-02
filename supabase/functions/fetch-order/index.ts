@@ -52,7 +52,10 @@ Deno.serve(async (req) => {
       )
     }
 
-    if (!data) {
+    const emailOk =
+      !!data && typeof customer_email === 'string' && customer_email.trim().length > 0 &&
+      data.email.toLowerCase().trim() === customer_email.toLowerCase().trim()
+    if (!data || !emailOk) {
       return new Response(
         JSON.stringify({ found: false }),
         { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
