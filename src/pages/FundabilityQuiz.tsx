@@ -11,12 +11,12 @@ import logo from "@/assets/logo-dark.png";
 import FundabilityResults from "@/components/FundabilityResults";
 import {
   BENCHMARKS, DISCLOSURE, FUNDING_REVIEW_URL,
-  captureUtm, scoreAssessment, track, type Answer,
+  captureUtm, landingUrl, bookingUrl, scoreAssessment, track, type Answer,
 } from "@/lib/fundability";
 
 const STORE = "fundability_progress_v1";
 type Stage = "quiz" | "transition" | "contact" | "results";
-interface Saved { answers: Record<string, Answer>; step: number; stage: Stage; startedAt: string; firstName?: string; crm?: string; id?: string | null }
+interface Saved { answers: Record<string, Answer>; step: number; stage: Stage; startedAt: string; firstName?: string; email?: string; crm?: string; id?: string | null }
 
 const load = (): Saved | null => { try { return JSON.parse(localStorage.getItem(STORE) || "null"); } catch { return null; } };
 const OPTIONS: { v: Answer; label: string; sub: string; Icon: typeof CheckCircle2; idle: string; on: string; chip: string; dot: string }[] = [
@@ -55,7 +55,7 @@ export default function FundabilityQuiz() {
   const [startedAt] = useState(saved?.startedAt ?? new Date().toISOString());
   const [firstName, setFirstName] = useState(saved?.firstName ?? "");
   const [crm, setCrm] = useState(saved?.crm);
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(saved?.email ?? "");
   const [phone, setPhone] = useState("");
   const [marketing, setMarketing] = useState(false);
   const [sms, setSms] = useState(false);
@@ -66,8 +66,8 @@ export default function FundabilityQuiz() {
 
   useEffect(() => { captureUtm(); if (!saved) track("quiz_started"); }, [saved]);
   useEffect(() => {
-    localStorage.setItem(STORE, JSON.stringify({ answers, step, stage, startedAt, firstName: stage === "results" ? firstName : undefined, crm }));
-  }, [answers, step, stage, startedAt, firstName, crm]);
+    localStorage.setItem(STORE, JSON.stringify({ answers, step, stage, startedAt, firstName: stage === "results" ? firstName : undefined, email: stage === "results" ? email.trim() : undefined, crm }));
+  }, [answers, step, stage, startedAt, firstName, email, crm]);
   useEffect(() => { window.scrollTo(0, 0); setOpenWhy(false); }, [step, stage]);
 
   const restart = () => { localStorage.removeItem(STORE); setAnswers({}); setStep(0); setStage("quiz"); setFirstName(""); setCrm(undefined); track("quiz_restarted"); };
@@ -96,7 +96,7 @@ export default function FundabilityQuiz() {
     setSubmitting(true);
     try {
       const { data, error: fnErr } = await supabase.functions.invoke("fundability-submit", {
-        body: { first_name: firstName.trim(), email: email.trim(), phone: phone.trim(), marketing_consent: marketing, sms_consent: sms && !!phone.trim(), answers, started_at: startedAt, utm: captureUtm(), landing_url: window.location.href.slice(0, 500), website: hp },
+        body: { first_name: firstName.trim(), email: email.trim(), phone: phone.trim(), marketing_consent: marketing, sms_consent: sms && !!phone.trim(), answers, started_at: startedAt, utm: captureUtm(), landing_url: landingUrl(), website: hp },
       });
       if (fnErr || !data?.ok) throw new Error(data?.error || "save failed");
       setCrm(data.crm);
@@ -113,10 +113,7 @@ export default function FundabilityQuiz() {
   };
 
   if (stage === "results" && result) {
-    const bookUrl = (() => {
-      if (!FUNDING_REVIEW_URL.startsWith("http")) return FUNDING_REVIEW_URL;
-      const u = new URL(FUNDING_REVIEW_URL); u.searchParams.set("first_name", firstName); return u.toString();
-    })();
+    const bookUrl = bookingUrl(firstName.trim(), email.trim());
     return (
       <Shell>
         <PageMeta title="Your Fundability Score | Ryland Partners" description="Your personalized Fundability Score results." noindex />
