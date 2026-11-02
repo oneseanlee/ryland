@@ -69,10 +69,11 @@ serve(async (req) => {
     // case-insensitive. We pull both columns so we can match either one.
     let affiliate: { id: string; full_name: string; affiliate_id: string } | null = null;
     if (affiliateRef) {
-      const refLower = affiliateRef.toLowerCase();
+      const refLower = affiliateRef.toLowerCase().replace(/[^a-z0-9_-]/g, "");
       const { data, error } = await supabase
         .from("affiliates")
         .select("id, full_name, affiliate_id, referral_slug")
+        .eq("status", "approved")
         .or(`affiliate_id.ilike.${refLower},referral_slug.eq.${refLower}`)
         .limit(1)
         .maybeSingle();
