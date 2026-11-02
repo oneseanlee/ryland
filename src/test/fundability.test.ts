@@ -43,3 +43,11 @@ describe("Fundability score", () => {
     expect(scoreAssessment(with_("yes", { "01": "no" })).track).not.toBe("funding_ready");
   });
 });
+
+import { leadSourceTag as lst } from "../../supabase/functions/_shared/fundability";
+describe("lead source tag", () => {
+  it("sms", () => expect(lst({ utm_source: "sms" })).toBe("lead source - sms keyword"));
+  it("webinar", () => expect(lst({ utm_source: "webinar" })).toBe("lead source - webinar replay"));
+  it("other", () => expect(lst({ utm_source: "facebook" })).toBe("lead source - facebook"));
+  it("direct", () => expect(lst({})).toBe("lead source - direct"));
+});

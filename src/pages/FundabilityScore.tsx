@@ -9,14 +9,14 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import gene from "@/assets/gene-ryland-fundability-clean.png.asset.json";
 import guide from "@/assets/fundability-12-benchmarks.pdf.asset.json";
 import { CLIENT_WINS } from "@/data/clientWins";
-import { BENCHMARKS, DISCLOSURE, captureUtm, track, type Answer } from "@/lib/fundability";
+import { BENCHMARKS, DISCLOSURE, captureUtm, track, withUtm, type Answer } from "@/lib/fundability";
 
 const STORE = "fundability_progress_v1";
 const accent = "text-fs-gold";
 
 const Cta = ({ label = "Get my Fundability Score", place, className = "" }: { label?: string; place: string; className?: string }) => (
   <Button asChild size="lg" className={`min-h-[52px] px-8 text-base font-bold bg-fs-gold text-fs-navy hover:bg-fs-gold/90 ${className}`}>
-    <Link to="/fundability/score" onClick={() => track("cta_clicked", { place })}>
+    <Link to={withUtm("/fundability/score")} onClick={() => track("cta_clicked", { place })}>
       {label} <ArrowRight className="ml-2 h-5 w-5" aria-hidden="true" />
     </Link>
   </Button>
@@ -34,7 +34,7 @@ const FirstQuestion = () => {
   const answer = (v: Answer) => {
     track("question_answered", { question: q.id, answer: v, place: "landing" });
     localStorage.setItem(STORE, JSON.stringify({ answers: { [q.id]: v }, step: 1, stage: "quiz", startedAt: new Date().toISOString() }));
-    nav("/fundability/score");
+    nav(withUtm("/fundability/score"));
   };
   return (
     <div id="first-question-card" className="rounded-2xl bg-background text-foreground p-6 sm:p-7 shadow-2xl">
@@ -260,7 +260,7 @@ const FundabilityScore = () => {
         </section>
       </main>
       <footer className="max-w-7xl mx-auto px-4 sm:px-6 py-6 pb-24 flex flex-wrap items-center justify-between gap-4"><img src={logo} alt="Ryland Partners" className="h-7 w-auto" /><p className="text-xs text-muted-foreground">Not a lender. We do not make credit decisions.</p></footer>
-      {showSticky && <Link to="/fundability/score" onClick={() => track("cta_clicked", { place: "sticky" })} className="fixed bottom-0 inset-x-0 z-40 bg-fs-gold text-fs-navy font-bold text-center py-4 min-h-[52px] flex items-center justify-center gap-2">Get my Fundability Score <ArrowRight className="h-5 w-5" aria-hidden="true" /></Link>}
+      {showSticky && <Link to={withUtm("/fundability/score")} onClick={() => track("cta_clicked", { place: "sticky" })} className="fixed bottom-0 inset-x-0 z-40 bg-fs-gold text-fs-navy font-bold text-center py-4 min-h-[52px] flex items-center justify-center gap-2">Get my Fundability Score <ArrowRight className="h-5 w-5" aria-hidden="true" /></Link>}
     </>
   );
 };

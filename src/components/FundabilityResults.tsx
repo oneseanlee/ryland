@@ -39,6 +39,7 @@ export default function FundabilityResults({ answers, result, firstName, crm, bo
       <a href={bookUrl} onClick={() => track("funding_review_clicked", { track: result.track, score: result.total })}>Book my free Funding Review</a>
     </Button>
   );
+  const bookingNote = <p className="mt-2 text-sm text-center opacity-80">15–30 minutes. We look at your real file with you. No pressure.</p>;
 
   return <>
     <section className="bg-brand-navy text-brand-foreground p-6 sm:p-10">
@@ -73,6 +74,7 @@ export default function FundabilityResults({ answers, result, firstName, crm, bo
         <h2 className="text-2xl font-bold font-heading">{attention.length ? "Want help fixing these?" : "Want to confirm you're ready?"}</h2>
         <p className="mt-2 text-sm text-muted-foreground">A funding manager reads your real file with you and maps the order to fix it.</p>
         {bookingButton}
+        {bookingNote}
         <p className="mt-3 text-xs text-center text-muted-foreground">Free · about 30 minutes</p>
       </div>
     </section>
@@ -117,7 +119,7 @@ export default function FundabilityResults({ answers, result, firstName, crm, bo
           <li key={title} className="flex gap-4"><span className="h-9 w-9 shrink-0 rounded-full bg-brand text-brand-foreground ring-2 ring-brand-foreground/30 font-bold flex items-center justify-center">{i + 1}</span><div><h3 className="font-bold">{title}</h3><p className="mt-1 text-sm opacity-90">{body}</p></div></li>)}
       </ol>
       {bookingButton}
-      <p className="mt-3 text-sm text-center">Free call · no pressure</p>
+      {bookingNote}
     </section>
     <Button variant="link" className="mt-4 w-full h-auto min-h-[48px] whitespace-normal" onClick={async () => { const { downloadScorecard } = await import("@/lib/fundabilityReport"); await downloadScorecard(firstName || "You", answers, result); track("report_downloaded"); }}><Download className="h-4 w-4" aria-hidden="true" />Download my scorecard</Button>
     <div className="mt-4 rounded-xl border bg-card p-5"><p className="text-xs font-bold text-brand">NOT READY TO BOOK?</p><p className="mt-1 text-sm">Start with fix #1 on your own. Your scorecard lists every step.</p></div>

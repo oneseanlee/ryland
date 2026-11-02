@@ -1,7 +1,7 @@
 export * from "../../supabase/functions/_shared/fundability";
 
 /** Booking destination for the Funding Review. Override with VITE_FUNDING_REVIEW_URL. */
-export const FUNDING_REVIEW_URL: string = import.meta.env.VITE_FUNDING_REVIEW_URL || "/consultation";
+export const FUNDING_REVIEW_URL: string = import.meta.env.VITE_FUNDING_REVIEW_URL || "https://meeting.rylandpartners.com";
 
 /** Denial Letter Decoder bonus stays hidden until a real PDF + delivery workflow are configured. */
 export const DENIAL_DECODER_ENABLED = import.meta.env.VITE_DENIAL_DECODER_ENABLED === "true";
@@ -16,6 +16,8 @@ export function track(event: string, params: Record<string, unknown> = {}) {
 }
 
 const UTM_KEY = "fundability_utm";
+const UTM_TTL = 30 * 24 * 60 * 60 * 1000;
+/** Reads UTMs from the current URL (newest wins) and keeps them in localStorage for 30 days, so they survive /fundability -> /fundability/score, new tabs and reloads. */
 export function captureUtm(): Record<string, string> {
   const p = new URLSearchParams(window.location.search);
   const fresh: Record<string, string> = {};
@@ -23,6 +25,31 @@ export function captureUtm(): Record<string, string> {
     const v = p.get(k);
     if (v) fresh[k] = v.slice(0, 200);
   }
-  if (Object.keys(fresh).length) sessionStorage.setItem(UTM_KEY, JSON.stringify(fresh));
-  try { return JSON.parse(sessionStorage.getItem(UTM_KEY) || "{}"); } catch { return {}; }
+  try {
+    if (Object.keys(fresh).length) {
+      localStorage.setItem(UTM_KEY, JSON.stringify({ utm: fresh, landing: window.location.href.slice(0, 500), at: Date.now() }));
+      return fresh;
+    }
+    const s = JSON.parse(localStorage.getItem(UTM_KEY) || "null");
+    if (s && Date.now() - s.at < UTM_TTL) return s.utm ?? {};
+  } catch { /* storage blocked */ }
+  return {};
+}
+/** The original landing URL that carried the UTMs, if any. */
+export function landingUrl(): string {
+  try { const s = JSON.parse(localStorage.getItem(UTM_KEY) || "null"); if (s?.landing) return s.landing; } catch { /* ignore */ }
+  return window.location.href.slice(0, 500);
+}
+/** Appends stored UTMs to an internal path, so they also show in the URL. */
+export function withUtm(path: string): string {
+  const u = captureUtm(); const q = new URLSearchParams(u).toString();
+  return q ? `${path}?${q}` : path;
+}
+/** Funding Review link with first name and email prefilled. */
+export function bookingUrl(firstName: string, email: string): string {
+  if (!FUNDING_REVIEW_URL.startsWith("http")) return FUNDING_REVIEW_URL;
+  const u = new URL(FUNDING_REVIEW_URL);
+  if (firstName) u.searchParams.set("first_name", firstName);
+  if (email) u.searchParams.set("email", email);
+  return u.toString();
 }
