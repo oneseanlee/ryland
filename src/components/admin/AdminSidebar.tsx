@@ -23,6 +23,7 @@ import {
   Eye,
   FileSearch,
   Settings2,
+  Gauge,
 } from "lucide-react";
 import {
   SidebarGroup,
@@ -40,6 +41,7 @@ const adminItems = [
   { icon: BarChart3, label: "Reports", path: "/portal/admin/reports" },
   { icon: FileSearch, label: "Inquiry Orders", path: "/portal/admin/inquiries" },
   { icon: Settings2, label: "Inquiry Settings", path: "/portal/admin/inquiry-settings" },
+  { icon: Gauge, label: "Fundability Sync", path: "/portal/admin/fundability" },
 ];
 
 const partnerViewItems = [

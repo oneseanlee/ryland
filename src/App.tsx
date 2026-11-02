@@ -45,6 +45,7 @@ const FundabilityScore = lazy(() => import("./pages/FundabilityScore"));
 const FundabilityQuiz = lazy(() => import("./pages/FundabilityQuiz"));
 const PortalInquiries = lazy(() => import("./pages/portal/PortalInquiries"));
 const AdminInquiries = lazy(() => import("./pages/admin/AdminInquiries"));
+const AdminFundability = lazy(() => import("./pages/admin/AdminFundability"));
 const AdminInquirySettings = lazy(() => import("./pages/admin/AdminInquirySettings"));
 const Intake = lazy(() => import("./pages/Intake"));
 const Unsubscribe = lazy(() => import("./pages/Unsubscribe"));
@@ -162,6 +163,7 @@ const AppContent = () => {
               <Route path="reports" element={<AdminReports />} />
               <Route path="inquiries" element={<AdminInquiries />} />
               <Route path="inquiry-settings" element={<AdminInquirySettings />} />
+              <Route path="fundability" element={<AdminFundability />} />
             </Route>
             {/* Command Center moved to standalone project: github.com/oneseanlee/Command-Center */}
             {/* Vanity affiliate URLs (e.g. /brittany) — must come right before the catch-all */}

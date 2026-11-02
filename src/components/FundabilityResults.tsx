@@ -115,7 +115,7 @@ export default function FundabilityResults({ answers, result, firstName, crm, bo
       <h2 className="mt-3 text-3xl sm:text-4xl leading-tight font-bold font-heading">Let's read your real file together.</h2>
       <p className="mt-3 opacity-90">Your quiz shows where to look. The review shows exactly what to fix, and in what order.</p>
       <ol className="mt-6 space-y-5 border-t border-brand-foreground/20 pt-6">
-        {[['Book a time', 'Pick a slot that works. About 30 minutes.'], ['Pull your 3 reports', 'So we can see the real numbers, not guesses.'], ['Read it together', 'A funding manager walks your file and maps your next steps.']].map(([title, body], i) =>
+        {[['Book a time', 'Pick a slot that works. 15–30 minutes.'], ['Pull your 3 reports', 'So we can see the real numbers, not guesses.'], ['Read it together', 'A funding manager walks your file and maps your next steps.']].map(([title, body], i) =>
           <li key={title} className="flex gap-4"><span className="h-9 w-9 shrink-0 rounded-full bg-brand text-brand-foreground ring-2 ring-brand-foreground/30 font-bold flex items-center justify-center">{i + 1}</span><div><h3 className="font-bold">{title}</h3><p className="mt-1 text-sm opacity-90">{body}</p></div></li>)}
       </ol>
       {bookingButton}
