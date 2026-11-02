@@ -1,9 +1,8 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { z } from "npm:zod@3";
-import {
-  ALL_TRACK_TAGS, BENCHMARKS, TRACK_LABEL, TRACK_TAG, benchmarkById, isCompleteAnswers, leadSourceTag, scoreAssessment,
-} from "../_shared/fundability.ts";
+import { BENCHMARKS, isCompleteAnswers, scoreAssessment } from "../_shared/fundability.ts";
+import { syncAssessmentToGhl } from "../_shared/fundability-ghl.ts";
 
 const json = (d: unknown, status = 200) =>
   new Response(JSON.stringify(d), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
