@@ -59,10 +59,18 @@ export async function syncAssessmentToGhl(db: any, row: AssessmentRow): Promise<
     contactId = await findDup(`email=${encodeURIComponent(b.email.toLowerCase())}`);
     if (!contactId && phone) contactId = await findDup(`number=${encodeURIComponent(phone)}`);
     const fields = { firstName: b.first_name, email: b.email.toLowerCase(), ...(phone ? { phone } : {}), source };
-    const up = contactId
-      ? await ghlFetch(`/contacts/${contactId}`, { method: "PUT", body: JSON.stringify(fields) }, key)
-      : await ghlFetch("/contacts/", { method: "POST", body: JSON.stringify({ locationId, ...fields }) }, key);
-    const upBody = await up.json().catch(() => ({}));
+    const save = (f: Record<string, string>) => contactId
+      ? ghlFetch(`/contacts/${contactId}`, { method: "PUT", body: JSON.stringify(f) }, key)
+      : ghlFetch("/contacts/", { method: "POST", body: JSON.stringify({ locationId, ...f }) }, key);
+    let up = await save(fields);
+    let upBody = await up.json().catch(() => ({}));
+    // The email matched one contact but the phone already belongs to another: keep the email match, skip the phone, flag it in the note.
+    let phoneConflict: string | null = null;
+    if (!up.ok && up.status === 400 && upBody?.meta?.matchingField === "phone" && phone) {
+      phoneConflict = upBody?.meta?.contactId ?? "another contact";
+      const { phone: _p, ...noPhone } = fields as Record<string, string>;
+      up = await save(noPhone); upBody = await up.json().catch(() => ({}));
+    }
     if (!up.ok) throw new Error(`contact ${contactId ? "update" : "create"} ${up.status}: ${JSON.stringify(upBody).slice(0, 300)}`);
     contactId = contactId ?? upBody?.contact?.id ?? null;
     if (!contactId) throw new Error("contact create returned no id");
@@ -82,6 +90,7 @@ export async function syncAssessmentToGhl(db: any, row: AssessmentRow): Promise<
       `Marketing consent: ${b.marketing_consent ? "yes" : "no"} · SMS consent: ${b.sms_consent && b.phone ? "yes" : "no"}`,
       `UTM: ${Object.entries(b.utm ?? {}).map(([k, v]) => `${k}=${v}`).join(", ") || "none"}`,
       `Landing: ${b.landing_url ?? ""}`, `Assessment ID: ${row.id}`,
+      ...(phoneConflict ? [`NOTE: phone ${phone} is already on another GHL contact (${phoneConflict}); not copied to this contact.`] : []),
     ].join("\n");
     const noteRes = await ghlFetch(`/contacts/${contactId}/notes`, { method: "POST", body: JSON.stringify({ body: note }) }, key);
     if (!noteRes.ok) throw new Error(`note ${noteRes.status}: ${(await noteRes.text()).slice(0, 300)}`);
