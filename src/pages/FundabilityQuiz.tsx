@@ -10,7 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import logo from "@/assets/logo-dark.png";
 import FundabilityResults from "@/components/FundabilityResults";
 import {
-  BENCHMARKS, DISCLOSURE, FUNDING_REVIEW_URL,
+  BENCHMARKS, DISCLOSURE,
   captureUtm, landingUrl, bookingUrl, scoreAssessment, track, type Answer,
 } from "@/lib/fundability";
 

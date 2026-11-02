@@ -2,7 +2,7 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { z } from "npm:zod@3";
 import {
-  ALL_TRACK_TAGS, BENCHMARKS, TRACK_LABEL, TRACK_TAG, benchmarkById, isCompleteAnswers, scoreAssessment,
+  ALL_TRACK_TAGS, BENCHMARKS, TRACK_LABEL, TRACK_TAG, benchmarkById, isCompleteAnswers, leadSourceTag, scoreAssessment,
 } from "../_shared/fundability.ts";
 
 const json = (d: unknown, status = 200) =>
@@ -31,12 +31,6 @@ function toE164(p?: string) {
   return d.length >= 8 ? `+${d}` : undefined;
 }
 
-export function leadSourceTag(utm?: Record<string, string>) {
-  const src = utm?.utm_source?.trim().toLowerCase();
-  if (src === "sms") return "lead source - sms keyword";
-  if (src === "webinar") return "lead source - webinar replay";
-  return src ? `lead source - ${src}` : "lead source - direct";
-}
 const answerText = (a: string) => (a === "yes" ? "Yes" : a === "no" ? "No" : "Not sure");
 
 async function ghlFetch(path: string, init: RequestInit, key: string) {

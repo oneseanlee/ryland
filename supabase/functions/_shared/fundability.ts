@@ -88,3 +88,11 @@ export function scoreAssessment(answers: Record<string, Answer>): ScoreResult {
 export function benchmarkById(id: string): Benchmark {
   return BENCHMARKS.find((b) => b.id === id)!;
 }
+
+/** GHL lead-source tag from UTMs. */
+export function leadSourceTag(utm?: Record<string, string>) {
+  const src = utm?.utm_source?.trim().toLowerCase();
+  if (src === "sms") return "lead source - sms keyword";
+  if (src === "webinar") return "lead source - webinar replay";
+  return src ? `lead source - ${src}` : "lead source - direct";
+}
