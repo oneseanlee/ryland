@@ -116,10 +116,7 @@ serve(async (req) => {
       source: "Ryland Partners Client Intake",
     };
 
-    console.log("Sending to Zapier webhook (SSN redacted):", {
-      ...zapierPayload,
-      ssn: "***-**-" + ssnClean.slice(-4),
-    });
+    console.log("Sending intake to Zapier webhook (personal details redacted)");
 
     const zapierRes = await fetch(webhookUrl, {
       method: "POST",
