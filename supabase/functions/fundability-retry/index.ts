@@ -8,7 +8,7 @@ const json = (d: unknown, status = 200) =>
   new Response(JSON.stringify(d), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
 const Body = z.object({ action: z.enum(["list", "retry"]), id: z.string().uuid().optional(), all: z.boolean().optional() });
-const COLS = "id, first_name, email, phone, marketing_consent, sms_consent, answers, utm, landing_url";
+const COLS = "id, first_name, email, phone, marketing_consent, sms_consent, answers, utm, landing_url, completed_at";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
