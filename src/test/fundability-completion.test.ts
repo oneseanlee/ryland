@@ -1,4 +1,3 @@
-// @vitest-environment node
 import { beforeEach, afterEach, describe, expect, it, vi } from "vitest";
 import { webcrypto } from "node:crypto";
 import { completionReceipt, verifyCompletionReceipt } from "../../supabase/functions/_shared/fundability-receipt";
@@ -54,6 +53,16 @@ describe("Funding Review appointment scope", () => {
 });
 
 describe("Shared sync and retry behavior", () => {
+  it("records a retryable failure if contact update fails", async () => {
+    vi.stubGlobal("Deno", { env: { get: (key: string) => ({ GHL_API_KEY: "test-key", GHL_LOCATION_ID: "test-location" }[key]) } });
+    vi.stubGlobal("fetch", vi.fn(async (url: string) => url.includes("search/duplicate")
+      ? new Response(JSON.stringify({ contact: { id: "test-contact" } }))
+      : new Response(JSON.stringify({ error: "test failure" }), { status: 400 })));
+    const update = vi.fn(() => ({ eq: vi.fn().mockResolvedValue({ error: null }) }));
+    const result = await syncAssessmentToGhl({ from: () => ({ update }) }, { id: "test-assessment", first_name: "Test", email: "test@example.com", phone: null, marketing_consent: false, sms_consent: false, answers, utm: {}, landing_url: null, completed_at: "2026-11-03T04:05:00Z" });
+    expect(result.crm).toBe("failed");
+    expect(update).toHaveBeenCalledWith({ crm_status: "failed", crm_error: expect.stringContaining("contact update 400"), ghl_contact_id: "test-contact" });
+  });
   it("writes fields, completion tag and full note once, while appointment failure is non-fatal", async () => {
     vi.stubGlobal("Deno", { env: { get: (key: string) => ({ GHL_API_KEY: "test-key", GHL_LOCATION_ID: "test-location" }[key]) } });
     const calls: { path: string; body: Record<string, unknown> | null }[] = [];
