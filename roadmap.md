@@ -1,7 +1,7 @@
 # Fundability completion sync
-- [ ] Create protected ghl-fundability-quiz completion function and connect non-blocking quiz completion.
-- [ ] Add five GHL custom fields and upcoming Funding Review appointment notes; preserve existing source tracking, full notes, and admin retries.
-- [ ] Test completion, authorization, field values, and appointment scope without contacting real leads.
+- [x] Create protected ghl-fundability-quiz completion function and connect non-blocking quiz completion.
+- [x] Add five GHL custom fields and upcoming Funding Review appointment notes; preserve existing source tracking, full notes, and admin retries. Deploy completion, submit and retry functions.
+- [x] Verify 94 tests, browser quiz completion with simulated sync failure, clean preview compilation, and deployed rejection of an invalid receipt (401); no real leads or appointments contacted. Live GHL field/appointment writes remain unverified.
 
 # Fundability answer controls made distinct
 - [x] Give Yes / No / Not sure each its own icon and color on the landing card, in the quiz (with a clearly selected state), and as filled pills on the downloaded scorecard.
