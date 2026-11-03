@@ -6,7 +6,10 @@ import { BENCHMARKS, type Answer } from "../../supabase/functions/_shared/fundab
 import { syncAssessmentToGhl } from "../../supabase/functions/_shared/fundability-ghl";
 
 const answers = Object.fromEntries(BENCHMARKS.map((b) => [b.id, "yes"])) as Record<string, Answer>;
-beforeEach(() => vi.stubGlobal("crypto", webcrypto));
+beforeEach(() => {
+  vi.stubGlobal("crypto", webcrypto);
+  vi.stubGlobal("AbortSignal", { timeout: () => new AbortController().signal });
+});
 afterEach(() => vi.unstubAllGlobals());
 
 describe("Fundability completion authorization", () => {
