@@ -9,6 +9,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
 import logo from "@/assets/logo-dark.png";
 import FundabilityResults from "@/components/FundabilityResults";
+import { syncQuizToGHL } from "@/lib/fundabilitySync";
 import {
   BENCHMARKS, DISCLOSURE,
   captureUtm, landingUrl, bookingUrl, scoreAssessment, track, type Answer,
@@ -100,6 +101,7 @@ export default function FundabilityQuiz() {
       });
       if (fnErr || !data?.ok) throw new Error(data?.error || "save failed");
       setCrm(data.crm);
+      if (data.id && data.receipt) void syncQuizToGHL(data.id, data.receipt);
       track("lead_submitted", { crm: data.crm, score: result?.total, track: result?.track });
     } catch {
       // Answers stay on the device; still show the result, but never claim delivery.

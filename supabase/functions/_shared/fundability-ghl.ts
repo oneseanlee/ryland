@@ -2,11 +2,13 @@
 import {
   ALL_TRACK_TAGS, BENCHMARKS, TRACK_LABEL, TRACK_TAG, benchmarkById, leadSourceTag, scoreAssessment, type Answer,
 } from "./fundability.ts";
+import { quizCustomFields, fundingReviewUpdate, type QuizAppointment } from "./fundability-quiz-fields.ts";
 
 export interface AssessmentRow {
   id: string; first_name: string; email: string; phone: string | null;
   marketing_consent: boolean; sms_consent: boolean; answers: Record<string, Answer>;
   utm: Record<string, string> | null; landing_url: string | null;
+  completed_at: string;
 }
 
 const GHL = "https://services.leadconnectorhq.com";
@@ -44,7 +46,7 @@ export async function syncAssessmentToGhl(db: any, row: AssessmentRow): Promise<
   let crm: "synced" | "failed" = "failed"; let crmError: string | null = null; let contactId: string | null = null;
   try {
     if (!key || !locationId) throw new Error("[config] GoHighLevel not configured");
-    const tags = ["Fundability Quiz Started", "Fundability Quiz Completed", ...TRACK_TAG[r.track], leadSourceTag(b.utm)];
+    const tags = ["Fundability Quiz Started", "Fundability Quiz Completed", "fundability quiz completed", `fundability-track-${r.track.toLowerCase().replace(/\s+/g, "-")}`, ...TRACK_TAG[r.track], leadSourceTag(b.utm)];
     if (b.marketing_consent) tags.push("Marketing Consent");
     if (b.sms_consent && b.phone) tags.push("SMS Consent");
     const phone = toE164(b.phone || undefined);
@@ -58,8 +60,8 @@ export async function syncAssessmentToGhl(db: any, row: AssessmentRow): Promise<
     };
     contactId = await findDup(`email=${encodeURIComponent(b.email.toLowerCase())}`);
     if (!contactId && phone) contactId = await findDup(`number=${encodeURIComponent(phone)}`);
-    const fields = { firstName: b.first_name, email: b.email.toLowerCase(), ...(phone ? { phone } : {}), source };
-    const save = (f: Record<string, string>) => contactId
+    const fields = { firstName: b.first_name, email: b.email.toLowerCase(), ...(phone ? { phone } : {}), source, customFields: quizCustomFields(answers, row.completed_at) };
+    const save = (f: Record<string, unknown>) => contactId
       ? ghlFetch(`/contacts/${contactId}`, { method: "PUT", body: JSON.stringify(f) }, key)
       : ghlFetch("/contacts/", { method: "POST", body: JSON.stringify({ locationId, ...f }) }, key);
     let up = await save(fields);
@@ -68,7 +70,7 @@ export async function syncAssessmentToGhl(db: any, row: AssessmentRow): Promise<
     let phoneConflict: string | null = null;
     if (!up.ok && up.status === 400 && upBody?.meta?.matchingField === "phone" && phone) {
       phoneConflict = upBody?.meta?.contactId ?? "another contact";
-      const { phone: _p, ...noPhone } = fields as Record<string, string>;
+      const { phone: _p, ...noPhone } = fields;
       up = await save(noPhone); upBody = await up.json().catch(() => ({}));
     }
     if (!up.ok) throw new Error(`contact ${contactId ? "update" : "create"} ${up.status}: ${JSON.stringify(upBody).slice(0, 300)}`);
@@ -96,6 +98,22 @@ export async function syncAssessmentToGhl(db: any, row: AssessmentRow): Promise<
     ].join("\n");
     const noteRes = await ghlFetch(`/contacts/${contactId}/notes`, { method: "POST", body: JSON.stringify({ body: note }) }, key);
     if (!noteRes.ok) throw new Error(`note ${noteRes.status}: ${(await noteRes.text()).slice(0, 300)}`);
+    // Only verified upcoming Funding Review events; appointment errors never fail contact sync.
+    try {
+      const apptRes = await ghlFetch(`/contacts/${contactId}/appointments`, { method: "GET" }, key);
+      if (!apptRes.ok) throw new Error(`appointments ${apptRes.status}`);
+      const apptBody = await apptRes.json();
+      const appointments: QuizAppointment[] = apptBody.appointments ?? apptBody.events ?? [];
+      const redChecks = r.failed.map((id) => benchmarkById(id).title).join("\n");
+      for (const appt of appointments) {
+        const notes = fundingReviewUpdate(appt, r.total, r.track, redChecks);
+        if (!notes || !appt.id) continue;
+        const updated = await ghlFetch(`/calendars/events/${encodeURIComponent(appt.id)}`, { method: "PUT", body: JSON.stringify({ notes }) }, key);
+        if (!updated.ok) throw new Error(`appointment update ${updated.status}`);
+      }
+    } catch {
+      console.warn("fundability appointment notes update failed (non-fatal)", row.id);
+    }
     crm = "synced";
   } catch (e) {
     crmError = String((e as Error).message ?? e).slice(0, 1000);
