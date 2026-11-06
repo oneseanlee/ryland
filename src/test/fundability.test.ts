@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { BENCHMARKS, scoreAssessment, type Answer } from "../../supabase/functions/_shared/fundability";
+import { bookingUrl } from "@/lib/fundability";
 
 const all = (a: Answer) => Object.fromEntries(BENCHMARKS.map((b) => [b.id, a])) as Record<string, Answer>;
 const with_ = (base: Answer, over: Record<string, Answer>) => ({ ...all(base), ...over });
@@ -50,4 +51,13 @@ describe("lead source tag", () => {
   it("webinar", () => expect(lst({ utm_source: "webinar" })).toBe("lead source - webinar replay"));
   it("other", () => expect(lst({ utm_source: "facebook" })).toBe("lead source - facebook"));
   it("direct", () => expect(lst({})).toBe("lead source - direct"));
+});
+
+describe("Funding Review booking", () => {
+  it("uses the direct branded calendar and preserves first name and email", () => {
+    const url = new URL(bookingUrl("Quiz E2E", "fundability-e2e@example.com"));
+    expect(url.origin + url.pathname).toBe("https://link.rylandpartners.com/widget/booking/PSQjJW46GofsIEfpoHUA");
+    expect(url.searchParams.get("first_name")).toBe("Quiz E2E");
+    expect(url.searchParams.get("email")).toBe("fundability-e2e@example.com");
+  });
 });

@@ -1,3 +1,7 @@
+# Fundability quiz and booking verification
+- [x] Complete the real quiz from landing through a saved 12/12 result and confirmed CRM sync with UTMs; open the booking calendar without scheduling an appointment.
+- [x] Fix the booking redirect dropping first name/email by using the direct branded calendar; verified prefilled details, available times and Schedule meeting button. Thirty focused tests passed; build OK.
+
 # Fundability completion sync
 - [x] Create protected ghl-fundability-quiz completion function and connect non-blocking quiz completion.
 - [x] Add five GHL custom fields and upcoming Funding Review appointment notes; preserve existing source tracking, full notes, and admin retries. Deploy completion, submit and retry functions.

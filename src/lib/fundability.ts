@@ -1,7 +1,7 @@
 export * from "../../supabase/functions/_shared/fundability";
 
-/** Booking destination for the Funding Review. Override with VITE_FUNDING_REVIEW_URL. */
-export const FUNDING_REVIEW_URL: string = import.meta.env.VITE_FUNDING_REVIEW_URL || "https://meeting.rylandpartners.com";
+/** Direct branded calendar: the meeting-domain redirect drops prefill query parameters. */
+export const FUNDING_REVIEW_URL: string = import.meta.env.VITE_FUNDING_REVIEW_URL || "https://link.rylandpartners.com/widget/booking/PSQjJW46GofsIEfpoHUA";
 
 /** Denial Letter Decoder bonus stays hidden until a real PDF + delivery workflow are configured. */
 export const DENIAL_DECODER_ENABLED = import.meta.env.VITE_DENIAL_DECODER_ENABLED === "true";
