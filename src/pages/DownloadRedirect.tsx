@@ -27,7 +27,7 @@ const DownloadRedirect = () => {
   return (
     <>
       <PageMeta
-        title="Download E-Book | Ryland"
+        title="Download E-Book | Ryland Partners"
         description="Download your purchased e-book."
         noindex
       />

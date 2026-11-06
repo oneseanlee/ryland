@@ -57,7 +57,7 @@ const Unsubscribe = () => {
 
   return (
     <>
-      <PageMeta title="Unsubscribe | Ryland" description="Manage your email preferences."
+      <PageMeta title="Unsubscribe | Ryland Partners" description="Manage your email preferences."
         noindex />
       <Navbar />
       <main className="min-h-screen bg-background pt-24 pb-16">

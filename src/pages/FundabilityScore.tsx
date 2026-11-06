@@ -97,7 +97,7 @@ const FundabilityScore = () => {
     <>
       <PageMeta
         title="What's Your Fundability Score? | Ryland Partners"
-        description="Banks run 12 checks before they fund you. Find out how many you pass in 3 minutes. Free, and nothing touches your credit."
+        description="Banks run 12 checks before they fund you. Find out how many you pass in 2 minutes. Free, and nothing touches your credit."
         canonical="/fundability"
       />
       <header className="bg-background border-b"><div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center"><img src={logo} alt="Ryland Partners" className="h-8 w-auto" /></div></header>
@@ -111,7 +111,7 @@ const FundabilityScore = () => {
                 Banks run 12 checks before they fund you. <span className={accent}>How many do you pass?</span>
               </h1>
               <p className="mt-3 text-sm font-medium text-brand-foreground/75">Takes 2 minutes · No credit check · See exactly where you stand before you apply</p>
-              <p className="mt-5 text-lg sm:text-xl opacity-90">Find out in 3 minutes. Free, and nothing touches your credit.</p>
+              <p className="mt-5 text-lg sm:text-xl opacity-90">Find out in 2 minutes. Free, and nothing touches your credit.</p>
               <div className="lg:hidden mt-6 flex flex-wrap items-end gap-x-4 gap-y-2">
                 <div><p className="text-2xl font-extrabold font-heading leading-none">250+</p><p className="mt-1 text-[11px] tracking-wider whitespace-nowrap opacity-80">FEATURED CLIENT OUTCOMES</p></div>
                 <div className="sm:border-l sm:border-brand-foreground/25 sm:pl-4"><p className="text-2xl font-extrabold font-heading leading-none">$23M+</p><p className="mt-1 text-[11px] tracking-wider whitespace-nowrap opacity-80">IN FUNDING REPRESENTED</p></div>
@@ -148,7 +148,7 @@ const FundabilityScore = () => {
           </ul>
           <div className="text-center lg:col-start-1 lg:row-start-2 lg:self-start lg:text-left">
             <Cta place="learn" className="w-full sm:w-auto px-5" />
-            <p className="mt-3 text-sm text-muted-foreground">Free. About 3 minutes. Nothing is pulled.</p>
+            <p className="mt-3 text-sm text-muted-foreground">Free. 2 minutes. Nothing is pulled.</p>
           </div>
         </section>
 

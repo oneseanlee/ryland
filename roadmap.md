@@ -1,3 +1,9 @@
+# Fundability landing copy consistency
+- [x] Switch the hero paragraph, page description and "your next 3 minutes" line to 2 minutes; verified in the browser that all three render and no old string survives in those spots.
+- [x] Fix brand labels that said only "Ryland": four page titles plus the transactional email sender name and order email template; deployed the three affected functions.
+- [x] Confirm the FAQ buttons already sit at 44px minimum and the sticky bar's navy-on-gold reads at 8.9:1; no change needed. Scan found no "BUSINES" typo and no leftover "slide" copy in the quiz or results.
+- [ ] Three unlisted 3-minute mentions remain on the landing page (the "your next 3 minutes" eyebrow, Gene's "this 3-minute quiz" line, and "Take 3 minutes and know."); left as-is because the brief said not to touch other copy — awaiting a yes/no.
+
 # Fundability quiz and booking verification
 - [x] Complete the real quiz from landing through a saved 12/12 result and confirmed CRM sync with UTMs; open the booking calendar without scheduling an appointment.
 - [x] Fix the booking redirect dropping first name/email by using the direct branded calendar; verified prefilled details, available times and Schedule meeting button. Thirty focused tests passed; build OK.

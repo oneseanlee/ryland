@@ -132,7 +132,7 @@ const ThankYou = () => {
   return (
     <>
       <PageMeta
-        title="Thank You for Your Purchase | Ryland"
+        title="Thank You for Your Purchase | Ryland Partners"
         description="Download your purchased e-books immediately."
         noindex
       />

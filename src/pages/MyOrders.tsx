@@ -82,7 +82,7 @@ const MyOrders = () => {
   return (
     <>
       <PageMeta
-        title="My Downloads | Ryland"
+        title="My Downloads | Ryland Partners"
         description="Access your purchased e-books and digital products."
         noindex
       />
