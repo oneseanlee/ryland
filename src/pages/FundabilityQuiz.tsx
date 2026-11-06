@@ -202,7 +202,7 @@ export default function FundabilityQuiz() {
         </button>
         {openWhy && <div className="px-4 pb-4 text-sm space-y-1.5"><p><b>Target:</b> {b.target}</p><p>{b.why}</p></div>}
       </div>
-      <p className="mt-6 text-xs text-muted-foreground inline-flex items-center gap-1.5"><Lock className="h-3.5 w-3.5" aria-hidden="true" /> No credit check. Nothing is pulled. Your answers are saved on this device.</p>
+      <p className="mt-6 text-xs text-muted-foreground inline-flex items-center gap-1.5"><Lock className="h-3.5 w-3.5" aria-hidden="true" /> Nothing is pulled. Your answers are saved on this device.</p>
     </Shell>
   );
 }

@@ -6,6 +6,8 @@ export interface ClientWin {
   name: string;
   badge: string;
   amount: number;
+  /** Optional override for how the amount is shown on case-study cards. */
+  amountDisplay?: string;
   industry: string;
   location: string;
   structureLabel: string;
@@ -1447,14 +1449,15 @@ export const CLIENT_WINS: ClientWin[] = [
     id: "win-80",
     name: "Nicole G.",
     badge: "Credit-to-Funding Result",
-    amount: 80000,
-    industry: "Cleaning Services",
+    amount: 155000,
+    amountDisplay: "$155,000+",
+    industry: "Party Planning & Rentals",
     location: "Savannah, GA",
     structureLabel: "Funding structure",
-    banks: "Chase",
+    banks: "",
     structureType: "Business revolving credit",
-    scoreFrom: 615,
-    scoreTo: 729,
+    scoreFrom: null,
+    scoreTo: null,
     months: 4,
     usedFor: "commercial equipment and supplies for a hospital contract",
     quote: "One part I did not expect was the credit work first; over 4 months I went from 615 to 729. I knew commercial equipment and supplies for a hospital contract would help the business, but I wanted a better way to finance it than just using whatever cash was available.",

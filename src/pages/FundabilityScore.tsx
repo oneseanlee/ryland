@@ -1,13 +1,12 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowRight, Gauge, FileText, Eye, AlertTriangle, ListChecks, CircleCheck, TrendingUp, Lock, Download, CheckCircle2, XCircle, HelpCircle } from "lucide-react";
+import { ArrowRight, Gauge, FileText, Eye, AlertTriangle, ListChecks, CircleCheck, TrendingUp, Lock, CheckCircle2, XCircle, HelpCircle } from "lucide-react";
 import logo from "@/assets/logo-dark.png";
 
 import PageMeta from "@/components/PageMeta";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import gene from "@/assets/gene-ryland-fundability-clean.png.asset.json";
-import guide from "@/assets/fundability-12-benchmarks.pdf.asset.json";
 import { CLIENT_WINS } from "@/data/clientWins";
 import { BENCHMARKS, DISCLOSURE, captureUtm, track, withUtm, type Answer } from "@/lib/fundability";
 
@@ -110,9 +109,8 @@ const FundabilityScore = () => {
               <h1 className="mt-4 text-4xl sm:text-5xl lg:text-6xl font-extrabold font-heading leading-[1.05]">
                 Banks run 12 checks before they fund you. <span className={accent}>How many do you pass?</span>
               </h1>
-              <p className="mt-3 text-sm font-medium text-brand-foreground/75">Takes 2 minutes · No credit check · See exactly where you stand before you apply</p>
-              <p className="mt-5 text-lg sm:text-xl opacity-90">Find out in 2 minutes. Free, and nothing touches your credit.</p>
-              <div className="lg:hidden mt-6 flex flex-wrap items-end gap-x-4 gap-y-2">
+              <p className="mt-3 text-sm font-medium text-brand-foreground/75">Takes 2 minutes. Free. Nothing is pulled.</p>
+              <div className="mt-6 flex flex-wrap items-end gap-x-4 gap-y-2">
                 <div><p className="text-2xl font-extrabold font-heading leading-none">250+</p><p className="mt-1 text-[11px] tracking-wider whitespace-nowrap opacity-80">FEATURED CLIENT OUTCOMES</p></div>
                 <div className="sm:border-l sm:border-brand-foreground/25 sm:pl-4"><p className="text-2xl font-extrabold font-heading leading-none">$23M+</p><p className="mt-1 text-[11px] tracking-wider whitespace-nowrap opacity-80">IN FUNDING REPRESENTED</p></div>
                 <p className="w-full text-[11px] leading-snug opacity-70">Individual results, not typical or guaranteed. Funding depends on your profile and lender approval.</p>
@@ -122,17 +120,12 @@ const FundabilityScore = () => {
             </div>
             <FirstQuestion />
           </div>
-          <div className="hidden lg:grid max-w-7xl mx-auto px-4 sm:px-6 mt-10 lg:grid-cols-[auto_auto_1fr] gap-10 items-center">
-            <div><p className="text-3xl font-extrabold font-heading">250+</p><p className="text-xs tracking-wider opacity-80">FEATURED CLIENT OUTCOMES</p></div>
-            <div className="sm:border-l sm:pl-10 border-brand-foreground/20"><p className="text-3xl font-extrabold font-heading">$23M+</p><p className="text-xs tracking-wider opacity-80">IN FUNDING REPRESENTED</p></div>
-            <p className="sm:border-l sm:pl-10 border-brand-foreground/20 text-xs opacity-80">Individual results, not typical or guaranteed. Funding depends on your profile and lender approval.</p>
-          </div>
         </section>
 
         {/* What you'll find out */}
         <section aria-labelledby="learn-heading" className="max-w-7xl mx-auto px-5 sm:px-6 py-12 sm:py-16 grid gap-7 lg:grid-cols-[0.9fr_1.1fr] lg:gap-x-16 lg:gap-y-6">
           <div className="lg:col-start-1 lg:row-start-1 lg:self-end">
-            <p className="text-xs font-bold tracking-widest text-fs-navy">YOUR NEXT 3 MINUTES</p>
+            <p className="text-xs font-bold tracking-widest text-fs-navy">YOUR NEXT 2 MINUTES</p>
             <h2 id="learn-heading" className="mt-3 max-w-md text-3xl sm:text-4xl font-bold font-heading leading-tight text-fs-navy [text-wrap:balance]">Know where you stand before you apply.</h2>
             <div className="mt-5 h-1 w-12 bg-fs-gold" aria-hidden="true" />
           </div>
@@ -193,7 +186,7 @@ const FundabilityScore = () => {
               <p>I didn't have huge revenue yet. I didn't qualify for traditional business loans, and I had zero strategy. I was just applying blind and hoping for the best.</p>
               <p>Then it hit me: the banks weren't rejecting me. They were rejecting my file.</p>
               <p>My profile had red flags I didn't even know existed. Once I learned the rules, fixed my file, and applied the right way, everything changed. Same guy. Same business. But this time, approved.</p>
-              <p>Today, my business holds over $800,000 in credit limits. This 3-minute quiz runs the exact checks I wish I had before my first application.</p>
+              <p>Today, my business holds over $800,000 in credit limits. This 2-minute quiz runs the exact checks I wish I had before my first application.</p>
             </div>
 
             <div className="mt-6 flex flex-col items-stretch gap-4 sm:flex-row sm:items-end sm:justify-between">
@@ -215,13 +208,15 @@ const FundabilityScore = () => {
                   <div className="min-w-0">
                     <p className="font-bold">{w.name}</p>
                     <p className="text-sm text-muted-foreground">{w.scoreFrom ? `Score ${w.scoreFrom} → ${w.scoreTo}` : w.industry}</p>
-                    <p className="mt-1 text-2xl font-extrabold font-heading">${w.amount.toLocaleString()}</p>
-                    <p className="text-sm text-muted-foreground">
-                      via{" "}
-                      {w.banks.split(" + ").map((bank, i) => (
-                        <span key={bank}>{i > 0 && " + "}<span className="whitespace-nowrap">{bank}</span></span>
-                      ))}
-                    </p>
+                    <p className="mt-1 text-2xl font-extrabold font-heading">{w.amountDisplay ?? `$${w.amount.toLocaleString()}`}</p>
+                    {w.banks && (
+                      <p className="text-sm text-muted-foreground">
+                        via{" "}
+                        {w.banks.split(" + ").map((bank, i) => (
+                          <span key={bank}>{i > 0 && " + "}<span className="whitespace-nowrap">{bank}</span></span>
+                        ))}
+                      </p>
+                    )}
                   </div>
                 </div>
               ))}
@@ -247,17 +242,9 @@ const FundabilityScore = () => {
             <h2 className="text-3xl sm:text-4xl font-bold font-heading">You've got two ways to do this.</h2>
             <div className="mt-8 grid sm:grid-cols-2 gap-4">
               <div className="rounded-xl bg-brand-foreground/10 p-5"><p className="font-bold">Apply and hope.</p><p className="mt-1 text-sm opacity-80">Find out what's wrong from the denial letter, with one more inquiry on your report.</p></div>
-              <div className="rounded-xl border-2 border-fs-gold p-5 bg-fs-gold/10"><p className={`font-bold ${accent}`}>Take 3 minutes and know.</p><p className="mt-1 text-sm opacity-90">See what the bank sees, fix what needs fixing, then apply.</p></div>
+              <div className="rounded-xl border-2 border-fs-gold p-5 bg-fs-gold/10"><p className={`font-bold ${accent}`}>Take 2 minutes and know.</p><p className="mt-1 text-sm opacity-90">See what the bank sees, fix what needs fixing, then apply.</p></div>
             </div>
             <div className="mt-8"><Cta place="final" className="w-full sm:w-auto sm:px-16" /></div>
-            <div className="mt-6 text-sm flex flex-col items-center gap-1 sm:flex-row sm:justify-center sm:gap-2">
-              <a href={guide.url} download="Ryland_Partners_12_Fundability_Benchmarks.pdf" className="underline inline-flex items-center gap-1 min-h-[44px] whitespace-nowrap" onClick={() => track("checklist_downloaded")}>
-                <Download className="h-4 w-4" aria-hidden="true" /> Download the 12 Benchmarks PDF
-              </a>
-              <span className="hidden sm:inline text-muted-foreground">·</span>
-              <Link to="/fundability/benchmarks" className="underline inline-flex items-center min-h-[44px] whitespace-nowrap">Read the benchmarks</Link>
-            </div>
-
           </div>
         </section>
 
