@@ -14,7 +14,7 @@ import { BENCHMARKS, DISCLOSURE, captureUtm, track, withUtm, type Answer } from 
 const STORE = "fundability_progress_v1";
 const accent = "text-fs-gold";
 
-const Cta = ({ label = "Get my Fundability Score", place, className = "" }: { label?: string; place: string; className?: string }) => (
+const Cta = ({ label = "Take the 2-Minute Fundability Quiz", place, className = "" }: { label?: string; place: string; className?: string }) => (
   <Button asChild size="lg" className={`min-h-[52px] px-8 text-base font-bold bg-fs-gold text-fs-navy hover:bg-fs-gold/90 ${className}`}>
     <Link to={withUtm("/fundability/score")} onClick={() => track("cta_clicked", { place })}>
       {label} <ArrowRight className="ml-2 h-5 w-5" aria-hidden="true" />
@@ -110,13 +110,19 @@ const FundabilityScore = () => {
               <h1 className="mt-4 text-4xl sm:text-5xl lg:text-6xl font-extrabold font-heading leading-[1.05]">
                 Banks run 12 checks before they fund you. <span className={accent}>How many do you pass?</span>
               </h1>
+              <p className="mt-3 text-sm font-medium text-brand-foreground/75">Takes 2 minutes · No credit check · See exactly where you stand before you apply</p>
               <p className="mt-5 text-lg sm:text-xl opacity-90">Find out in 3 minutes. Free, and nothing touches your credit.</p>
+              <div className="lg:hidden mt-6 flex flex-wrap items-end gap-x-4 gap-y-2">
+                <div><p className="text-2xl font-extrabold font-heading leading-none">250+</p><p className="mt-1 text-[11px] tracking-wider whitespace-nowrap opacity-80">FEATURED CLIENT OUTCOMES</p></div>
+                <div className="sm:border-l sm:border-brand-foreground/25 sm:pl-4"><p className="text-2xl font-extrabold font-heading leading-none">$23M+</p><p className="mt-1 text-[11px] tracking-wider whitespace-nowrap opacity-80">IN FUNDING REPRESENTED</p></div>
+                <p className="w-full text-[11px] leading-snug opacity-70">Individual results, not typical or guaranteed. Funding depends on your profile and lender approval.</p>
+              </div>
               <div className="mt-7"><Cta place="hero" className="w-full sm:w-auto" /></div>
               <p className="mt-3 text-sm opacity-80">12 yes-or-no questions. No credit pull.</p>
             </div>
             <FirstQuestion />
           </div>
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 mt-10 grid sm:grid-cols-[auto_auto_1fr] gap-6 sm:gap-10 items-center">
+          <div className="hidden lg:grid max-w-7xl mx-auto px-4 sm:px-6 mt-10 lg:grid-cols-[auto_auto_1fr] gap-10 items-center">
             <div><p className="text-3xl font-extrabold font-heading">250+</p><p className="text-xs tracking-wider opacity-80">FEATURED CLIENT OUTCOMES</p></div>
             <div className="sm:border-l sm:pl-10 border-brand-foreground/20"><p className="text-3xl font-extrabold font-heading">$23M+</p><p className="text-xs tracking-wider opacity-80">IN FUNDING REPRESENTED</p></div>
             <p className="sm:border-l sm:pl-10 border-brand-foreground/20 text-xs opacity-80">Individual results, not typical or guaranteed. Funding depends on your profile and lender approval.</p>
@@ -192,7 +198,7 @@ const FundabilityScore = () => {
 
             <div className="mt-6 flex flex-col items-stretch gap-4 sm:flex-row sm:items-end sm:justify-between">
               <div><p className="font-bold">Gene Ryland</p><p className="text-sm text-muted-foreground">Founder</p></div>
-              <Cta label="Score my file now" place="story" className="w-full sm:w-auto" />
+              <Cta place="story" className="w-full sm:w-auto" />
             </div>
 
           </div>
@@ -260,7 +266,7 @@ const FundabilityScore = () => {
         </section>
       </main>
       <footer className="max-w-7xl mx-auto px-4 sm:px-6 py-6 pb-24 flex flex-wrap items-center justify-between gap-4"><img src={logo} alt="Ryland Partners" className="h-7 w-auto" /><p className="text-xs text-muted-foreground">Not a lender. We do not make credit decisions.</p></footer>
-      {showSticky && <Link to={withUtm("/fundability/score")} onClick={() => track("cta_clicked", { place: "sticky" })} className="fixed bottom-0 inset-x-0 z-40 bg-fs-gold text-fs-navy font-bold text-center py-4 min-h-[52px] flex items-center justify-center gap-2">Get my Fundability Score <ArrowRight className="h-5 w-5" aria-hidden="true" /></Link>}
+      {showSticky && <Link to={withUtm("/fundability/score")} onClick={() => track("cta_clicked", { place: "sticky" })} className="fixed bottom-0 inset-x-0 z-40 bg-fs-gold text-fs-navy font-bold text-center py-4 min-h-[52px] flex items-center justify-center gap-2">Take the 2-Minute Fundability Quiz <ArrowRight className="h-5 w-5" aria-hidden="true" /></Link>}
     </>
   );
 };
