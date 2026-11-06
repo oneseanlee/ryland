@@ -41,14 +41,14 @@ export default function Wins() {
     });
     return {
       byIndustry,
-      credit: CLIENT_WINS.filter((w) => w.scoreFrom !== null).length,
+      credit: CLIENT_WINS.filter((w) => typeof w.scoreFrom === "number").length,
       over100k: CLIENT_WINS.filter((w) => w.amount >= 100000).length,
     };
   }, []);
 
   const visible = useMemo(() => {
     let list = [...CLIENT_WINS];
-    if (filter === "credit") list = list.filter((w) => w.scoreFrom !== null);
+    if (filter === "credit") list = list.filter((w) => typeof w.scoreFrom === "number");
     else if (filter === "100k") list = list.filter((w) => w.amount >= 100000);
     else if (filter !== "all") list = list.filter((w) => w.industry === filter);
     return sort === "highest" ? list.sort((a, b) => b.amount - a.amount) : list;
@@ -230,7 +230,7 @@ export default function Wins() {
                   <p className="text-xs text-zinc-400 mt-1">{w.structureType}</p>
                 </div>
 
-                {w.scoreFrom !== null && (
+                {typeof w.scoreFrom === "number" && (
                   <div className="mt-3 rounded-xl bg-white/5 ring-1 ring-white/10 p-4">
                     <p className="text-[11px] uppercase tracking-wider text-blue-300/80 flex items-center gap-1.5">
                       <TrendingUp className="w-3 h-3" aria-hidden="true" /> Credit profile
@@ -333,7 +333,7 @@ export default function Wins() {
                   <p className="text-[11px] uppercase tracking-wider text-blue-300/80">{active.structureLabel}</p>
                   <p className="text-sm mt-1.5">{active.banks}</p>
                 </div>
-                {active.scoreFrom !== null && (
+                {typeof active.scoreFrom === "number" && (
                   <div className="rounded-xl bg-white/5 ring-1 ring-white/10 p-4">
                     <p className="text-[11px] uppercase tracking-wider text-blue-300/80">Credit profile</p>
                     <p className="text-sm mt-1.5">

@@ -208,7 +208,7 @@ const FundabilityScore = () => {
                   <div className="min-w-0">
                     <p className="font-bold">{w.name}</p>
                     <p className="text-sm text-muted-foreground">{w.scoreFrom ? `Score ${w.scoreFrom} → ${w.scoreTo}` : w.industry}</p>
-                    <p className="mt-1 text-2xl font-extrabold font-heading">{w.amountDisplay ?? `$${w.amount.toLocaleString()}`}</p>
+                    <p className="mt-1 text-2xl font-extrabold font-heading">${w.amount.toLocaleString()}{w.showPlus ? "+" : ""}</p>
                     {w.banks && (
                       <p className="text-sm text-muted-foreground">
                         via{" "}
