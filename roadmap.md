@@ -69,3 +69,4 @@
 - 2026-10-28: Fundability landing page — replaced the story headline and body with Gene's own copy, spaced into five paragraphs (verified on phone and desktop).
 - 2026-10-28: Fundability landing — new hero eyebrow ("BUSINESS OWNERS: CHECK IF YOU QUALIFY BEFORE YOU APPLY"), two men added to the client result cards (Ethan K., Kevin B.), and mobile layout fixes (single-column 3-minutes list, full-width story button, unbroken bank names, stacked closer links).
 - 2026-11-01: Fundability checks 01-06 rewritten in Gene's own words (700+ on all three bureaus, no negative marks, 2 or fewer hard inquiries in 2 years, 4+ accounts incl. 2+ cards and a car loan or mortgage, all card balances under 10% with the $500/$5,000 example, accounts 2+ years old); the 10% card-balance target replaced the old 28% everywhere it appeared. Verified live in the quiz and on the results page.
+- [x] Point booking buttons to permanent GHL booking link (already in place)

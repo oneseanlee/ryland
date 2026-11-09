@@ -130,9 +130,9 @@ const Index = () => {
               We help entrepreneurs discover <span className="text-white font-semibold">high-limit business credit strategies</span>, optimize their credit, and master the digital economy.
             </p>
             <div className="flex flex-col mt-6 sm:mt-8 xl:mt-10 gap-4 items-center lg:items-start">
-              <Link to="/assessment" className="inline-block bg-transparent">
+              <Link to="/fundability" className="inline-block bg-transparent">
                 <button className="shiny-cta !py-3 !px-6 sm:!py-5 sm:!px-10 !text-sm sm:!text-lg focus:outline-none">
-                  <span>Take the Free Funding Assessment</span>
+                  <span>Take the Fundability Quiz</span>
                 </button>
               </Link>
               <p className="text-[10px] text-zinc-500 max-w-xs text-center lg:text-left">{DISCLAIMER_TEXT}</p>
