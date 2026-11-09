@@ -2,17 +2,13 @@ import { useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import PageMeta from "@/components/PageMeta";
 import { Loader2 } from "lucide-react";
-
-const AFFILIATE_BOOKING_URL = "https://link.rylandpartners.com/widget/booking/rpfgxBFIjZC7pWMCYBv9";
+import { affiliateBookingUrl } from "@/lib/affiliateBooking";
 
 export default function AffiliateBooking() {
   const [params] = useSearchParams();
 
   useEffect(() => {
-    const bookingUrl = new URL(AFFILIATE_BOOKING_URL);
-    const ref = params.get("ref");
-    if (ref) bookingUrl.searchParams.set("ref", ref);
-    window.location.replace(bookingUrl.toString());
+    window.location.replace(affiliateBookingUrl(params.get("ref")));
   }, [params]);
 
   return (

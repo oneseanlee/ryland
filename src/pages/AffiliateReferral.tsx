@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { captureReferral, getReferralAffiliateId } from "@/lib/referralTracking";
+import { affiliateBookingUrl } from "@/lib/affiliateBooking";
 import { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -94,9 +95,7 @@ export default function AffiliateReferral() {
       toast.success("Thanks! Let's get you booked.");
 
       // Redirect to the GHL affiliate booking widget, preserving the referring partner
-      const bookingUrl = new URL("https://link.rylandpartners.com/widget/booking/rpfgxBFIjZC7pWMCYBv9");
-      if (refParam) bookingUrl.searchParams.set("ref", refParam);
-      window.location.href = bookingUrl.toString();
+      window.location.href = affiliateBookingUrl(refParam);
     } catch (err: unknown) {
       console.error("Referral submit failed:", err);
       toast.error("Something went wrong. Please try again.");
