@@ -69,7 +69,7 @@ export default function SubmitLeadDrawer({ open, onClose, onSuccess }: SubmitLea
     setLoading(false);
 
     if (error) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
+      toast({ title: error.code === "23505" ? "Already submitted" : "Error", description: error.code === "23505" ? "This person is already in the system as a lead, so it can't be added again." : error.message, variant: "destructive" });
     } else {
       const partnerName = affiliate.full_name;
       const partnerTag = `partner:${partnerName}`;

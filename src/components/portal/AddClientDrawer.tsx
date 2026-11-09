@@ -66,7 +66,7 @@ export default function AddClientDrawer({ open, onClose, onSuccess }: AddClientD
 
     if (dbError) {
       setLoading(false);
-      toast({ title: "Error", description: dbError.message, variant: "destructive" });
+      toast({ title: dbError.code === "23505" ? "Already submitted" : "Error", description: dbError.code === "23505" ? "This person is already in the system as a lead, so it can't be added again." : dbError.message, variant: "destructive" });
       return;
     }
 
